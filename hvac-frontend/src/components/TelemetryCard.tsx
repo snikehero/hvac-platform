@@ -19,7 +19,7 @@ export function TelemetryCard({ data }: Props) {
         {data.stationId} - {data.pointKey}
       </h2>
       <p>
-        Value: <span className="font-semibold">{data.value}</span>{" "}
+        Values: <span className="font-semibold">{data.value}</span>{" "}
         {data.unit || ""}
       </p>
       <p>Timestamp: {new Date(data.timestamp).toLocaleTimeString()}</p>
