@@ -1,17 +1,30 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import {
+  WebSocketGateway,
+  WebSocketServer,
+  OnGatewayConnection,
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+import { Inject, forwardRef } from '@nestjs/common';
+import { HvacService } from './hvac.service';
 import { TelemetryDto } from './dto/telemetry.dto';
 
 @WebSocketGateway({
   cors: { origin: '*' },
 })
-export class HvacGateway {
+export class HvacGateway implements OnGatewayConnection {
   @WebSocketServer()
   server: Server;
 
-  sendTelemetry(data: TelemetryDto) {
-    this.server.emit('telemetry', data);
+  constructor(
+    @Inject(forwardRef(() => HvacService))
+    private readonly hvacService: HvacService,
+  ) {}
+
+  handleConnection(client: Socket) {
+    client.emit('hvac_snapshot', this.hvacService.getSnapshot());
+  }
+
+  emitUpdate(payload: TelemetryDto) {
+    this.server.emit('hvac_update', payload);
   }
 }

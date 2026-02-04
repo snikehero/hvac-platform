@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { MqttModule } from './mqtt/mqtt.module';
 import { HvacModule } from './hvac/hvac.module';
+import { MqttModule } from './mqtt/mqtt.module';
 
 @Module({
-  imports: [MqttModule, HvacModule],
+  imports: [HvacModule, MqttModule],
 })
 export class AppModule {}

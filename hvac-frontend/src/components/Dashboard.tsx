@@ -4,11 +4,6 @@ import { useTelemetry } from "@/hooks/useTelemetry"
 export default function Dashboard() {
   const { telemetry } = useTelemetry()
 
-  // Obtener estaciones únicas (AHUs)
-  const stations = Array.from(
-    new Set(telemetry.map((t) => t.stationId)),
-  )
-
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Dashboard HVAC</h1>
@@ -17,12 +12,8 @@ export default function Dashboard() {
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {stations.map((stationId) => (
-          <TelemetryCard
-            key={stationId}
-            stationId={stationId}
-            telemetry={telemetry}
-          />
+        {telemetry.map((ahu) => (
+          <TelemetryCard key={ahu.stationId} ahu={ahu} />
         ))}
       </div>
     </div>

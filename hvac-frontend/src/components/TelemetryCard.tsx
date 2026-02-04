@@ -1,67 +1,47 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Thermometer, Droplets, Fan } from "lucide-react"
-import type { TelemetryDto } from "@/types/telemetry"
+import type { HvacTelemetry } from "@/types/telemetry"
 
-interface TelemetryCardProps {
-  stationId: string
-  telemetry: TelemetryDto[]
+interface Props {
+  ahu: HvacTelemetry
 }
 
-export default function TelemetryCard({
-  stationId,
-  telemetry,
-}: TelemetryCardProps) {
-  const getPoint = (key: string) =>
-    telemetry.find(
-      (t) => t.stationId === stationId && t.pointKey === key,
-    )
+export default function TelemetryCard({ ahu }: Props) {
+  const { stationId, points, timestamp } = ahu
 
-  const temperature = getPoint("temperature")
-  const humidity = getPoint("humidity")
-  const fan = getPoint("fan_status")
-  const status = getPoint("status")
+  const temperature = points.temperature
+  const humidity = points.humidity
+  const fan = points.fan_status
+  const status = points.status?.value as string | undefined
 
-  const statusValue = status?.value as string | undefined
-
-  const statusColor =
-    statusValue === "ALARM"
+  const statusVariant =
+    status === "ALARM"
       ? "destructive"
-      : statusValue === "WARNING"
+      : status === "WARNING"
       ? "secondary"
       : "default"
 
   return (
-    <Card className="w-full">
+    <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>{stationId}</CardTitle>
-        <Badge variant={statusColor}>{statusValue ?? "N/A"}</Badge>
+        <Badge variant={statusVariant}>{status ?? "N/A"}</Badge>
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Temperature */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm">
-            <Thermometer className="h-4 w-4" />
-            Temperatura
-          </div>
-          <span className="font-semibold">
-            {temperature?.value ?? "--"} {temperature?.unit}
-          </span>
-        </div>
+        <Row
+          icon={<Thermometer className="h-4 w-4" />}
+          label="Temperatura"
+          value={`${temperature?.value ?? "--"} ${temperature?.unit ?? ""}`}
+        />
 
-        {/* Humidity */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm">
-            <Droplets className="h-4 w-4" />
-            Humedad
-          </div>
-          <span className="font-semibold">
-            {humidity?.value ?? "--"} {humidity?.unit}
-          </span>
-        </div>
+        <Row
+          icon={<Droplets className="h-4 w-4" />}
+          label="Humedad"
+          value={`${humidity?.value ?? "--"} ${humidity?.unit ?? ""}`}
+        />
 
-        {/* Fan */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm">
             <Fan className="h-4 w-4" />
@@ -72,14 +52,31 @@ export default function TelemetryCard({
           </Badge>
         </div>
 
-        {/* Timestamp */}
         <div className="text-xs text-muted-foreground pt-2">
           Última actualización:{" "}
-          {temperature?.timestamp
-            ? new Date(temperature.timestamp).toLocaleTimeString()
-            : "--"}
+          {new Date(timestamp).toLocaleTimeString()}
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+function Row({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode
+  label: string
+  value: string
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2 text-sm">
+        {icon}
+        {label}
+      </div>
+      <span className="font-semibold">{value}</span>
+    </div>
   )
 }

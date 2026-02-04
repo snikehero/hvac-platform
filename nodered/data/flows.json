@@ -1,18 +1,18 @@
 [
     {
-        "id": "2fe43d6eec7777e1",
-        "type": "tab",
-        "label": "Temperature",
-        "disabled": false,
-        "info": "Envio",
-        "env": []
-    },
-    {
         "id": "b5eac41902843c3f",
         "type": "tab",
         "label": "Lectura",
         "disabled": false,
         "info": "",
+        "env": []
+    },
+    {
+        "id": "06936ed9048da629",
+        "type": "tab",
+        "label": "Temperature",
+        "disabled": false,
+        "info": "Envio",
         "env": []
     },
     {
@@ -45,63 +45,6 @@
         "willMsg": {},
         "userProps": "",
         "sessionExpiry": ""
-    },
-    {
-        "id": "inject-ahu",
-        "type": "inject",
-        "z": "2fe43d6eec7777e1",
-        "name": "Simulate AHUs",
-        "props": [],
-        "repeat": "",
-        "crontab": "",
-        "once": true,
-        "onceDelay": "1",
-        "topic": "",
-        "x": 260,
-        "y": 340,
-        "wires": [
-            [
-                "fn-ahu"
-            ]
-        ]
-    },
-    {
-        "id": "fn-ahu",
-        "type": "function",
-        "z": "2fe43d6eec7777e1",
-        "name": "Generate AHU Telemetry",
-        "func": "const ahus = [\n  'AHU-01', 'AHU-02', 'AHU-03', 'AHU-04', 'AHU-05',\n  'AHU-06', 'AHU-07', 'AHU-08', 'AHU-09', 'AHU-10', 'AHU-11'\n];\n\nconst messages = [];\n\nahus.forEach(ahu => {\n  const temperature = +(20 + Math.random() * 12).toFixed(1);\n  const humidity = +(40 + Math.random() * 30).toFixed(1);\n  const fan_status = Math.random() > 0.15 ? 'ON' : 'OFF';\n\n  let status = 'OK';\n  if (fan_status === 'OFF') {\n    status = 'ALARM';\n  } else if (temperature < 20 || temperature > 28 || humidity > 65) {\n    status = 'WARNING';\n  }\n\n  const timestamp = new Date().toISOString();\n\n  messages.push({\n    topic: `hvac/planta1/${ahu}`,\n    payload: {\n      plantId: 'planta1',\n      stationId: ahu,\n      timestamp,\n      points: {\n        temperature: {\n          value: temperature,\n          unit: '°C',\n          quality: status === 'OK' ? 'GOOD' : status === 'ALARM' ? 'BAD' : 'UNCERTAIN'\n        },\n        humidity: {\n          value: humidity,\n          unit: '%',\n          quality: status === 'OK' ? 'GOOD' : status === 'ALARM' ? 'BAD' : 'UNCERTAIN'\n        },\n        fan_status: {\n          value: fan_status,\n          unit: '',\n          quality: status === 'OK' ? 'GOOD' : status === 'ALARM' ? 'BAD' : 'UNCERTAIN'\n        },\n        status: {\n          value: status,\n          unit: '',\n          quality: status === 'OK' ? 'GOOD' : status === 'ALARM' ? 'BAD' : 'UNCERTAIN'\n        }\n      }\n    }\n  });\n});\n\nreturn [messages];\n",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 490,
-        "y": 340,
-        "wires": [
-            [
-                "mqtt-out"
-            ]
-        ]
-    },
-    {
-        "id": "mqtt-out",
-        "type": "mqtt out",
-        "z": "2fe43d6eec7777e1",
-        "name": "MQTT → Mosquitto",
-        "topic": "",
-        "qos": "",
-        "retain": "",
-        "respTopic": "",
-        "contentType": "",
-        "userProps": "",
-        "correl": "",
-        "expiry": "",
-        "broker": "8c44c13ea6274c19",
-        "x": 730,
-        "y": 340,
-        "wires": []
     },
     {
         "id": "b03dabfa790c26cd",
@@ -138,6 +81,63 @@
         "statusType": "auto",
         "x": 640,
         "y": 180,
+        "wires": []
+    },
+    {
+        "id": "ae0cb9d4a3c8753c",
+        "type": "inject",
+        "z": "06936ed9048da629",
+        "name": "Simulate AHUs",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 260,
+        "y": 340,
+        "wires": [
+            [
+                "fa89433c84ce74c9"
+            ]
+        ]
+    },
+    {
+        "id": "fa89433c84ce74c9",
+        "type": "function",
+        "z": "06936ed9048da629",
+        "name": "Generate AHU Telemetry",
+        "func": "const ahus = [\n  'AHU-01', 'AHU-02', 'AHU-03', 'AHU-04', 'AHU-05',\n  'AHU-06', 'AHU-07', 'AHU-08', 'AHU-09', 'AHU-10', 'AHU-11'\n];\n\nconst messages = [];\n\nahus.forEach(ahu => {\n  const temperature = +(20 + Math.random() * 12).toFixed(1);\n  const humidity = +(40 + Math.random() * 30).toFixed(1);\n  const fan_status = Math.random() > 0.15 ? 'ON' : 'OFF';\n\n  let status = 'OK';\n  if (fan_status === 'OFF') {\n    status = 'ALARM';\n  } else if (temperature < 20 || temperature > 28 || humidity > 65) {\n    status = 'WARNING';\n  }\n\n  const timestamp = new Date().toISOString();\n\n  messages.push({\n    topic: `hvac/planta1/${ahu}`,\n    payload: {\n      plantId: 'planta1',\n      stationId: ahu,\n      timestamp,\n      points: {\n        temperature: {\n          value: temperature,\n          unit: '°C',\n          quality: status === 'OK' ? 'GOOD' : status === 'ALARM' ? 'BAD' : 'UNCERTAIN'\n        },\n        humidity: {\n          value: humidity,\n          unit: '%',\n          quality: status === 'OK' ? 'GOOD' : status === 'ALARM' ? 'BAD' : 'UNCERTAIN'\n        },\n        fan_status: {\n          value: fan_status,\n          unit: '',\n          quality: status === 'OK' ? 'GOOD' : status === 'ALARM' ? 'BAD' : 'UNCERTAIN'\n        },\n        status: {\n          value: status,\n          unit: '',\n          quality: status === 'OK' ? 'GOOD' : status === 'ALARM' ? 'BAD' : 'UNCERTAIN'\n        }\n      }\n    }\n  });\n});\n\nreturn [messages];\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 490,
+        "y": 340,
+        "wires": [
+            [
+                "70745ef2e644b323"
+            ]
+        ]
+    },
+    {
+        "id": "70745ef2e644b323",
+        "type": "mqtt out",
+        "z": "06936ed9048da629",
+        "name": "MQTT → Mosquitto",
+        "topic": "",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8c44c13ea6274c19",
+        "x": 730,
+        "y": 340,
         "wires": []
     }
 ]

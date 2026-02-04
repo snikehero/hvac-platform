@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-console.log('🚀 MqttService file loaded');
-
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import * as mqtt from 'mqtt';
 import { HvacService } from '../hvac/hvac.service';
@@ -9,31 +7,34 @@ import { HvacService } from '../hvac/hvac.service';
 export class MqttService implements OnModuleInit {
   private client: mqtt.MqttClient;
 
-  constructor(private readonly hvacService: HvacService) {
-    console.log('🧠 MqttService constructor');
-  }
+  constructor(private readonly hvacService: HvacService) {}
 
   onModuleInit() {
-    this.client = mqtt.connect('mqtt://mosquitto:1883', {
-      clientId: 'backend-hvac',
-    });
+    console.log('[MQTT] Initializing MQTT service');
+
+    this.client = mqtt.connect('mqtt://mosquitto:1883');
 
     this.client.on('connect', () => {
-      console.log('✅ Backend conectado a MQTT');
-      this.client.subscribe('hvac/#');
+      console.log('[MQTT] Connected to broker');
+      this.client.subscribe('hvac/#', (err) => {
+        if (err) {
+          console.error('[MQTT] Subscribe error', err);
+        } else {
+          console.log('[MQTT] Subscribed to hvac/#');
+        }
+      });
     });
 
-    this.client.on('message', (topic, payload) => {
+    this.client.on('message', (topic, message) => {
+      console.log('[MQTT] Message received:', topic);
+      console.log('[MQTT] Payload:', message.toString());
+
       try {
-        const data = JSON.parse(payload.toString());
-        this.hvacService.handleTelemetry(topic, data);
+        const payload = JSON.parse(message.toString());
+        this.hvacService.handleTelemetry(payload);
       } catch (err) {
-        console.error('❌ Payload inválido', err);
+        console.error('[MQTT] JSON parse error', err);
       }
-    });
-
-    this.client.on('error', (err) => {
-      console.error('❌ Error MQTT', err);
     });
   }
 }
