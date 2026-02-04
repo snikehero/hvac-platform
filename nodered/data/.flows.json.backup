@@ -1,0 +1,108 @@
+[
+    {
+        "id": "2fe43d6eec7777e1",
+        "type": "tab",
+        "label": "Envio",
+        "disabled": false,
+        "info": "Envio",
+        "env": []
+    },
+    {
+        "id": "8c44c13ea6274c19",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "mosquitto",
+        "port": 1883,
+        "clientid": "nodered-hvac",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "5",
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "7d9b985e44dd9a9b",
+        "type": "inject",
+        "z": "2fe43d6eec7777e1",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 140,
+        "wires": [
+            [
+                "18c778b8175b80ea"
+            ]
+        ]
+    },
+    {
+        "id": "18c778b8175b80ea",
+        "type": "function",
+        "z": "2fe43d6eec7777e1",
+        "name": "function 1",
+        "func": "msg.payload = {\n  station: \"AHU-01\",\n  temperature: (20 + Math.random() * 5).toFixed(2),\n  humidity: (40 + Math.random() * 10).toFixed(1),\n  timestamp: new Date().toISOString()\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 140,
+        "wires": [
+            [
+                "0509d68123adfa6a"
+            ]
+        ]
+    },
+    {
+        "id": "0509d68123adfa6a",
+        "type": "mqtt out",
+        "z": "2fe43d6eec7777e1",
+        "name": "",
+        "topic": "hvac/ahu/AHU-01/telemetry",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8c44c13ea6274c19",
+        "x": 640,
+        "y": 100,
+        "wires": []
+    }
+]

@@ -1,0 +1,51 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: mosquitto
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto/data:/mosquitto/data
+    networks:
+      - hvac-net
+
+  nodered:
+    image: nodered/node-red:latest
+    container_name: hvac-nodered
+    ports:
+      - "1880:1880"
+    volumes:
+      - ./nodered/data:/data
+    environment:
+      - TZ=America/Mexico_City
+    depends_on:
+      - mosquitto
+    networks:
+      - hvac-net
+
+  backend:
+    build: ./backend
+    container_name: hvac-backend
+    ports:
+      - "3000:3000"
+    environment:
+      MQTT_BROKER_URL: mqtt://mosquitto:1883
+    depends_on:
+      - mosquitto
+    networks:
+      - hvac-net
+
+  frontend:
+    build: ./frontend
+    container_name: hvac-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - hvac-net
+
+networks:
+  hvac-net:
+    driver: bridge
