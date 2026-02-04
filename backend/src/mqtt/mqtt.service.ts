@@ -1,9 +1,17 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+console.log('🚀 MqttService file loaded');
+
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import * as mqtt from 'mqtt';
+import { HvacService } from '../hvac/hvac.service';
 
 @Injectable()
 export class MqttService implements OnModuleInit {
   private client: mqtt.MqttClient;
+
+  constructor(private readonly hvacService: HvacService) {
+    console.log('🧠 MqttService constructor');
+  }
 
   onModuleInit() {
     this.client = mqtt.connect('mqtt://mosquitto:1883', {
@@ -16,10 +24,16 @@ export class MqttService implements OnModuleInit {
     });
 
     this.client.on('message', (topic, payload) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const message = JSON.parse(payload.toString());
-      console.log(`📥 ${topic}`, message);
-      // aquí se normaliza y guarda
+      try {
+        const data = JSON.parse(payload.toString());
+        this.hvacService.handleTelemetry(topic, data);
+      } catch (err) {
+        console.error('❌ Payload inválido', err);
+      }
+    });
+
+    this.client.on('error', (err) => {
+      console.error('❌ Error MQTT', err);
     });
   }
 }

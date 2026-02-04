@@ -8,6 +8,14 @@
         "env": []
     },
     {
+        "id": "b5eac41902843c3f",
+        "type": "tab",
+        "label": "Lectura",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
         "id": "8c44c13ea6274c19",
         "type": "mqtt-broker",
         "name": "",
@@ -72,7 +80,7 @@
         "type": "function",
         "z": "2fe43d6eec7777e1",
         "name": "function 1",
-        "func": "msg.payload = {\n  station: \"AHU-01\",\n  temperature: (20 + Math.random() * 5).toFixed(2),\n  humidity: (40 + Math.random() * 10).toFixed(1),\n  timestamp: new Date().toISOString()\n};\nreturn msg;",
+        "func": "msg.topic = \"hvac/plant01/AHU-01/temperature_supply\";\n\nmsg.payload = {\n  value: 22 + Math.random(),\n  unit: \"C\",\n  quality: \"GOOD\"\n};\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -92,7 +100,7 @@
         "type": "mqtt out",
         "z": "2fe43d6eec7777e1",
         "name": "",
-        "topic": "hvac/ahu/AHU-01/telemetry",
+        "topic": "",
         "qos": "",
         "retain": "",
         "respTopic": "",
@@ -101,8 +109,45 @@
         "correl": "",
         "expiry": "",
         "broker": "8c44c13ea6274c19",
-        "x": 640,
+        "x": 570,
         "y": 100,
+        "wires": []
+    },
+    {
+        "id": "b03dabfa790c26cd",
+        "type": "mqtt in",
+        "z": "b5eac41902843c3f",
+        "name": "",
+        "topic": "hvac/#",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "8c44c13ea6274c19",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 290,
+        "y": 160,
+        "wires": [
+            [
+                "a14c8034c3c75305"
+            ]
+        ]
+    },
+    {
+        "id": "a14c8034c3c75305",
+        "type": "debug",
+        "z": "b5eac41902843c3f",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 640,
+        "y": 180,
         "wires": []
     }
 ]
