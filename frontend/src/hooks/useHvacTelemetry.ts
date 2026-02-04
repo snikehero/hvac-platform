@@ -7,10 +7,10 @@ export function useHvacTelemetry() {
   const [telemetry, setTelemetry] = useState<Telemetry[]>([]);
 
   useEffect(() => {
-    // snapshot inicial
+    // Snapshot inicial
     getLatestTelemetry().then(setTelemetry);
 
-    // tiempo real
+    // Tiempo real
     socket.on("telemetry", (data: Telemetry) => {
       setTelemetry((prev) => {
         const key = `${data.stationId}-${data.pointKey}`;

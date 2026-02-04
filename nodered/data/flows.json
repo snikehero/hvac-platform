@@ -2,7 +2,7 @@
     {
         "id": "2fe43d6eec7777e1",
         "type": "tab",
-        "label": "Envio",
+        "label": "Temperature",
         "disabled": false,
         "info": "Envio",
         "env": []
@@ -11,6 +11,22 @@
         "id": "b5eac41902843c3f",
         "type": "tab",
         "label": "Lectura",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "dd9fe3b1082e8f90",
+        "type": "tab",
+        "label": "Humidity",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "c357c5b5af93b595",
+        "type": "tab",
+        "label": "fanStatus",
         "disabled": false,
         "info": "",
         "env": []
@@ -80,7 +96,7 @@
         "type": "function",
         "z": "2fe43d6eec7777e1",
         "name": "function 1",
-        "func": "msg.topic = \"hvac/plant01/AHU-01/temperature_supply\";\n\nmsg.payload = {\n  value: 22 + Math.random(),\n  unit: \"C\",\n  quality: \"GOOD\"\n};\n\nreturn msg;\n",
+        "func": "const ahus = ['AHU-01', 'AHU-02', 'AHU-03'];\n\nreturn ahus.map((ahu) => {\n  return {\n    topic: `hvac/plant1/AHU-01/temperature`,\n    payload: {\n      value: (18 + Math.random() * 6).toFixed(1),\n      unit: '°C',\n      quality: 'GOOD',\n      timestamp: Date.now(),\n    },\n  };\n});\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -118,7 +134,7 @@
         "type": "mqtt in",
         "z": "b5eac41902843c3f",
         "name": "",
-        "topic": "hvac/plant01/AHU-01/temperature_supply",
+        "topic": "hvac/#",
         "qos": "2",
         "datatype": "auto-detect",
         "broker": "8c44c13ea6274c19",
@@ -126,8 +142,8 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 400,
-        "y": 160,
+        "x": 230,
+        "y": 180,
         "wires": [
             [
                 "a14c8034c3c75305"
@@ -147,6 +163,140 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 640,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "e1dbe77eb35100fa",
+        "type": "inject",
+        "z": "dd9fe3b1082e8f90",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 210,
+        "y": 220,
+        "wires": [
+            [
+                "189f0f03dfbd0499"
+            ]
+        ]
+    },
+    {
+        "id": "189f0f03dfbd0499",
+        "type": "function",
+        "z": "dd9fe3b1082e8f90",
+        "name": "function 2",
+        "func": "const ahus = ['AHU-01', 'AHU-02', 'AHU-03'];\n\nreturn ahus.map((ahu) => {\n  return {\n    topic: `hvac/plant1/AHU-02/humidity`,\n    payload: {\n      value: (18 + Math.random() * 6).toFixed(1),\n      unit: '°C',\n      quality: 'GOOD',\n      timestamp: Date.now(),\n    },\n  };\n});\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 220,
+        "wires": [
+            [
+                "7add21b1d01abdd9"
+            ]
+        ]
+    },
+    {
+        "id": "7add21b1d01abdd9",
+        "type": "mqtt out",
+        "z": "dd9fe3b1082e8f90",
+        "name": "",
+        "topic": "",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8c44c13ea6274c19",
+        "x": 670,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "54ef13d6f4444544",
+        "type": "inject",
+        "z": "c357c5b5af93b595",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 290,
+        "y": 180,
+        "wires": [
+            [
+                "b4482cab3facc81c"
+            ]
+        ]
+    },
+    {
+        "id": "b4482cab3facc81c",
+        "type": "function",
+        "z": "c357c5b5af93b595",
+        "name": "function 3",
+        "func": "const ahus = ['AHU-01', 'AHU-02', 'AHU-03'];\n\nreturn ahus.map((ahu) => {\n  return {\n    topic: `hvac/plant1/AHU-03/fanStatus`,\n    payload: {\n      value: (18 + Math.random() * 6).toFixed(1),\n      unit: '°C',\n      quality: 'GOOD',\n      timestamp: Date.now(),\n    },\n  };\n});\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 180,
+        "wires": [
+            [
+                "cb24ff4d393f0ece"
+            ]
+        ]
+    },
+    {
+        "id": "cb24ff4d393f0ece",
+        "type": "mqtt out",
+        "z": "c357c5b5af93b595",
+        "name": "",
+        "topic": "",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8c44c13ea6274c19",
+        "x": 750,
         "y": 180,
         "wires": []
     }
