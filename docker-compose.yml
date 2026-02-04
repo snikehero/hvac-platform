@@ -43,21 +43,14 @@ services:
 
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
+      context: ./hvac-frontend
     container_name: hvac-frontend
     ports:
-      - "5173:5173"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    environment:
-      NODE_ENV: development
+      - "8080:80"
     depends_on:
       - backend
     networks:
       - hvac-net
-
 networks:
   hvac-net:
     driver: bridge

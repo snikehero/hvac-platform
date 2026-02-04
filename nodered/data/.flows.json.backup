@@ -52,7 +52,7 @@
         "z": "2fe43d6eec7777e1",
         "name": "Simulate AHUs",
         "props": [],
-        "repeat": "2",
+        "repeat": "5",
         "crontab": "",
         "once": true,
         "onceDelay": "1",
