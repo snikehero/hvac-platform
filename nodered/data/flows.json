@@ -16,6 +16,14 @@
         "env": []
     },
     {
+        "id": "1389027caad582e5",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": true,
+        "info": "",
+        "env": []
+    },
+    {
         "id": "8c44c13ea6274c19",
         "type": "mqtt-broker",
         "name": "",
@@ -25,6 +33,37 @@
         "autoConnect": true,
         "usetls": false,
         "protocolVersion": "5",
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "02177584e50b7846",
+        "type": "mqtt-broker",
+        "name": "RadxaServer",
+        "broker": "10.10.10.154",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
         "keepalive": 60,
         "cleansession": true,
         "autoUnsubscribe": true,
@@ -138,6 +177,53 @@
         "broker": "8c44c13ea6274c19",
         "x": 730,
         "y": 340,
+        "wires": []
+    },
+    {
+        "id": "edb850faf125fa2f",
+        "type": "comment",
+        "z": "06936ed9048da629",
+        "name": "",
+        "info": "https://github.com/snikehero/hvac-platform",
+        "x": 340,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "0a44f8908efd7b7d",
+        "type": "mqtt in",
+        "z": "1389027caad582e5",
+        "name": "",
+        "topic": "hvac/#",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "02177584e50b7846",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 230,
+        "y": 260,
+        "wires": [
+            [
+                "422b6c0f37d5083b"
+            ]
+        ]
+    },
+    {
+        "id": "422b6c0f37d5083b",
+        "type": "debug",
+        "z": "1389027caad582e5",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 500,
+        "y": 260,
         "wires": []
     }
 ]
