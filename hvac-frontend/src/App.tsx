@@ -1,10 +1,13 @@
 import "./App.css";
-import Dashboard from "./components/Dashboard";
+import Dashboard from "./components/DashboardHVAC";
 
 function App() {
   return (
     <>
       <Dashboard />
+      <section className="border-2 border-red-600 animate-glow p-6">
+  TEST ANIMACIÓN
+</section>
     </>
   );
 }

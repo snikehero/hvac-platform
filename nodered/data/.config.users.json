@@ -15,10 +15,13 @@
             },
             "tours": {
                 "welcome": "4.1.0"
+            },
+            "context": {
+                "flowRefresh": false
             }
         },
         "debug": {
-            "filter": "filterCurrent"
+            "filter": "filterAll"
         }
     }
 }

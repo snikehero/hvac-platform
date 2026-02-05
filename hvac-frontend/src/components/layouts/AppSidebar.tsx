@@ -1,9 +1,10 @@
 import { NavLink } from "react-router-dom"
-import { Home, LayoutDashboard, Bell, Settings } from "lucide-react"
+import { Home, LayoutDashboard, Bell, Settings, AirVent } from "lucide-react"
 
 const links = [
   { to: "/", label: "Home", icon: Home },
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/dashboards", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/dashboardHVAC", label: "HVAC",  icon: AirVent},
   { to: "/alarms", label: "Alarmas", icon: Bell },
   { to: "/settings", label: "Configuración", icon: Settings },
 ]
@@ -12,7 +13,7 @@ export default function AppSidebar() {
   return (
     <aside className="w-64 bg-background border-r">
       <div className="p-4 font-bold text-lg">
-        HVAC Platform
+        FireIIOT Platform
       </div>
 
       <nav className="flex flex-col gap-1 px-2">

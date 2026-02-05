@@ -6,8 +6,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 
 import AppLayout from "@/components/layouts/AppLayout"
 import HomePage from "@/pages/Homepage"
-import Dashboard from "@/components/Dashboard"
 import { WebSocketProvider } from "./providers/WebSocketProvider"
+import AhuDetailPage from "./pages/AhuDetailPage"
+import DashboardHVAC from "@/components/DashboardHVAC"
 ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 ).render(
@@ -18,8 +19,9 @@ ReactDOM.createRoot(
       <AppLayout>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-
+          <Route path="/dashboardHVAC" element={<DashboardHVAC />} />
+          <Route path="/plants/:plantId/ahus/:ahuId" element={<AhuDetailPage />}
+/>
         </Routes>
         </AppLayout>
         </WebSocketProvider>

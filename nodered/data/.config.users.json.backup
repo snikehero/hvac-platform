@@ -15,7 +15,13 @@
             },
             "tours": {
                 "welcome": "4.1.0"
+            },
+            "context": {
+                "flowRefresh": true
             }
+        },
+        "debug": {
+            "filter": "filterAll"
         }
     }
 }

@@ -121,3 +121,19 @@
     @apply bg-background text-foreground;
   }
 }
+@keyframes alarmGlow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0px rgba(239, 68, 68, 0.6);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.9);
+  }
+}
+
+.alarm-glow {
+  animation: alarmGlow 2s ease-in-out infinite;
+  border: 2px solid rgb(220 38 38);
+}
