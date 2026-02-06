@@ -1,49 +1,46 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import type { HvacStatus } from "@/types/hvac-status"
 
 interface Props {
   title: string
-  backgroundImage: string
   status?: HvacStatus
   children: React.ReactNode
 }
 
 export function AhuSection({
   title,
-  backgroundImage,
   status,
   children,
 }: Props) {
   const overlayClass =
     status === "ALARM"
-      ? "bg-red-900/60"
+      ? "bg-red-900/70"
       : status === "WARNING"
-      ? "bg-yellow-800/50"
-      : "bg-black/50"
+      ? "bg-yellow-800/60"
+      : "bg-black/60"
 
   return (
-    <Card className="relative overflow-hidden">
-      {/* ---------- Background ---------- */}
+    <Card className="relative overflow-hidden rounded-lg">
+      {/* Background */}
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url('${backgroundImage}')` }}
       />
 
-      {/* ---------- Overlay ---------- */}
+      {/* Overlay */}
       <div className={`absolute inset-0 ${overlayClass}`} />
 
-      {/* ---------- Content ---------- */}
-      <div className="relative z-10 text-white">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base text-white">
-            {title}
-          </CardTitle>
-        </CardHeader>
+      {/* Content */}
+      <CardContent className="relative z-10 px-4 py-3 text-white">
+        {/* Title */}
+        <div className="mb-2 text-sm font-semibold tracking-wide text-white/90">
+          {title}
+        </div>
 
-        <CardContent className="space-y-2">
+        {/* Rows */}
+        <div className="grid gap-1">
           {children}
-        </CardContent>
-      </div>
+        </div>
+      </CardContent>
     </Card>
   )
 }

@@ -1,15 +1,19 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { HvacPoint } from "@/types/telemetry"
+
 export function AhuDataRow({
   label,
   point,
 }: {
   label: string
-  point?: { value: any; unit?: string }
+  point?: HvacPoint
 }) {
+  const valueColor ="text-white"
+  
+
   return (
-    <div className="flex justify-between text-sm">
+    <div className="flex items-center justify-between text-sm">
       <span className="text-white/80">{label}</span>
-      <span className="font-medium text-white">
+      <span className={`font-medium ${valueColor}`}>
         {point
           ? `${point.value} ${point.unit ?? ""}`
           : "--"}

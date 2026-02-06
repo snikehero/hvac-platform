@@ -1,8 +1,8 @@
 import type { HvacTelemetry } from "@/types/telemetry"
+import type { HvacStatus } from "@/types/hvac-status"
 import { AhuSection } from "@/components/ahu/AhuSection"
 import { AhuDataRow } from "@/components/ahu/AhuDataRow"
-import type { HvacStatus } from "@/types/hvac-status"
-
+import { AHU_SECTIONS } from "@/config/ahuSections.config"
 export default function AhuOperationalSections({
   ahu,
   status,
@@ -11,55 +11,39 @@ export default function AhuOperationalSections({
   status?: HvacStatus
 }) {
   return (
-    <>
+  <div
+    className="
+      grid
+      grid-cols-1
+      sm:grid-cols-2
+      xl:grid-cols-3
+      gap-4
+    "
+  >
+    {AHU_SECTIONS.map(section => (
       <AhuSection
-        title="Temperatura y Humedad"
-        backgroundImage="/images/temp-bg.jpg"
+        key={section.title}
+        title={section.title}
         status={status}
       >
-        <AhuDataRow
-          label="Temperatura"
-          point={ahu.points.temperature}
-        />
-        <AhuDataRow
-          label="Humedad"
-          point={ahu.points.humidity}
-        />
-      </AhuSection>
+        {section.rows.map(row => {
+          const point = ahu.points[row.pointKey]
+          const formattedPoint =
+            point && row.format
+              ? { ...point, value: row.format(point.value) }
+              : point
 
-      <AhuSection
-        title="Ventilación"
-        backgroundImage="/images/ventilation-bg.jpg"
-        status={status}
-      >
-        <AhuDataRow
-          label="Ventilador"
-          point={ahu.points.fan_status}
-        />
-        <AhuDataRow
-          label="Flujo de aire"
-          point={ahu.points.airflow}
-        />
-        <AhuDataRow
-          label="Compuerta"
-          point={ahu.points.damper_position}
-        />
+          return (
+            <AhuDataRow
+              key={row.label}
+              label={row.label}
+              point={formattedPoint}
+            />
+          )
+        })}
       </AhuSection>
+    ))}
+  </div>
+)
 
-      <AhuSection
-        title="Estado y Energía"
-        backgroundImage="/images/energy-bg.jpg"
-        status={status}
-      >
-        <AhuDataRow
-          label="Energía"
-          point={ahu.points.power_status}
-        />
-        <AhuDataRow
-          label="ΔP Filtros"
-          point={ahu.points.filter_dp}
-        />
-      </AhuSection>
-    </>
-  )
 }

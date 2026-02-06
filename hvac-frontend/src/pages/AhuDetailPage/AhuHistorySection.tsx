@@ -13,7 +13,6 @@ export default function AhuHistorySection({
   return (
     <AhuSection
       title="Histórico reciente"
-      backgroundImage="/images/ahu-bg.jpg"
       status={status}
     >
       <div className="grid md:grid-cols-2 gap-4">

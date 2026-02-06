@@ -12,7 +12,6 @@ export default function AhuEventsSection({
   return (
     <AhuSection
       title="Eventos recientes"
-      backgroundImage="/images/ahu-bg.jpg"
       status={status}
     >
       <AhuEventTimeline events={events} />

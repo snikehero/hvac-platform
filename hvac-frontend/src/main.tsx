@@ -5,7 +5,7 @@ import ReactDOM from "react-dom/client"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 
 import AppLayout from "@/components/layouts/AppLayout"
-import HomePage from "@/pages/HomePage/Homepage"
+import HomePage from "./pages/HomePage/Homepage"
 import { WebSocketProvider } from "./providers/WebSocketProvider"
 import AhuDetailPage from "./pages/AhuDetailPage/AhuDetailPage"
 import DashboardHVAC from "@/pages/DashboardHVAC/DashboardHVAC"
