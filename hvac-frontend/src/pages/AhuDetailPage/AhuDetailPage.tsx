@@ -9,10 +9,13 @@ import AhuHeader from "./AhuHeader"
 import AhuOperationalSections from "./AhuOperationalSections"
 import AhuHistorySection from "./AhuHistorySection"
 import AhuEventsSection from "./AhuEventsSection"
+import { getAhuHealth } from "@/domain/ahu/getAhuHealth"
+import { AhuHealthSummary } from "@/components/ahu/AhuHealthSummary"
 
 export default function AhuDetailPage() {
   const { telemetry } = useTelemetry()
   const { ahuId, plantId } = useParams()
+
 
   const ahu = telemetry.find(
     t => t.stationId === ahuId && t.plantId === plantId
@@ -33,9 +36,15 @@ export default function AhuDetailPage() {
       : undefined
   const history = useAhuHistory(ahu)
   const events = useAhuEvents(ahu)
-
+const health = getAhuHealth(ahu, hvacStatus)
   return (
-    <div className="space-y-6">
+      <div className="space-y-4">
+      <AhuHealthSummary
+        status={health.status}
+        badPoints={health.badPoints}
+        lastUpdate={health.lastUpdate}
+      />
+
       <AhuHeader ahu={ahu} status={hvacStatus} />
 
       <AhuOperationalSections ahu={ahu} status={hvacStatus} />
