@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import AppLayout from "@/components/layouts/AppLayout"
 import HomePage from "@/pages/Homepage"
 import { WebSocketProvider } from "./providers/WebSocketProvider"
-import AhuDetailPage from "./pages/AhuDetailPage"
+import AhuDetailPage from "./pages/AhuDetailPage/AhuDetailPage"
 import DashboardHVAC from "@/pages/DashboardHVAC"
 ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
