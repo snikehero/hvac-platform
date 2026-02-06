@@ -63,13 +63,17 @@ export default function AhuOperationalSections({
                   const point = ahu.points[row.pointKey]
                   const formattedPoint =
                     point && row.format
-                      ? { ...point, value: row.format(point.value) }
+                      ? {
+                          ...point,
+                          displayValue: row.format(point.value),
+                        }
                       : point
 
                   return (
                     <AhuDataRow
                       key={row.label}
                       label={row.label}
+                      pointKey={row.pointKey}
                       point={formattedPoint}
                     />
                   )
