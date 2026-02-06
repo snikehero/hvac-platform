@@ -8,7 +8,7 @@ import AppLayout from "@/components/layouts/AppLayout"
 import HomePage from "@/pages/Homepage"
 import { WebSocketProvider } from "./providers/WebSocketProvider"
 import AhuDetailPage from "./pages/AhuDetailPage"
-import DashboardHVAC from "@/components/DashboardHVAC"
+import DashboardHVAC from "@/pages/DashboardHVAC"
 ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 ).render(

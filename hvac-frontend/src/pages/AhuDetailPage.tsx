@@ -3,14 +3,14 @@
 import { useParams } from "react-router-dom"
 import { useTelemetry } from "@/hooks/useTelemetry"
 import { useAhuHistory } from "@/hooks/useAhuHistory"
-import AhuHistoryChart from "@/components/AhuHistoryChart"
+import AhuHistoryChart from "@/components/History/AhuHistoryChart"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-
+import { useAhuEvents } from "@/hooks/useAhuEvents"
+import AhuEventTimeline from "@/components/EventTimeline/AhuEventTimeLine"
 export default function AhuDetailPage() {
   const { telemetry } = useTelemetry()
   const { ahuId, plantId } = useParams()
-
   const ahu = telemetry.find(
     (t) => t.stationId === ahuId && t.plantId === plantId,
   )
@@ -26,6 +26,7 @@ export default function AhuDetailPage() {
     | undefined
   // 🔥 Histórico local por AHU
   const history = useAhuHistory(ahu)
+  const events = useAhuEvents(ahu)
 
   return (
     <div className="space-y-6">
@@ -40,14 +41,14 @@ export default function AhuDetailPage() {
 
         <Badge
           variant={
-            status === "ALARM"
+            hvacStatus === "ALARM"
               ? "destructive"
-              : status === "WARNING"
+              : hvacStatus === "WARNING"
               ? "secondary"
               : "default"
           }
         >
-          {status ?? "N/A"}
+          {hvacStatus ?? "N/A"}
         </Badge>
       </div>
 
@@ -55,7 +56,7 @@ export default function AhuDetailPage() {
       <AhuSection
         title="Temperatura y Humedad"
         backgroundImage="/images/temp-bg.jpg"
-        status={status}
+        status={hvacStatus}
       >
         <DataRow label="Temperatura" point={ahu.points.temperature} />
         <DataRow label="Humedad" point={ahu.points.humidity} />
@@ -64,7 +65,7 @@ export default function AhuDetailPage() {
       <AhuSection
         title="Ventilación"
         backgroundImage="/images/ventilation-bg.jpg"
-        status={status}
+        status={hvacStatus}
       >
         <DataRow label="Ventilador" point={ahu.points.fan_status} />
         <DataRow label="Flujo de aire" point={ahu.points.airflow} />
@@ -74,7 +75,7 @@ export default function AhuDetailPage() {
       <AhuSection
         title="Estado y Energía"
         backgroundImage="/images/energy-bg.jpg"
-        status={status}
+        status={hvacStatus}
       >
         <DataRow label="Energía" point={ahu.points.power_status} />
         <DataRow label="ΔP Filtros" point={ahu.points.filter_dp} />
@@ -84,7 +85,7 @@ export default function AhuDetailPage() {
         <AhuSection
             title="Histórico reciente"
             backgroundImage="/images/ahu-bg.jpg"
-            status={status}
+            status={hvacStatus}
             >
             <div className="grid md:grid-cols-2 gap-4">
                 <AhuHistoryChart
@@ -101,6 +102,14 @@ export default function AhuDetailPage() {
                 status={hvacStatus}
                 />
             </div>
+          </AhuSection>
+          
+          <AhuSection
+            title="Eventos recientes"
+            backgroundImage="/images/ahu-bg.jpg"
+            status={hvacStatus}
+            >
+            <AhuEventTimeline events={events} />
         </AhuSection>
 
 
