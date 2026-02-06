@@ -25,6 +25,7 @@ export function AhuSection({
       <div
         className="absolute inset-0 bg-cover bg-center"
       />
+      
 
       {/* Overlay */}
       <div className={`absolute inset-0 ${overlayClass}`} />
@@ -35,6 +36,7 @@ export function AhuSection({
         <div className="mb-2 text-sm font-semibold tracking-wide text-white/90">
           {title}
         </div>
+        
 
         {/* Rows */}
         <div className="grid gap-1">
