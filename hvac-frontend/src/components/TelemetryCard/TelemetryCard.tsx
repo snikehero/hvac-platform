@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useNavigate } from "react-router-dom"
 import type { HvacTelemetry } from "@/types/telemetry"
-import { getPointIcon } from "../Helpers/getPointIcon"
+import { getPointIcon } from "../../Helpers/getPointIcon"
 interface Props {
   ahu: HvacTelemetry
 }

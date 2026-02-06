@@ -1,4 +1,4 @@
-import TelemetryCard from "@/components/TelemetryCard"
+import TelemetryCard from "@/components/TelemetryCard/TelemetryCard"
 import { useTelemetry } from "@/hooks/useTelemetry"
 import type { HvacTelemetry } from "@/types/telemetry"
 
