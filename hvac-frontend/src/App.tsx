@@ -1,5 +1,5 @@
 import "./App.css";
-import Dashboard from "./pages/DashboardHVAC";
+import Dashboard from "./pages/DashboardHVAC/DashboardHVAC";
 
 function App() {
   return (
