@@ -4,7 +4,7 @@ import { useTelemetry } from "@/hooks/useTelemetry"
 import { useAhuHistory } from "@/hooks/useAhuHistory"
 import { useAhuEvents } from "@/hooks/useAhuEvents"
 import type { HvacStatus } from "@/types/hvac-status"
-
+import { isHvacStatus } from "@/types/hvac-status"
 import AhuHeader from "./AhuHeader"
 import AhuOperationalSections from "./AhuOperationalSections"
 import AhuHistorySection from "./AhuHistorySection"
@@ -26,13 +26,11 @@ export default function AhuDetailPage() {
     )
   }
 
+   // ✅ Status validado con type guard
   const hvacStatus: HvacStatus | undefined =
-  ahu.points.status?.value === "OK" ||
-  ahu.points.status?.value === "WARNING" ||
-  ahu.points.status?.value === "ALARM"
-    ? ahu.points.status.value
-    : undefined
-
+    isHvacStatus(ahu.points.status?.value)
+      ? ahu.points.status.value
+      : undefined
   const history = useAhuHistory(ahu)
   const events = useAhuEvents(ahu)
 

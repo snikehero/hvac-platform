@@ -1,33 +1,31 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { Card } from "@/components/ui/card"
 import { useNavigate } from "react-router-dom"
 import type { HvacTelemetry } from "@/types/telemetry"
-import { getPointIcon } from "../../Helpers/getPointIcon"
-interface Props {
-  ahu: HvacTelemetry
-}
+import type { HvacStatus } from "@/types/hvac-status"
+import { isHvacStatus } from "@/types/hvac-status"
+
+import TelemetryCardHeader from "./TelemetryCardHeader"
+import TelemetryCardCore from "./TelemetryCardCore"
+import TelemetryCardFan from "./TelemetryCardFan"
+import TelemetryCardExtras from "./TelemertryCardExtras"
 
 const CORE_KEYS = ["temperature", "humidity", "fan_status", "status"]
 
-export default function TelemetryCard({ ahu }: Props) {
+interface TelemetryCardProps {
+  ahu: HvacTelemetry
+}
+
+export default function TelemetryCard({
+  ahu,
+}: TelemetryCardProps) {
   const navigate = useNavigate()
   const { stationId, points, timestamp, plantId } = ahu
 
-  const temperature = points.temperature
-  const humidity = points.humidity
-  const fan = points.fan_status
-  const hvacStatus = points.status?.value as
-    | "OK"
-    | "WARNING"
-    | "ALARM"
-    | undefined
-
-  const statusVariant =
-    hvacStatus === "ALARM"
-    ? "destructive"
-    : hvacStatus === "WARNING"
-      ? "secondary"
-    : "default"
+  // ✅ Status validado correctamente
+  const hvacStatus: HvacStatus | undefined =
+    isHvacStatus(points.status?.value)
+      ? points.status.value
+      : undefined
 
   const overlayClass =
     hvacStatus === "ALARM"
@@ -64,119 +62,26 @@ export default function TelemetryCard({ ahu }: Props) {
 
       {/* ---------- Content ---------- */}
       <div className="relative z-10 text-white">
-        {/* Header */}
-        <CardHeader className="flex flex-row items-center justify-between pb-3">
-          <CardTitle className="text-lg font-semibold text-white">
-            {stationId}
-          </CardTitle>
+        <TelemetryCardHeader
+          stationId={stationId}
+          status={hvacStatus}
+        />
 
-          <Badge variant={statusVariant}>
-            {hvacStatus ?? "N/A"}
-          </Badge>
-        </CardHeader>
+        <div className="px-6 pb-6 space-y-4">
+          <TelemetryCardCore points={points} />
 
-        {/* Body */}
-        <CardContent className="space-y-4">
-          <Row
-            icon={getPointIcon(
-              "temperature",
-              temperature?.value,
-            )}
-            label="Temperatura"
-            value={`${temperature?.value ?? "--"} ${
-              temperature?.unit ?? ""
-            }`}
-          />
+          <TelemetryCardFan fan={points.fan_status} />
 
-          <Row
-            icon={getPointIcon(
-              "humidity",
-              humidity?.value,
-            )}
-            label="Humedad"
-            value={`${humidity?.value ?? "--"} ${
-              humidity?.unit ?? ""
-            }`}
-          />
-
-          {/* Fan */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm font-medium">
-              {getPointIcon("fan_status", fan?.value)}
-              Ventilador
-            </div>
-
-            <Badge
-              className={
-                fan?.value === "ON"
-                  ? "bg-green-600 text-white"
-                  : "bg-gray-600 text-white"
-              }
-            >
-              {fan?.value ?? "--"}
-            </Badge>
-          </div>
-
-          {/* Extra points */}
           {extraPoints.length > 0 && (
-            <div className="pt-3 border-t border-white/20 space-y-2">
-              <div className="text-xs font-semibold text-white/70 uppercase tracking-wide">
-                Datos adicionales
-              </div>
-
-              {extraPoints.map(([key, point]) => (
-                <Row
-                  key={key}
-                  icon={getPointIcon(key, point.value)}
-                  label={formatLabel(key)}
-                  value={`${point.value ?? "--"} ${
-                    point.unit ?? ""
-                  }`}
-                />
-              ))}
-            </div>
+            <TelemetryCardExtras points={extraPoints} />
           )}
 
-          {/* Timestamp */}
           <div className="pt-2 text-xs text-white/60">
             Última actualización:{" "}
             {new Date(timestamp).toLocaleTimeString()}
           </div>
-        </CardContent>
+        </div>
       </div>
     </Card>
-  )
-}
-
-/* ---------- Helpers ---------- */
-
-function formatLabel(key: string) {
-  return key
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (l) => l.toUpperCase())
-}
-
-function Row({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode
-  label: string
-  value: string
-}) {
-  return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2 text-sm">
-        {icon}
-        <span className="font-medium text-white">
-          {label}
-        </span>
-      </div>
-
-      <span className="font-semibold tabular-nums text-white">
-        {value}
-      </span>
-    </div>
   )
 }
