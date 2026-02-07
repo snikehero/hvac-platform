@@ -1,20 +1,21 @@
-import type { HvacPoint } from "@/types/telemetry"
-import { getPointIcon } from "@/Helpers/getPointIcon"
+import type { HvacPoint } from "@/types/telemetry";
+import { getPointIcon } from "@/Helpers/getPointIcon";
+
 export function AhuDataRow({
   label,
   pointKey,
   point,
 }: {
-  label: string
-  pointKey: string
-  point?: HvacPoint & { displayValue?: string }
+  label: string;
+  pointKey: string;
+  point?: HvacPoint & { displayValue?: string };
 }) {
   const valueColor =
     point?.quality === "BAD"
       ? "text-red-400"
       : point?.quality === "GOOD"
-      ? "text-green-400"
-      : "text-white"
+        ? "text-green-400"
+        : "text-white";
 
   return (
     <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 text-xs">
@@ -24,9 +25,7 @@ export function AhuDataRow({
       </div>
 
       {/* Label */}
-      <span className="text-white/75 truncate">
-        {label}
-      </span>
+      <span className="text-white/75 truncate">{label}</span>
 
       {/* Valor → usa DISPLAY */}
       <span className={`font-mono font-semibold ${valueColor}`}>
@@ -35,5 +34,5 @@ export function AhuDataRow({
           : "--"}
       </span>
     </div>
-  )
+  );
 }

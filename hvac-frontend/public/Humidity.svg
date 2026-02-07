@@ -1,0 +1,27 @@
+<svg width="80" height="320" viewBox="0 0 120 360" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo del tubo -->
+  <rect x="55" y="40" width="20" height="240" rx="10" fill="#020617" stroke="#334155" stroke-width="2"></rect>
+
+  <!-- Gota de humedad animada -->
+  <circle cx="65" cy="200" r="20" fill="url(#gradHum)">
+    <animate attributeName="cy" values="200;190;200" dur="1.5s" repeatCount="indefinite"></animate>
+  </circle>
+
+  <!-- Gradiente azul para la gota -->
+  <defs>
+    <linearGradient id="gradHum" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3b82f6"></stop>
+      <stop offset="100%" stop-color="#60a5fa"></stop>
+    </linearGradient>
+  </defs>
+
+  <!-- Etiqueta Humedad -->
+  <text x="60" y="30" text-anchor="middle" fill="#e5e7eb" font-size="14" font-weight="bold">
+    Humedad
+  </text>
+
+  <!-- Valor numérico -->
+  <text x="60" y="340" text-anchor="middle" fill="#e5e7eb" font-size="14" font-weight="bold">
+    75%
+  </text>
+</svg>

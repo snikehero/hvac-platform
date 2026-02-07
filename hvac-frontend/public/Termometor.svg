@@ -1,0 +1,28 @@
+<svg width="120" height="360" viewBox="0 0 120 360" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Fondo -->
+  <rect x="0" y="0" width="120" height="360" rx="16" fill="#0f172a"></rect>
+
+  <!-- Etiquetas -->
+  <text x="20" y="40" fill="#94a3b8" font-size="12">40°</text>
+  <text x="20" y="100" fill="#94a3b8" font-size="12">30°</text>
+  <text x="20" y="160" fill="#94a3b8" font-size="12">20°</text>
+  <text x="20" y="220" fill="#94a3b8" font-size="12">10°</text>
+
+  <!-- Tubo -->
+  <rect x="55" y="40" width="20" height="240" rx="10" fill="#020617" stroke="#334155" stroke-width="2"></rect>
+
+  <!-- Mercurio (ANIMABLE) -->
+  <!-- Cambia height y y dinámicamente -->
+  <rect id="mercury" x="57" y="200" width="16" height="80" rx="8" fill="#22c55e"></rect>
+
+  <!-- Bulbo -->
+  <circle cx="65" cy="300" r="22" fill="#020617" stroke="#334155" stroke-width="2"></circle>
+
+  <circle id="bulb" cx="65" cy="300" r="16" fill="#22c55e"></circle>
+
+  <!-- Valor -->
+  <text id="tempValue" x="60" y="340" text-anchor="middle" fill="#e5e7eb" font-size="14" font-weight="bold">
+    22.4 °C
+  </text>
+</svg>
