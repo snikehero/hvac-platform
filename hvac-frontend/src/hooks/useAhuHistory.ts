@@ -1,37 +1,24 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState } from "react"
-import type { HvacTelemetry } from "@/types/telemetry"
-import type { HistoryPoint } from "@/types/history"
-
-const MAX_POINTS = 30
+import { useMemo } from "react";
+import { useTelemetry } from "@/hooks/useTelemetry";
+import type { HistoryPoint } from "@/types/history";
+import type { HvacTelemetry } from "@/types/telemetry";
 
 export function useAhuHistory(ahu?: HvacTelemetry) {
-  const [temperature, setTemperature] = useState<HistoryPoint[]>([])
-  const [humidity, setHumidity] = useState<HistoryPoint[]>([])
+  const { history } = useTelemetry();
 
-  useEffect(() => {
-    if (!ahu) return
+  // Crear la clave del AHU actual
+  const key = ahu ? `${ahu.plantId}-${ahu.stationId}` : undefined;
 
-    const ts = ahu.timestamp
-
-    const temp = ahu.points.temperature?.value
-    const hum = ahu.points.humidity?.value
-
-    if (typeof temp === "number") {
-      setTemperature((prev) =>
-        [...prev, { timestamp: ts, value: temp }].slice(-MAX_POINTS),
-      )
+  // Memoizar para no recalcular en cada render
+  const result = useMemo(() => {
+    if (!key || !history[key]) {
+      return {
+        temperature: [] as HistoryPoint[],
+        humidity: [] as HistoryPoint[],
+      };
     }
+    return history[key];
+  }, [key, history]);
 
-    if (typeof hum === "number") {
-      setHumidity((prev) =>
-        [...prev, { timestamp: ts, value: hum }].slice(-MAX_POINTS),
-      )
-    }
-  }, [ahu?.timestamp])
-
-  return {
-    temperature,
-    humidity,
-  }
+  return result;
 }
