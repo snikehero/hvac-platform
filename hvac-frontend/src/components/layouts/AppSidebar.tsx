@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 
 const links = [
   { to: "/", label: "Home", icon: Home },
-  { to: "/dashboards", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/dashboards", label: "DashboardOverviewPage", icon: LayoutDashboard },
   { to: "/dashboardHVAC", label: "HVAC", icon: AirVent },
   { to: "/alarms", label: "Alarmas", icon: Bell },
   { to: "/settings", label: "Configuración", icon: Settings },

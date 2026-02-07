@@ -11,6 +11,7 @@ import { WebSocketProvider } from "./providers/WebSocketProvider";
 import AhuDetailTabs from "./pages/Tabs/AhuDetailTabs";
 import DashboardHVAC from "@/pages/DashboardHVAC/DashboardHVAC";
 import AlarmsPage from "./pages/Alarms/AlarmsPage";
+import DashboardOverviewPage from "./pages/Dashboard/DashboardOverviewPage";
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
@@ -25,6 +26,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                 element={<AhuDetailTabs />}
               />
               <Route path="/alarms" element={<AlarmsPage />} />
+              <Route path="/dashboards" element={<DashboardOverviewPage />} />
             </Routes>
           </AppLayout>
         </ThemeProvider>
