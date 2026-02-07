@@ -9,6 +9,7 @@ import {
   ReferenceArea,
 } from "recharts";
 import type { HistoryPoint } from "@/types/history";
+import { Badge } from "../ui/badge";
 
 interface Props {
   title?: string;
@@ -22,18 +23,26 @@ export function AhuHistoryTemperatureChart({
   status,
 }: Props) {
   const lineColor = "#38bdf8"; // azul fijo (puedes cambiarlo si quieres)
-
+  const avgTemperature =
+    data.length > 0
+      ? data.reduce((acc, p) => acc + p.value, 0) / data.length
+      : null;
   // último punto (para animarlo si está en ALARM)
   const lastIndex = data.length - 1;
 
   return (
     <Card
-      className={`bg-gray-900 text-white rounded-xl shadow-md ${
+      className={` text-white rounded-xl shadow-md ${
         status === "ALARM" ? "alarm-glow" : ""
       }`}
     >
       <CardHeader className="pb-2">
         <CardTitle className="text-base">{title}</CardTitle>
+        {avgTemperature !== null && (
+          <Badge variant="secondary">
+            Temperatura Promedio: {avgTemperature.toFixed(1)} °C
+          </Badge>
+        )}
       </CardHeader>
 
       <CardContent>

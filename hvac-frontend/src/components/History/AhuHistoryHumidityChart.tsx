@@ -9,6 +9,7 @@ import {
   ReferenceArea,
 } from "recharts";
 import type { HistoryPoint } from "@/types/history";
+import { Badge } from "../ui/badge";
 
 interface Props {
   title?: string;
@@ -25,15 +26,24 @@ export function AhuHistoryHumidityChart({
   const lineColor = "#38bdf8"; // azul fijo (puedes cambiarlo si quieres)
 
   const lastIndex = data.length - 1;
+  const avgHumidity =
+    data.length > 0
+      ? data.reduce((acc, p) => acc + p.value, 0) / data.length
+      : null;
 
   return (
     <Card
-      className={`bg-gray-900 text-white rounded-xl shadow-md ${
+      className={`text-white rounded-xl shadow-md ${
         status === "ALARM" ? "alarm-glow" : ""
       }`}
     >
       <CardHeader className="pb-2">
         <CardTitle className="text-base">{title}</CardTitle>
+        {avgHumidity !== null && (
+          <Badge variant="secondary">
+            Humedad Promedio: {avgHumidity.toFixed(1)} %
+          </Badge>
+        )}
       </CardHeader>
 
       <CardContent>
