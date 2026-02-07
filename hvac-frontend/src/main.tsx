@@ -8,7 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import AppLayout from "@/components/layouts/AppLayout";
 import HomePage from "./pages/HomePage/Homepage";
 import { WebSocketProvider } from "./providers/WebSocketProvider";
-import AhuDetailPage from "./pages/AhuDetailPage/AhuDetailPage";
+import AhuDetailTabs from "./pages/Tabs/AhuDetailTabs";
 import DashboardHVAC from "@/pages/DashboardHVAC/DashboardHVAC";
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
@@ -21,7 +21,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
               <Route path="/dashboardHVAC" element={<DashboardHVAC />} />
               <Route
                 path="/plants/:plantId/ahus/:ahuId"
-                element={<AhuDetailPage />}
+                element={<AhuDetailTabs />}
               />
             </Routes>
           </AppLayout>

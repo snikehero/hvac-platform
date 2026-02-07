@@ -3,17 +3,15 @@ import { useParams } from "react-router-dom";
 
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAhuHistory } from "@/hooks/useAhuHistory";
-import { useAhuEvents } from "@/hooks/useAhuEvents";
 
 import type { HvacStatus } from "@/types/hvac-status";
 import { isHvacStatus } from "@/types/hvac-status";
 
 import AhuHeader from "./AhuHeader";
-import AhuEventsSection from "./AhuEventsSection";
 import { AhuHealthSummary } from "@/components/ahu/AhuHealthSummary";
 import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
 
-import { renderAhuCard } from "@/components/ahu/RenderAhuCard";
+import { renderAhuCard } from "@/components/ahu/renderAhuCard";
 import { AhuHistoryTemperatureChart } from "@/components/History/AhuHistoryTemperatureCard";
 import { AhuHistoryHumidityChart } from "@/components/History/AhuHistoryHumidityChart";
 
@@ -35,7 +33,6 @@ export default function AhuDetailPage() {
     : undefined;
 
   const history = useAhuHistory(ahu);
-  const events = useAhuEvents(ahu);
   const health = getAhuHealth(ahu, hvacStatus);
 
   return (
@@ -96,9 +93,6 @@ export default function AhuDetailPage() {
             />
           </div>
         </section>
-      </section>
-      <section className="h-full grid grid-cols-2 gap-2">
-        <AhuEventsSection events={events} status={hvacStatus} />
       </section>
 
       <div className="text-[10px] text-muted-foreground text-right">
