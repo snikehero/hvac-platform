@@ -11,6 +11,7 @@ import PowerCard from "../Graphs/Power/PowerCard";
 import FilterCard from "../Graphs/Power/FilterCard";
 export function renderAhuCard(id: AhuCardId, ahu: any) {
   const points = ahu.points;
+  const status = ahu.points.status?.value;
 
   switch (id) {
     case "temperature":
@@ -23,7 +24,9 @@ export function renderAhuCard(id: AhuCardId, ahu: any) {
       return <FanCardIndustrial status={points.fan_status?.value ?? "OFF"} />;
 
     case "airflow":
-      return <AirflowCard airflow={points.airflow?.value ?? 0} />;
+      return (
+        <AirflowCard airflow={points.airflow?.value ?? 0} status={status} />
+      );
 
     case "damper":
       return <DamperCard position={points.damper_position?.value ?? 0} />;

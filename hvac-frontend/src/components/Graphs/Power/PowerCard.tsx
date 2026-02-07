@@ -1,3 +1,5 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 interface PowerCardProps {
   status: "ON" | "OFF";
   title?: string;
@@ -7,24 +9,32 @@ export default function PowerCard({
   status,
   title = "Energía",
 }: PowerCardProps) {
+  const isAlarm = status === "OFF";
+
   const imgSrc =
     status === "ON" ? "/images/Energy-on.gif" : "/images/Energy-off.png";
-  const bgColor = status === "ON" ? "bg-green-700" : "bg-red-700";
 
   return (
-    <div
-      className={`flex flex-col items-center p-4 ${bgColor} rounded-xl shadow-md`}
-    >
-      <h3 className="mb-2 text-white/75 font-semibold">{title}</h3>
+    <Card className={isAlarm ? "alarm-glow" : "border border-slate-700"}>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm text-muted-foreground">{title}</CardTitle>
+      </CardHeader>
 
-      {/* Imagen/GIF forzada a 512x512 */}
-      <img
-        src={imgSrc}
-        alt="Estado de energía"
-        className="w-[300px] h-[300px] object-contain"
-      />
+      <CardContent className="flex flex-col items-center">
+        <img
+          src={imgSrc}
+          alt="Estado de energía"
+          className="w-[300px] h-[300px] object-contain"
+        />
 
-      <span className="mt-2 text-lg font-bold text-white">{status}</span>
-    </div>
+        <span
+          className={`mt-2 text-lg font-bold ${
+            isAlarm ? "text-red-400" : "text-green-400"
+          }`}
+        >
+          {status}
+        </span>
+      </CardContent>
+    </Card>
   );
 }

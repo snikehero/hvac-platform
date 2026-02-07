@@ -21,10 +21,17 @@ export function AhuHistoryHumidityChart({
   data,
   status,
 }: Props) {
-  const color = getColorByStatus(status);
+  // 👉 color fijo para toda la línea
+  const lineColor = "#38bdf8"; // azul fijo (puedes cambiarlo si quieres)
+
+  const lastIndex = data.length - 1;
 
   return (
-    <Card className="bg-gray-900 text-white rounded-xl shadow-md">
+    <Card
+      className={`bg-gray-900 text-white rounded-xl shadow-md ${
+        status === "ALARM" ? "alarm-glow" : ""
+      }`}
+    >
       <CardHeader className="pb-2">
         <CardTitle className="text-base">{title}</CardTitle>
       </CardHeader>
@@ -33,7 +40,7 @@ export function AhuHistoryHumidityChart({
         {data.length === 0 ? (
           <div className="text-sm text-gray-400">Sin datos históricos</div>
         ) : (
-          <ResponsiveContainer width="100%" height={250}>
+          <ResponsiveContainer width="100%" height={220}>
             <LineChart
               data={data}
               margin={{ top: 10, right: 20, bottom: 30, left: 40 }}
@@ -75,14 +82,27 @@ export function AhuHistoryHumidityChart({
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke={color}
+                stroke={lineColor}
                 strokeWidth={3}
-                dot={{ r: 3, fill: color }}
+                dot={(props) => {
+                  const isLastPoint =
+                    props.index === lastIndex && status === "ALARM";
+
+                  return (
+                    <circle
+                      cx={props.cx}
+                      cy={props.cy}
+                      r={isLastPoint ? 6 : 3}
+                      fill={lineColor}
+                      className={isLastPoint ? "alarm-blink-dot" : ""}
+                    />
+                  );
+                }}
                 activeDot={{
                   r: 6,
                   stroke: "#fff",
                   strokeWidth: 2,
-                  fill: color,
+                  fill: lineColor,
                 }}
               />
             </LineChart>
@@ -92,19 +112,7 @@ export function AhuHistoryHumidityChart({
     </Card>
   );
 }
-/* ---------- helpers ---------- */
 function formatTime(ts: string) {
   const d = new Date(ts);
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-}
-
-function getColorByStatus(status?: "OK" | "WARNING" | "ALARM") {
-  switch (status) {
-    case "ALARM":
-      return "#dc2626"; // rojo
-    case "WARNING":
-      return "#facc15"; // amarillo
-    default:
-      return "#22c55e"; // verde
-  }
 }

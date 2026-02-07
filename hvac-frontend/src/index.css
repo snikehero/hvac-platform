@@ -137,3 +137,18 @@
   animation: alarmGlow 2s ease-in-out infinite;
   border: 2px solid rgb(220 38 38);
 }
+@keyframes alarmBlink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.alarm-blink-dot {
+  animation: alarmBlink 1s infinite;
+}

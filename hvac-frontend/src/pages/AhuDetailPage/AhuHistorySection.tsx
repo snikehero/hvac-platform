@@ -14,10 +14,7 @@ export default function AhuHistorySection({
   return (
     <AhuSection title="Histórico reciente" status={status}>
       <div className="grid md:grid-cols-2 gap-4">
-        <AhuHistoryTemperatureChart
-          data={history.temperature}
-          status={status}
-        />
+        <AhuHistoryTemperatureChart data={history.temperature} />
 
         <AhuHistoryHumidityChart data={history.humidity} status={status} />
       </div>
