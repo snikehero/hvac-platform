@@ -1,19 +1,22 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useParams } from "react-router-dom";
+
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAhuHistory } from "@/hooks/useAhuHistory";
 import { useAhuEvents } from "@/hooks/useAhuEvents";
+
 import type { HvacStatus } from "@/types/hvac-status";
 import { isHvacStatus } from "@/types/hvac-status";
-import AhuHeader from "./AhuHeader";
-import AhuHistorySection from "./AhuHistorySection";
-import AhuEventsSection from "./AhuEventsSection";
-import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
-import { AhuHealthSummary } from "@/components/ahu/AhuHealthSummary";
 
-import AhuTempHumSection from "./AhuTempHumSection";
-import AhuVentSection from "./AhuVentSection";
-import AhuStatusEnergySection from "./AhuStatusEnergySection";
+import AhuHeader from "./AhuHeader";
+import AhuEventsSection from "./AhuEventsSection";
+import { AhuHealthSummary } from "@/components/ahu/AhuHealthSummary";
+import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
+
+import { renderAhuCard } from "@/components/ahu/RenderAhuCard";
+import { AhuHistoryTemperatureChart } from "@/components/History/AhuHistoryTemperatureCard";
+import { AhuHistoryHumidityChart } from "@/components/History/AhuHistoryHumidityChart";
+
 export default function AhuDetailPage() {
   const { telemetry } = useTelemetry();
   const { ahuId, plantId } = useParams();
@@ -36,7 +39,7 @@ export default function AhuDetailPage() {
   const health = getAhuHealth(ahu, hvacStatus);
 
   return (
-    <div className="space-y-4">
+    <div className="h-screen grid grid-rows-[auto_auto_auto_1fr_auto] gap-2 p-2">
       <AhuHealthSummary
         status={health.status}
         badPoints={health.badPoints}
@@ -45,15 +48,60 @@ export default function AhuDetailPage() {
 
       <AhuHeader ahu={ahu} status={hvacStatus} />
 
-      {/* Secciones SVG */}
-      <AhuTempHumSection ahu={ahu} />
-      <AhuVentSection ahu={ahu} />
-      <AhuStatusEnergySection ahu={ahu} />
+      {/* ========================= */}
+      {/* CONDICIONES AMBIENTALES */}
+      {/* ========================= */}
+      <section className="space-y-3">
+        <section className="space-y-1">
+          <h3 className="text-sm font-semibold text-muted-foreground">
+            Condiciones Ambientales
+          </h3>
+          <div className="grid grid-cols-3 lg:grid-cols-3 gap-2 text-xs">
+            {renderAhuCard("temperature", ahu)}
+            {renderAhuCard("humidity", ahu)}
+            <AhuHistoryTemperatureChart
+              data={history.temperature}
+              status={hvacStatus}
+            />
+          </div>
+        </section>
 
-      <AhuHistorySection history={history} status={hvacStatus} />
-      <AhuEventsSection events={events} status={hvacStatus} />
+        {/* ========================= */}
+        {/* MOVIMIENTO DE AIRE */}
+        {/* ========================= */}
+        <section className="space-y-1">
+          <h3 className="text-sm font-semibold text-muted-foreground">
+            Movimiento de Aire
+          </h3>
+          <div className="grid grid-cols-3 lg:grid-cols-3 gap-2 text-xs">
+            {renderAhuCard("fan", ahu)}
+            {renderAhuCard("airflow", ahu)}
+            {renderAhuCard("damper", ahu)}
+          </div>
+        </section>
 
-      <div className="text-xs text-muted-foreground">
+        {/* ========================= */}
+        {/* ENERGÍA Y FILTRACIÓN */}
+        {/* ========================= */}
+        <section className="space-y-1">
+          <h3 className="text-sm font-semibold text-muted-foreground">
+            Energía y Filtración
+          </h3>
+          <div className="grid grid-cols-3 lg:grid-cols-3 gap-2 text-xs">
+            {renderAhuCard("power", ahu)}
+            {renderAhuCard("filter", ahu)}
+            <AhuHistoryHumidityChart
+              data={history.humidity}
+              status={hvacStatus}
+            />
+          </div>
+        </section>
+      </section>
+      <section className="h-full grid grid-cols-2 gap-2">
+        <AhuEventsSection events={events} status={hvacStatus} />
+      </section>
+
+      <div className="text-[10px] text-muted-foreground text-right">
         Última actualización: {new Date(ahu.timestamp).toLocaleString()}
       </div>
     </div>

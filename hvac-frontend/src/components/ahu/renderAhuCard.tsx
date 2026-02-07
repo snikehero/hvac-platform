@@ -1,0 +1,40 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// renderAhuCard.tsx
+import TemperatureCard from "../Graphs/Temperature/TemperatureCard";
+import HumidityCard from "../Graphs/Humidity/HumidityCard";
+import FanCardIndustrial from "../Graphs/Fan/FanCard";
+
+import { type AhuCardId } from "@/types/AhuCardId";
+import AirflowCard from "../Graphs/Fan/AirflowCard";
+import DamperCard from "../Graphs/Fan/DamperCard";
+import PowerCard from "../Graphs/Power/PowerCard";
+import FilterCard from "../Graphs/Power/FilterCard";
+export function renderAhuCard(id: AhuCardId, ahu: any) {
+  const points = ahu.points;
+
+  switch (id) {
+    case "temperature":
+      return <TemperatureCard temperature={points.temperature?.value ?? 0} />;
+
+    case "humidity":
+      return <HumidityCard humidity={points.humidity?.value ?? 0} />;
+
+    case "fan":
+      return <FanCardIndustrial status={points.fan_status?.value ?? "OFF"} />;
+
+    case "airflow":
+      return <AirflowCard airflow={points.airflow?.value ?? 0} />;
+
+    case "damper":
+      return <DamperCard position={points.damper_position?.value ?? 0} />;
+
+    case "power":
+      return <PowerCard status={points.power_status?.value ?? "OFF"} />;
+
+    case "filter":
+      return <FilterCard dp={points.filter_dp?.value ?? 0} />;
+
+    default:
+      return null;
+  }
+}

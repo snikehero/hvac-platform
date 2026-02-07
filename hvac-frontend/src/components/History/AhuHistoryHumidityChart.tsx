@@ -11,13 +11,16 @@ import {
 import type { HistoryPoint } from "@/types/history";
 
 interface Props {
-  title: string;
-  unit: string;
+  title?: string;
   data: HistoryPoint[];
   status?: "OK" | "WARNING" | "ALARM";
 }
 
-export default function AhuHistoryChart({ title, unit, data, status }: Props) {
+export function AhuHistoryHumidityChart({
+  title = "Humedad",
+  data,
+  status,
+}: Props) {
   const color = getColorByStatus(status);
 
   return (
@@ -35,10 +38,10 @@ export default function AhuHistoryChart({ title, unit, data, status }: Props) {
               data={data}
               margin={{ top: 10, right: 20, bottom: 30, left: 40 }}
             >
-              {/* Bandas de alerta */}
-              <ReferenceArea y1={0} y2={50} fill="#22c55e33" />
-              <ReferenceArea y1={50} y2={70} fill="#facc1533" />
-              <ReferenceArea y1={70} y2={100} fill="#dc262633" />
+              {/* Zonas de humedad */}
+              <ReferenceArea y1={0} y2={50} fill="#22c55e22" />
+              <ReferenceArea y1={50} y2={70} fill="#facc1522" />
+              <ReferenceArea y1={70} y2={100} fill="#dc262622" />
 
               <XAxis
                 dataKey="timestamp"
@@ -46,22 +49,15 @@ export default function AhuHistoryChart({ title, unit, data, status }: Props) {
                 tick={{ fontSize: 11, fill: "#cbd5e1" }}
                 axisLine={{ stroke: "#475569" }}
                 tickLine={false}
-                label={{
-                  value: "Tiempo",
-                  position: "insideBottom",
-                  offset: -15,
-                  fontSize: 12,
-                }}
               />
 
               <YAxis
+                domain={[0, 100]}
                 tick={{ fontSize: 11, fill: "#cbd5e1" }}
                 axisLine={{ stroke: "#475569" }}
                 tickLine={false}
-                width={40}
-                domain={["auto", "auto"]}
                 label={{
-                  value: unit,
+                  value: "%",
                   angle: -90,
                   position: "insideLeft",
                   fontSize: 12,
@@ -70,24 +66,16 @@ export default function AhuHistoryChart({ title, unit, data, status }: Props) {
 
               <Tooltip
                 contentStyle={{ backgroundColor: "#1e293b", border: "none" }}
+                formatter={(v: number) => [`${v} %`, "Humedad"]}
                 labelFormatter={(l) =>
                   `Hora: ${new Date(l).toLocaleTimeString()}`
                 }
-                formatter={(v: number) => [`${v} ${unit}`, title]}
               />
-
-              {/* Línea con gradiente */}
-              <defs>
-                <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={color} stopOpacity={0.8} />
-                  <stop offset="100%" stopColor={color} stopOpacity={0.2} />
-                </linearGradient>
-              </defs>
 
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke="url(#lineGrad)"
+                stroke={color}
                 strokeWidth={3}
                 dot={{ r: 3, fill: color }}
                 activeDot={{
@@ -96,8 +84,6 @@ export default function AhuHistoryChart({ title, unit, data, status }: Props) {
                   strokeWidth: 2,
                   fill: color,
                 }}
-                isAnimationActive={true}
-                animationDuration={800}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -106,7 +92,6 @@ export default function AhuHistoryChart({ title, unit, data, status }: Props) {
     </Card>
   );
 }
-
 /* ---------- helpers ---------- */
 function formatTime(ts: string) {
   const d = new Date(ts);
