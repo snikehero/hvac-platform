@@ -508,7 +508,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 520,
+        "x": 440,
         "y": 440,
         "wires": [
             [
@@ -537,7 +537,7 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 260,
+        "x": 180,
         "y": 460,
         "wires": [
             [
@@ -557,7 +557,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 510,
+        "x": 430,
         "y": 520,
         "wires": [
             []
@@ -584,7 +584,7 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 260,
+        "x": 180,
         "y": 520,
         "wires": [
             [

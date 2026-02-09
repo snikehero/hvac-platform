@@ -101,7 +101,7 @@ export default function AlarmsPage() {
           value={filterType}
           onValueChange={(v) => setFilterType(v as any)}
         >
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger className="w-37.5">
             <SelectValue placeholder="Filtrar tipo" />
           </SelectTrigger>
           <SelectContent>
@@ -115,7 +115,7 @@ export default function AlarmsPage() {
           placeholder="Buscar AHU"
           value={searchAhu}
           onChange={(e) => setSearchAhu(e.target.value)}
-          className="w-[200px]"
+          className="w-50"
         />
       </div>
 

@@ -103,21 +103,25 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       const previousStatus = lastStatusRef.current[key];
       const status = ahu.points.status?.value;
 
-      // Validar que sea un estado correcto
-      if (status === "ALARM" || status === "WARNING" || status === "OK") {
-        // Actualizar lastStatusRef
-        lastStatusRef.current[key] = status;
+  if (
+  status === "ALARM" ||
+  status === "WARNING" ||
+  status === "OK"
+) {
+  // ❗ SOLO si hay cambio real
+  if (status !== previousStatus) {
+    lastStatusRef.current[key] = status;
 
-        // Generar evento
-        const event: HvacEvent = {
-          timestamp: ahu.timestamp,
-          ahuId: ahu.stationId,
-          plantId: ahu.plantId,
-          type: status,
-          message: buildMessage(status, previousStatus ?? "OK"),
-        };
-        setEvents((prev) => [event, ...prev].slice(0, 50));
+    const event: HvacEvent = {
+      timestamp: ahu.timestamp,
+      ahuId: ahu.stationId,
+      plantId: ahu.plantId,
+      type: status,
+      message: buildMessage(status, previousStatus ?? "OK"),
+    };
 
+    setEvents((prev) => [event, ...prev].slice(0, 50));
+  }
         // Actualizar contadores activos
         setActiveCounts((prev) => ({
           ...prev,
