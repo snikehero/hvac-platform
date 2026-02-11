@@ -8,6 +8,7 @@ import {
   AlertTriangle,
   AirVent,
   Bell,
+  ShieldCheck,
 } from "lucide-react"
 import { Link } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
@@ -36,6 +37,40 @@ export default function HomePage() {
 
     return { activeAlarms: alarms, activeWarnings: warnings }
   }, [telemetry])
+
+  /* -------------------------------- */
+/* Salud Operacional Global */
+/* -------------------------------- */
+
+const systemHealth = useMemo(() => {
+  if (telemetry.length === 0) return "NO_DATA"
+
+  let hasAlarm = false
+  let hasWarning = false
+  let hasDisconnected = false
+
+  telemetry.forEach((ahu) => {
+    const health = getAhuHealth(ahu)
+
+    if (health.status === "ALARM") hasAlarm = true
+    else if (health.status === "WARNING") hasWarning = true
+    else if (health.status === "DISCONNECTED") hasDisconnected = true
+  })
+
+  if (hasAlarm) return "CRITICAL"
+  if (hasWarning || hasDisconnected) return "DEGRADED"
+
+  return "HEALTHY"
+}, [telemetry])
+
+const healthColor =
+  systemHealth === "CRITICAL"
+    ? "text-red-600"
+    : systemHealth === "DEGRADED"
+      ? "text-orange-500"
+      : systemHealth === "NO_DATA"
+        ? "text-neutral-500"
+        : "text-green-600"
 
   /* -------------------------------- */
   /* Temperatura promedio (solo conectados) */
@@ -76,6 +111,13 @@ export default function HomePage() {
         : "Sin conexión al servidor",
       color: connected ? "text-green-600" : "text-red-600",
     },
+      {
+    icon: ShieldCheck,
+    title: "Salud Operacional",
+    value: systemHealth,
+    subtitle: "Estado global de AHUs",
+    color: healthColor,
+  },
     {
       icon: Thermometer,
       title: "Temperatura promedio",

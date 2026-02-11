@@ -4,7 +4,6 @@ import MiniLineChart from "@/components/Charts/MiniLineChart"
 
 import { useAhuHistory } from "@/hooks/useAhuHistory"
 import { getAhuHealth } from "@/domain/ahu/getAhuHealth"
-import { getAhuStatus } from "../utils/hvacSelectors"
 
 import type { HvacTelemetry } from "@/types/telemetry"
 
@@ -17,8 +16,7 @@ export function AhuCard({ ahu, onClick }: Props) {
   const history = useAhuHistory(ahu)
 
   // Estado operativo global
-  const hvacStatus = getAhuStatus(ahu)
-  const health = getAhuHealth(ahu, hvacStatus)
+  const health = getAhuHealth(ahu)
 
   const temperature = Number(ahu.points.temperature?.value)
   const humidity = Number(ahu.points.humidity?.value)

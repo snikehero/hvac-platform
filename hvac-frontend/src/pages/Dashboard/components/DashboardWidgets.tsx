@@ -109,7 +109,7 @@ const widgets = [
         : "text-white",
     onClick:
       stats.warnings > 0
-        ? () => onFilterStatus("WARNING")
+        ? () => onFilterStatus("ALARM")
         : undefined,
   },
 
