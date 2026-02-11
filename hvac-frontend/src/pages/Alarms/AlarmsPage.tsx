@@ -3,6 +3,7 @@ import { useState, useMemo } from "react";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAhuHistory } from "@/hooks/useAhuHistory";
 import { AhuHistoryTemperatureChart } from "@/components/History/AhuHistoryTemperatureCard";
+import { getAhuOperationalStatus } from "@/domain/ahu/ahuSelectors"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -40,11 +41,12 @@ export default function AlarmsPage() {
     let alarms = 0;
     let warnings = 0;
 
-    telemetry.forEach((ahu) => {
-      const status = ahu.points.status?.value;
-      if (status === "ALARM") alarms += 1;
-      else if (status === "WARNING") warnings += 1;
-    });
+telemetry.forEach((ahu) => {
+  const status = getAhuOperationalStatus(ahu)
+
+  if (status === "ALARM") alarms++
+  else if (status === "WARNING") warnings++
+})
 
     return { activeAlarms: alarms, activeWarnings: warnings };
   }, [telemetry]);
@@ -54,19 +56,22 @@ export default function AlarmsPage() {
   // ------------------------------
   const filteredActiveAhu = useMemo(() => {
     return telemetry.filter((ahu) => {
-      const status = ahu.points.status?.value;
+      const status = getAhuOperationalStatus(ahu)
+
       const matchesType =
-        filterType === "ALL" || (status && status === filterType);
+        filterType === "ALL" || status === filterType
+
       const matchesSearch =
         searchAhu === "" ||
-        ahu.stationId.toLowerCase().includes(searchAhu.toLowerCase());
+        ahu.stationId.toLowerCase().includes(searchAhu.toLowerCase())
+
       return (
         (status === "ALARM" || status === "WARNING") &&
         matchesType &&
         matchesSearch
-      );
-    });
-  }, [telemetry, filterType, searchAhu]);
+      )
+    })
+  }, [telemetry, filterType, searchAhu])
 
   return (
     <div className="p-4 space-y-6">
@@ -125,7 +130,7 @@ export default function AlarmsPage() {
           <Card
             key={`${ahu.plantId}-${ahu.stationId}`}
             className={`cursor-pointer hover:shadow-lg border-2 hover:scale-102 transition ${
-              ahu.points.status?.value === "ALARM"
+              getAhuOperationalStatus(ahu) === "ALARM"
                 ? "border-red-600"
                 : "border-yellow-500"
             }`}
@@ -136,12 +141,12 @@ export default function AlarmsPage() {
                 {ahu.stationId}
                 <Badge
                   variant={
-                    ahu.points.status?.value === "ALARM"
+                     getAhuOperationalStatus(ahu) === "ALARM"
                       ? "destructive"
                       : "secondary"
                   }
                 >
-                  {ahu.points.status?.value}
+                  {getAhuOperationalStatus(ahu)}
                 </Badge>
               </CardTitle>
             </CardHeader>
@@ -172,7 +177,7 @@ export default function AlarmsPage() {
               <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                 <AhuHistoryTemperatureChart
                   data={selectedAhuHistory.temperature}
-                  status={selectedAhu.points.status?.value as any}
+                  status={getAhuOperationalStatus(selectedAhu) as any}
                 />
               </div>
             </div>

@@ -24,6 +24,14 @@
         "env": []
     },
     {
+        "id": "4e276229317f0606",
+        "type": "tab",
+        "label": "Bascula",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
         "id": "d9490cfb64c4ef60",
         "type": "group",
         "z": "06936ed9048da629",
@@ -508,7 +516,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 520,
+        "x": 440,
         "y": 440,
         "wires": [
             [
@@ -537,7 +545,7 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 260,
+        "x": 180,
         "y": 460,
         "wires": [
             [
@@ -557,7 +565,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 510,
+        "x": 430,
         "y": 520,
         "wires": [
             []
@@ -584,7 +592,7 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 260,
+        "x": 180,
         "y": 520,
         "wires": [
             [

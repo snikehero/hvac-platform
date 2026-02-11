@@ -1,11 +1,16 @@
 import TelemetryCard from "@/components/TelemetryCard/TelemetryCard"
 import { useTelemetry } from "@/hooks/useTelemetry"
 import type { HvacTelemetry } from "@/types/telemetry"
+import { isAhuConnected, getAhuOperationalStatus } 
+  from "@/domain/ahu/ahuSelectors"
 
 export default function DashboardHVAC() {
   const { telemetry } = useTelemetry()
 
-  const groupedByPlant = groupByPlant(telemetry)
+const connectedAhus = telemetry.filter(isAhuConnected)
+
+
+const groupedByPlant = groupByPlant(connectedAhus)
 
   return (
     <div className="space-y-8">
@@ -64,6 +69,6 @@ function groupByPlant(telemetry: HvacTelemetry[]) {
 
 function hasAlarm(ahus: HvacTelemetry[]) {
   return ahus.some(
-    (ahu) => ahu.points.status?.value === "ALARM",
+    (ahu) => getAhuOperationalStatus(ahu) === "ALARM"
   )
 }

@@ -4,7 +4,7 @@ import { io, type Socket } from "socket.io-client";
 import type { HvacTelemetry } from "@/types/telemetry";
 import type { HvacEvent, HvacEventType } from "@/types/event";
 import type { HistoryPoint } from "@/types/history";
-
+import { STALE_THRESHOLD_MS } from "@/domain/ahu/constants";
 const MAX_POINTS = 30;
 
 interface TelemetryContextValue {
@@ -43,6 +43,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const [connected, setConnected] = useState(false);
 
   const lastStatusRef = useRef<Record<string, HvacEventType>>({});
+  const lastConnectivityRef = useRef<Record<string, boolean>>({});
 
   useEffect(() => {
     const socket: Socket = io("http://localhost:3000");
@@ -173,6 +174,61 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       socket.disconnect();
     };
   }, []);
+useEffect(() => {
+
+  const interval = setInterval(() => {
+    setTelemetry((prev) => {
+      const now = Date.now();
+
+      prev.forEach((ahu) => {
+        const key = `${ahu.plantId}-${ahu.stationId}`;
+        const lastUpdate = new Date(ahu.timestamp).getTime();
+
+        const isDisconnected =
+          now - lastUpdate > STALE_THRESHOLD_MS;
+
+        const wasDisconnected =
+          lastConnectivityRef.current[key] ?? false;
+
+        /* 🔴 Conectado → Desconectado */
+        if (isDisconnected && !wasDisconnected) {
+          const event: HvacEvent = {
+            timestamp: new Date().toISOString(),
+            ahuId: ahu.stationId,
+            plantId: ahu.plantId,
+            type: "ALARM",
+            message: "Unidad perdió comunicación",
+          };
+
+          setEvents((prevEvents) =>
+            [event, ...prevEvents].slice(0, 50)
+          );
+        }
+
+        /* 🟢 Desconectado → Conectado */
+        if (!isDisconnected && wasDisconnected) {
+          const event: HvacEvent = {
+            timestamp: new Date().toISOString(),
+            ahuId: ahu.stationId,
+            plantId: ahu.plantId,
+            type: "OK",
+            message: "Unidad restableció comunicación",
+          };
+
+          setEvents((prevEvents) =>
+            [event, ...prevEvents].slice(0, 50)
+          );
+        }
+
+        lastConnectivityRef.current[key] = isDisconnected;
+      });
+
+      return [...prev]; // fuerza re-render
+    });
+  }, 10000);
+
+  return () => clearInterval(interval);
+}, []);
 
   return (
     <TelemetryContext.Provider

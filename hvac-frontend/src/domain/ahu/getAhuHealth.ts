@@ -1,5 +1,6 @@
 import type { HvacTelemetry, HvacPoint } from "@/types/telemetry"
 import type { HvacStatus } from "@/types/hvac-status"
+import { STALE_THRESHOLD_MS } from "./constants"
 
 export type AhuHealthStatus =
   | "OK"
@@ -7,7 +8,6 @@ export type AhuHealthStatus =
   | "ALARM"
   | "DISCONNECTED"
 
-const STALE_THRESHOLD_MS = 2 * 60 * 1000 // 2 minutos
 
 export function getAhuHealth(
   ahu: HvacTelemetry,
