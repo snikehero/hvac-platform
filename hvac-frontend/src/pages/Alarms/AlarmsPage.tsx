@@ -5,7 +5,6 @@ import { useAhuHistory } from "@/hooks/useAhuHistory";
 import { AhuHistoryTemperatureChart } from "@/components/History/AhuHistoryTemperatureCard";
 
 import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
-import { getAhuOperationalStatus } from "@/domain/ahu/ahuSelectors";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -44,8 +43,7 @@ export default function AlarmsPage() {
     let warnings = 0;
 
     telemetry.forEach((ahu) => {
-      const operational = getAhuOperationalStatus(ahu);
-      const health = getAhuHealth(ahu, operational as any);
+      const health = getAhuHealth(ahu);
 
       if (health.status === "ALARM") alarms++;
       if (health.status === "WARNING") warnings++;
@@ -59,8 +57,7 @@ export default function AlarmsPage() {
   /* -------------------------------- */
   const filteredActiveAhu = useMemo(() => {
     return telemetry.filter((ahu) => {
-      const operational = getAhuOperationalStatus(ahu);
-      const health = getAhuHealth(ahu, operational as  any);
+      const health = getAhuHealth(ahu);
 
       // 🚫 Ignorar desconectados completamente
       if (health.status === "DISCONNECTED") return false;
@@ -134,8 +131,7 @@ export default function AlarmsPage() {
       {/* Tabla */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredActiveAhu.map((ahu) => {
-          const operational = getAhuOperationalStatus(ahu);
-          const health = getAhuHealth(ahu, operational as any);
+          const health = getAhuHealth(ahu);
 
           return (
             <Card

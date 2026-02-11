@@ -1,26 +1,25 @@
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import AhuDetailPage from "../AhuDetailPage/AhuDetailContent";
-import AhuEventsPage from "../AhuEventsPage/AhuEventsPage";
-import { useTelemetry } from "@/hooks/useTelemetry";
-import { useParams } from "react-router-dom";
-import { useAhuEvents } from "@/hooks/useAhuEvents";
-import { getAhuOperationalStatus } from "@/domain/ahu/ahuSelectors";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import AhuDetailPage from "../AhuDetailPage/AhuDetailContent"
+import AhuEventsPage from "../AhuEventsPage/AhuEventsPage"
+import { useTelemetry } from "@/hooks/useTelemetry"
+import { useParams } from "react-router-dom"
+import { useAhuEvents } from "@/hooks/useAhuEvents"
+import { getAhuHealth } from "@/domain/ahu/getAhuHealth"
 
 export default function AhuDetailTabs() {
-  const { telemetry } = useTelemetry();
-  const { ahuId, plantId } = useParams();
+  const { telemetry } = useTelemetry()
+  const { ahuId, plantId } = useParams()
 
   const ahu = telemetry.find(
-    (t) => t.stationId === ahuId && t.plantId === plantId,
-  );
+    (t) => t.stationId === ahuId && t.plantId === plantId
+  )
 
-  const events = useAhuEvents(ahu);
+  const events = useAhuEvents(ahu)
 
-  const operationalStatus = ahu
-    ? getAhuOperationalStatus(ahu)
-    : undefined;
+  const health = ahu ? getAhuHealth(ahu) : undefined
 
-  const alarmActive = operationalStatus === "ALARM";
+  // 🔥 Glow solo si realmente está en ALARM
+  const alarmActive = health?.status === "ALARM"
 
   return (
     <Tabs defaultValue="detail" className="h-screen">
@@ -49,5 +48,5 @@ export default function AhuDetailTabs() {
         <AhuEventsPage />
       </TabsContent>
     </Tabs>
-  );
+  )
 }

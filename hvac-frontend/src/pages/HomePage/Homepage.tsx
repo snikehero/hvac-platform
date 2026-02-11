@@ -1,80 +1,86 @@
 // src/app/page.tsx
-import { useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useMemo } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import {
   Activity,
   Thermometer,
   AlertTriangle,
   AirVent,
   Bell,
-} from "lucide-react";
-import { Link } from "react-router-dom";
-import { Badge } from "@/components/ui/badge";
-import { useTelemetry } from "@/hooks/useTelemetry";
-import { useWebSocket } from "@/hooks/useWebSocket";
-import { getAhuOperationalStatus } from "@/domain/ahu/ahuSelectors"
+} from "lucide-react"
+import { Link } from "react-router-dom"
+import { Badge } from "@/components/ui/badge"
+import { useTelemetry } from "@/hooks/useTelemetry"
+import { useWebSocket } from "@/hooks/useWebSocket"
+import { getAhuHealth } from "@/domain/ahu/getAhuHealth"
 
 export default function HomePage() {
-  const { telemetry } = useTelemetry();
-  const connected = useWebSocket(); // true si WebSocket activo
+  const { telemetry } = useTelemetry()
+  const connected = useWebSocket()
 
-  // ------------------------------
-  // Contadores de alarmas y warnings
-  // ------------------------------
-const { activeAlarms, activeWarnings } = useMemo(() => {
-  let alarms = 0
-  let warnings = 0
+  /* -------------------------------- */
+  /* Contadores usando HEALTH */
+  /* -------------------------------- */
 
-  telemetry.forEach((ahu) => {
-    const status = getAhuOperationalStatus(ahu)
+  const { activeAlarms, activeWarnings } = useMemo(() => {
+    let alarms = 0
+    let warnings = 0
 
-    if (status === "ALARM") alarms++
-    else if (status === "WARNING") warnings++
-  })
+    telemetry.forEach((ahu) => {
+      const health = getAhuHealth(ahu)
 
-  return { activeAlarms: alarms, activeWarnings: warnings }
-}, [telemetry])
+      if (health.status === "ALARM") alarms++
+      else if (health.status === "WARNING") warnings++
+    })
 
-  // ------------------------------
-  // Temperatura promedio
-  // ------------------------------
-const avgTemperature = useMemo(() => {
-  const temps: number[] = []
+    return { activeAlarms: alarms, activeWarnings: warnings }
+  }, [telemetry])
 
-  telemetry.forEach((ahu) => {
-    const status = getAhuOperationalStatus(ahu)
+  /* -------------------------------- */
+  /* Temperatura promedio (solo conectados) */
+  /* -------------------------------- */
 
-    if (status === "DISCONNECTED") return
+  const avgTemperature = useMemo(() => {
+    const temps: number[] = []
 
-    const t = ahu.points.temperature?.value
-    if (typeof t === "number") temps.push(t)
-  })
+    telemetry.forEach((ahu) => {
+      const health = getAhuHealth(ahu)
 
-  return temps.length
-    ? temps.reduce((a, b) => a + b, 0) / temps.length
-    : 0
-}, [telemetry])
+      // 🚫 Ignorar desconectados
+      if (health.status === "DISCONNECTED") return
 
+      const t = ahu.points.temperature?.value
+      if (typeof t === "number") temps.push(t)
+    })
 
-  const avgTemperatureDisplay = `${avgTemperature.toFixed(1)} °C`;
+    return temps.length
+      ? temps.reduce((a, b) => a + b, 0) / temps.length
+      : null
+  }, [telemetry])
 
-  // ------------------------------
-  // Widgets dinámicos
-  // ------------------------------
+  const avgTemperatureDisplay =
+    avgTemperature !== null ? `${avgTemperature.toFixed(1)} °C` : "--"
+
+  /* -------------------------------- */
+  /* Widgets */
+  /* -------------------------------- */
+
   const widgets = [
     {
       icon: Activity,
       title: "Estado del sistema",
       value: connected ? "ONLINE" : "OFFLINE",
-      subtitle: connected ? "Conexión establecida" : "Sin conexión al servidor",
+      subtitle: connected
+        ? "Conexión establecida"
+        : "Sin conexión al servidor",
       color: connected ? "text-green-600" : "text-red-600",
     },
     {
       icon: Thermometer,
       title: "Temperatura promedio",
       value: avgTemperatureDisplay,
-      subtitle: "Últimos AHUs activos",
+      subtitle: "AHUs actualmente activos",
       color: "text-blue-600",
     },
     {
@@ -99,11 +105,12 @@ const avgTemperature = useMemo(() => {
       subtitle: "Monitoreo necesario",
       color: "text-yellow-600",
     },
-  ];
+  ]
 
-  // ------------------------------
-  // Quick Links a módulos
-  // ------------------------------
+  /* -------------------------------- */
+  /* Quick Links */
+  /* -------------------------------- */
+
   const quickLinks = [
     {
       to: "/dashboardHVAC",
@@ -112,8 +119,7 @@ const avgTemperature = useMemo(() => {
       color: "text-blue-500",
     },
     { to: "/alarms", label: "Alarmas", icon: Bell, color: "text-red-500" },
-    // Se pueden agregar más módulos aquí
-  ];
+  ]
 
   return (
     <div className="p-6 space-y-6">
@@ -122,7 +128,7 @@ const avgTemperature = useMemo(() => {
         Monitoreo en tiempo real de PLCs y sistemas conectados
       </p>
 
-      {/* ---------------- Widgets ---------------- */}
+      {/* Widgets */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         {widgets.map(({ icon: Icon, title, value, subtitle, color }) => (
           <Card key={title}>
@@ -136,20 +142,25 @@ const avgTemperature = useMemo(() => {
                         ? "bg-green-500 animate-ping"
                         : "bg-red-500 animate-pulse"
                     }`}
-                  ></span>
+                  />
                 )}
               </div>
               <CardTitle>{title}</CardTitle>
             </CardHeader>
+
             <CardContent>
-              <p className={`text-2xl font-semibold ${color}`}>{value}</p>
-              <p className="text-sm text-muted-foreground">{subtitle}</p>
+              <p className={`text-2xl font-semibold ${color}`}>
+                {value}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {subtitle}
+              </p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* ---------------- Quick Links ---------------- */}
+      {/* Quick Links */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-6">
         {quickLinks.map((link) => (
           <Link key={link.to} to={link.to}>
@@ -163,12 +174,11 @@ const avgTemperature = useMemo(() => {
         ))}
       </div>
 
-      {/* ---------------- Botón principal ---------------- */}
       <div className="pt-4">
         <Link to="/dashboard">
           <Button size="lg">Ir al Dashboard</Button>
         </Link>
       </div>
     </div>
-  );
+  )
 }

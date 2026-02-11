@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import type { HvacTelemetry } from "@/types/telemetry";
-import { getAhuStatus } from "../utils/hvacSelectors";
 import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
 
 export type SystemStatus =
@@ -20,8 +19,7 @@ export function useDashboardStats(telemetry: HvacTelemetry[]) {
     let count = 0;
 
     telemetry.forEach((ahu) => {
-      const operationalStatus = getAhuStatus(ahu);
-      const health = getAhuHealth(ahu, operationalStatus);
+      const health = getAhuHealth(ahu);
 
       // 🔥 SOLO usar health.status
       if (health.status === "ALARM") alarms++;

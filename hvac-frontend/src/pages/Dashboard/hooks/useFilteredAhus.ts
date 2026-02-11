@@ -1,6 +1,6 @@
 import { useMemo } from "react"
 import type { HvacTelemetry } from "@/types/telemetry"
-import { getAhuOperationalStatus } from "@/domain/ahu/ahuSelectors"
+import { getAhuHealth } from "@/domain/ahu/getAhuHealth"
 
 export function useFilteredAhus(
   telemetry: HvacTelemetry[],
@@ -9,7 +9,8 @@ export function useFilteredAhus(
 ) {
   return useMemo(() => {
     return telemetry.filter((ahu) => {
-      const status = getAhuOperationalStatus(ahu)
+      const health = getAhuHealth(ahu)
+      const status = health.status
 
       /* ---------- filtro planta ---------- */
       if (plantFilter && ahu.plantId !== plantFilter) {
@@ -21,7 +22,7 @@ export function useFilteredAhus(
         return true
       }
 
-      /* ---------- filtro por estado operacional ---------- */
+      /* ---------- filtro por estado real (health) ---------- */
       return status === statusFilter
     })
   }, [telemetry, plantFilter, statusFilter])

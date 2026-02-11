@@ -1,16 +1,17 @@
 import TelemetryCard from "@/components/TelemetryCard/TelemetryCard"
 import { useTelemetry } from "@/hooks/useTelemetry"
 import type { HvacTelemetry } from "@/types/telemetry"
-import { isAhuConnected, getAhuOperationalStatus } 
-  from "@/domain/ahu/ahuSelectors"
+import { getAhuHealth } from "@/domain/ahu/getAhuHealth"
 
 export default function DashboardHVAC() {
   const { telemetry } = useTelemetry()
 
-const connectedAhus = telemetry.filter(isAhuConnected)
+  // 🔥 Solo AHUs conectados
+  const connectedAhus = telemetry.filter(
+    (ahu) => getAhuHealth(ahu).status !== "DISCONNECTED"
+  )
 
-
-const groupedByPlant = groupByPlant(connectedAhus)
+  const groupedByPlant = groupByPlant(connectedAhus)
 
   return (
     <div className="space-y-8">
@@ -23,6 +24,7 @@ const groupedByPlant = groupByPlant(connectedAhus)
 
       {Object.entries(groupedByPlant).map(([plantId, ahus]) => {
         const alarmActive = hasAlarm(ahus)
+
         return (
           <section
             key={plantId}
@@ -69,6 +71,6 @@ function groupByPlant(telemetry: HvacTelemetry[]) {
 
 function hasAlarm(ahus: HvacTelemetry[]) {
   return ahus.some(
-    (ahu) => getAhuOperationalStatus(ahu) === "ALARM"
+    (ahu) => getAhuHealth(ahu).status === "ALARM"
   )
 }

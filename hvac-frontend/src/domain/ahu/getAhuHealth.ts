@@ -1,5 +1,4 @@
 import type { HvacTelemetry, HvacPoint } from "@/types/telemetry"
-
 import { STALE_THRESHOLD_MS } from "./constants"
 
 export type AhuHealthStatus =
@@ -8,10 +7,8 @@ export type AhuHealthStatus =
   | "ALARM"
   | "DISCONNECTED"
 
-
 export function getAhuHealth(
-  ahu: HvacTelemetry,
-  operationalStatus?: "OK" | "WARNING" | "ALARM"
+  ahu: HvacTelemetry
 ): {
   status: AhuHealthStatus
   badPoints: number
@@ -20,7 +17,7 @@ export function getAhuHealth(
   const now = Date.now()
   const lastUpdate = new Date(ahu.timestamp)
 
-  // 1️⃣ DISCONNECTED (máxima prioridad)
+  /* ---------------- 1️⃣ DISCONNECTED ---------------- */
   if (now - lastUpdate.getTime() > STALE_THRESHOLD_MS) {
     return {
       status: "DISCONNECTED",
@@ -29,8 +26,10 @@ export function getAhuHealth(
     }
   }
 
-  // 2️⃣ ALARM operacional (segunda prioridad)
-  if (operationalStatus === "ALARM") {
+  const rawStatus = ahu.points.status?.value
+
+  /* ---------------- 2️⃣ ALARM operacional ---------------- */
+  if (rawStatus === "ALARM") {
     return {
       status: "ALARM",
       badPoints: 0,
@@ -38,9 +37,12 @@ export function getAhuHealth(
     }
   }
 
-  // 3️⃣ Contar BAD points
+  /* ---------------- 3️⃣ BAD quality → WARNING ---------------- */
   const points = Object.values(ahu.points) as HvacPoint[]
-  const badPoints = points.filter(p => p?.quality === "BAD").length
+
+  const badPoints = points.filter(
+    p => p?.quality === "BAD"
+  ).length
 
   if (badPoints > 0) {
     return {
@@ -50,8 +52,8 @@ export function getAhuHealth(
     }
   }
 
-  // 4️⃣ WARNING operacional explícito
-  if (operationalStatus === "WARNING") {
+  /* ---------------- 4️⃣ WARNING explícito ---------------- */
+  if (rawStatus === "WARNING") {
     return {
       status: "WARNING",
       badPoints: 0,
@@ -59,7 +61,7 @@ export function getAhuHealth(
     }
   }
 
-  // 5️⃣ OK
+  /* ---------------- 5️⃣ OK ---------------- */
   return {
     status: "OK",
     badPoints: 0,

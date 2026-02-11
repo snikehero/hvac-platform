@@ -10,7 +10,7 @@ import {
 import { useTelemetry } from "@/hooks/useTelemetry"
 import { Badge } from "@/components/ui/badge"
 import { useEffect, useState, useMemo } from "react"
-import { getAhuOperationalStatus } from "@/domain/ahu/ahuSelectors"
+import { getAhuHealth } from "@/domain/ahu/getAhuHealth"
 
 const links = [
   { to: "/", label: "Home", icon: Home },
@@ -23,14 +23,16 @@ const links = [
 export default function AppSidebar() {
   const { telemetry } = useTelemetry()
 
-  // ✅ Contador usando dominio, no points
+  /* 🔥 Contador usando HEALTH */
   const activeAlarms = useMemo(() => {
     return telemetry.reduce((acc, ahu) => {
-      return acc + (getAhuOperationalStatus(ahu) === "ALARM" ? 1 : 0)
+      const health = getAhuHealth(ahu)
+      return acc + (health.status === "ALARM" ? 1 : 0)
     }, 0)
   }, [telemetry])
 
-  // Estado para trigger de animación
+  /* ---------- Animación ---------- */
+
   const [animate, setAnimate] = useState(false)
   const [prevCount, setPrevCount] = useState(activeAlarms)
 

@@ -99,6 +99,19 @@ const widgets = [
         ? () => onFilterStatus("ALARM")
         : undefined,
   },
+  {
+    icon: AlertTriangle,
+    label: "Warnings Activos",
+    value: noData ? "--" : stats.warnings,
+    valueClass:
+      stats.warnings > 0
+        ? "text-yellow-500"
+        : "text-white",
+    onClick:
+      stats.warnings > 0
+        ? () => onFilterStatus("WARNING")
+        : undefined,
+  },
 
   // 👇 SOLO si hay AHUs activos
   ...(hasActiveAhus
