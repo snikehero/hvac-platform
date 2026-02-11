@@ -1,6 +1,4 @@
 import { useTelemetry } from "./useTelemetry"
-import { getAhuStatus } from "@/pages/Dashboard/utils/hvacSelectors"
-
 import { getAhuHealth } from "@/domain/ahu/getAhuHealth"
 import type { HvacTelemetry } from "@/types/telemetry"
 import type { HvacEvent } from "@/types/event"
@@ -9,9 +7,8 @@ export function useAhuEvents(ahu?: HvacTelemetry): HvacEvent[] {
   const { events } = useTelemetry()
   if (!ahu) return []
 
-  // 🔎 Evaluar estado actual
-  const status = getAhuStatus(ahu)
-  const health = getAhuHealth(ahu, status)
+  // 🔎 Evaluar estado actual desde dominio
+  const health = getAhuHealth(ahu)
 
   // 🚫 Si está desconectado → no mostrar eventos
   if (health.status === "DISCONNECTED") {

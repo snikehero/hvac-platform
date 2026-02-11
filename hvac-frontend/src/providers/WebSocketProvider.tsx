@@ -5,6 +5,7 @@ import type { HvacTelemetry } from "@/types/telemetry";
 import type { HvacEvent, HvacEventType } from "@/types/event";
 import type { HistoryPoint } from "@/types/history";
 import { STALE_THRESHOLD_MS } from "@/domain/ahu/constants";
+
 const MAX_POINTS = 30;
 
 interface TelemetryContextValue {
@@ -31,7 +32,11 @@ export const TelemetryContext = createContext<TelemetryContextValue | null>(
   null,
 );
 
-export function WebSocketProvider({ children }: { children: React.ReactNode }) {
+export function WebSocketProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [telemetry, setTelemetry] = useState<HvacTelemetry[]>([]);
   const [events, setEvents] = useState<HvacEvent[]>([]);
   const [history, setHistory] = useState<
@@ -51,7 +56,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     socket.on("connect", () => setConnected(true));
     socket.on("disconnect", () => setConnected(false));
 
-    // Snapshot inicial
+    /* ---------------- SNAPSHOT ---------------- */
+
     socket.on("hvac_snapshot", (data: HvacTelemetry[]) => {
       setTelemetry(data);
 
@@ -63,13 +69,13 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         const key = `${ahu.plantId}-${ahu.stationId}`;
         const status = ahu.points.status?.value;
 
-        // Solo asignar si es un estado válido
         const validStatus: HvacEventType =
           status === "ALARM" || status === "WARNING" || status === "OK"
             ? status
             : "OK";
 
         newLastStatus[key] = validStatus;
+        lastConnectivityRef.current[key] = false;
 
         newActiveCounts[key] = {
           alarms: validStatus === "ALARM" ? 1 : 0,
@@ -85,9 +91,15 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
                 },
               ]
             : [];
+
         const hum =
           typeof ahu.points.humidity?.value === "number"
-            ? [{ timestamp: ahu.timestamp, value: ahu.points.humidity.value }]
+            ? [
+                {
+                  timestamp: ahu.timestamp,
+                  value: ahu.points.humidity.value,
+                },
+              ]
             : [];
 
         newHistory[key] = { temperature: temp, humidity: hum };
@@ -98,32 +110,34 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       setActiveCounts(newActiveCounts);
     });
 
-    // Updates incrementales
+    /* ---------------- UPDATE ---------------- */
+
     socket.on("hvac_update", (ahu: HvacTelemetry) => {
       const key = `${ahu.plantId}-${ahu.stationId}`;
       const previousStatus = lastStatusRef.current[key];
       const status = ahu.points.status?.value;
 
-  if (
-  status === "ALARM" ||
-  status === "WARNING" ||
-  status === "OK"
-) {
-  // ❗ SOLO si hay cambio real
-  if (status !== previousStatus) {
-    lastStatusRef.current[key] = status;
+      /* ----- Eventos de estado operativo ----- */
 
-    const event: HvacEvent = {
-      timestamp: ahu.timestamp,
-      ahuId: ahu.stationId,
-      plantId: ahu.plantId,
-      type: status,
-      message: buildMessage(status, previousStatus ?? "OK"),
-    };
+      if (
+        status === "ALARM" ||
+        status === "WARNING" ||
+        status === "OK"
+      ) {
+        if (status !== previousStatus) {
+          lastStatusRef.current[key] = status;
 
-    setEvents((prev) => [event, ...prev].slice(0, 50));
-  }
-        // Actualizar contadores activos
+          const event: HvacEvent = {
+            timestamp: ahu.timestamp,
+            ahuId: ahu.stationId,
+            plantId: ahu.plantId,
+            type: status,
+            message: buildMessage(status, previousStatus ?? "OK"),
+          };
+
+          setEvents((prev) => [event, ...prev].slice(0, 50));
+        }
+
         setActiveCounts((prev) => ({
           ...prev,
           [key]: {
@@ -133,9 +147,11 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         }));
       }
 
-      // Actualizar historial
+      /* ----- Historial ----- */
+
       setHistory((prev) => {
         const prevHist = prev[key] ?? { temperature: [], humidity: [] };
+
         const newTemp =
           typeof ahu.points.temperature?.value === "number"
             ? [
@@ -146,26 +162,36 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
                 },
               ].slice(-MAX_POINTS)
             : prevHist.temperature;
+
         const newHum =
           typeof ahu.points.humidity?.value === "number"
             ? [
                 ...prevHist.humidity,
-                { timestamp: ahu.timestamp, value: ahu.points.humidity.value },
+                {
+                  timestamp: ahu.timestamp,
+                  value: ahu.points.humidity.value,
+                },
               ].slice(-MAX_POINTS)
             : prevHist.humidity;
+
         return { ...prev, [key]: { temperature: newTemp, humidity: newHum } };
       });
 
-      // Actualizar telemetry
+      /* ----- Actualizar Telemetry ----- */
+
       setTelemetry((prev) => {
         const idx = prev.findIndex(
-          (p) => p.stationId === ahu.stationId && p.plantId === ahu.plantId,
+          (p) =>
+            p.stationId === ahu.stationId &&
+            p.plantId === ahu.plantId,
         );
+
         if (idx >= 0) {
           const copy = [...prev];
           copy[idx] = ahu;
           return copy;
         }
+
         return [...prev, ahu];
       });
     });
@@ -174,13 +200,15 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       socket.disconnect();
     };
   }, []);
-useEffect(() => {
 
-  const interval = setInterval(() => {
-    setTelemetry((prev) => {
+  /* ---------------- MONITOR DE CONECTIVIDAD ---------------- */
+
+  useEffect(() => {
+    const interval = setInterval(() => {
       const now = Date.now();
+      const newEvents: HvacEvent[] = [];
 
-      prev.forEach((ahu) => {
+      telemetry.forEach((ahu) => {
         const key = `${ahu.plantId}-${ahu.stationId}`;
         const lastUpdate = new Date(ahu.timestamp).getTime();
 
@@ -192,43 +220,43 @@ useEffect(() => {
 
         /* 🔴 Conectado → Desconectado */
         if (isDisconnected && !wasDisconnected) {
-          const event: HvacEvent = {
+          newEvents.push({
             timestamp: new Date().toISOString(),
             ahuId: ahu.stationId,
             plantId: ahu.plantId,
-            type: "ALARM",
+            type: "DISCONNECTED",
             message: "Unidad perdió comunicación",
-          };
+          });
 
-          setEvents((prevEvents) =>
-            [event, ...prevEvents].slice(0, 50)
-          );
+          setActiveCounts((prev) => ({
+            ...prev,
+            [key]: { alarms: 0, warnings: 0 },
+          }));
         }
 
         /* 🟢 Desconectado → Conectado */
         if (!isDisconnected && wasDisconnected) {
-          const event: HvacEvent = {
+          newEvents.push({
             timestamp: new Date().toISOString(),
             ahuId: ahu.stationId,
             plantId: ahu.plantId,
             type: "OK",
             message: "Unidad restableció comunicación",
-          };
-
-          setEvents((prevEvents) =>
-            [event, ...prevEvents].slice(0, 50)
-          );
+          });
         }
 
         lastConnectivityRef.current[key] = isDisconnected;
       });
 
-      return [...prev]; // fuerza re-render
-    });
-  }, 10000);
+      if (newEvents.length > 0) {
+        setEvents((prev) =>
+          [...newEvents, ...prev].slice(0, 50),
+        );
+      }
+    }, 10000);
 
-  return () => clearInterval(interval);
-}, []);
+    return () => clearInterval(interval);
+  }, [telemetry]);
 
   return (
     <TelemetryContext.Provider
@@ -239,10 +267,16 @@ useEffect(() => {
   );
 }
 
-/* ---------- helpers ---------- */
-function buildMessage(current: HvacEventType, previous: HvacEventType) {
+/* ---------------- HELPERS ---------------- */
+
+function buildMessage(
+  current: HvacEventType,
+  previous: HvacEventType,
+) {
   if (current === "ALARM") return "Unidad entró en ALARMA";
-  if (current === "WARNING") return "Unidad en condición de ADVERTENCIA";
-  if (current === "OK") return "Unidad volvió a estado NORMAL";
+  if (current === "WARNING")
+    return "Unidad en condición de ADVERTENCIA";
+  if (current === "OK")
+    return "Unidad volvió a estado NORMAL";
   return `Cambio de estado: ${previous} → ${current}`;
 }

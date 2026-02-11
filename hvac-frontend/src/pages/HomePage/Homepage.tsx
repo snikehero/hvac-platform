@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { getAhuOperationalStatus } from "@/domain/ahu/ahuSelectors"
 
 export default function HomePage() {
   const { telemetry } = useTelemetry();
@@ -21,28 +22,40 @@ export default function HomePage() {
   // ------------------------------
   // Contadores de alarmas y warnings
   // ------------------------------
-  const { activeAlarms, activeWarnings } = useMemo(() => {
-    let alarms = 0;
-    let warnings = 0;
-    telemetry.forEach((ahu) => {
-      const status = ahu.points.status?.value;
-      if (status === "ALARM") alarms += 1;
-      else if (status === "WARNING") warnings += 1;
-    });
-    return { activeAlarms: alarms, activeWarnings: warnings };
-  }, [telemetry]);
+const { activeAlarms, activeWarnings } = useMemo(() => {
+  let alarms = 0
+  let warnings = 0
+
+  telemetry.forEach((ahu) => {
+    const status = getAhuOperationalStatus(ahu)
+
+    if (status === "ALARM") alarms++
+    else if (status === "WARNING") warnings++
+  })
+
+  return { activeAlarms: alarms, activeWarnings: warnings }
+}, [telemetry])
 
   // ------------------------------
   // Temperatura promedio
   // ------------------------------
-  const avgTemperature = useMemo(() => {
-    const temps: number[] = [];
-    telemetry.forEach((ahu) => {
-      const t = ahu.points.temperature?.value;
-      if (typeof t === "number") temps.push(t);
-    });
-    return temps.length ? temps.reduce((a, b) => a + b, 0) / temps.length : 0;
-  }, [telemetry]);
+const avgTemperature = useMemo(() => {
+  const temps: number[] = []
+
+  telemetry.forEach((ahu) => {
+    const status = getAhuOperationalStatus(ahu)
+
+    if (status === "DISCONNECTED") return
+
+    const t = ahu.points.temperature?.value
+    if (typeof t === "number") temps.push(t)
+  })
+
+  return temps.length
+    ? temps.reduce((a, b) => a + b, 0) / temps.length
+    : 0
+}, [telemetry])
+
 
   const avgTemperatureDisplay = `${avgTemperature.toFixed(1)} °C`;
 

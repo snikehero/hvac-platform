@@ -1,4 +1,4 @@
-export type HvacEventType = "OK" | "WARNING" | "ALARM"
+export type HvacEventType = "OK" | "WARNING" | "ALARM" | "DISCONNECTED"
 
 export interface HvacEvent {
   timestamp: string

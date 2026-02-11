@@ -1,9 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card"
-import type { HvacStatus } from "@/types/hvac-status"
+import type { AhuHealthStatus } from "@/domain/ahu/getAhuHealth"
 
 interface Props {
   title: string
-  status?: HvacStatus
+  status: AhuHealthStatus
   children: React.ReactNode
 }
 
@@ -16,16 +16,15 @@ export function AhuSection({
     status === "ALARM"
       ? "bg-red-900/70"
       : status === "WARNING"
-      ? "bg-yellow-800/60"
-      : "bg-black/60"
+        ? "bg-yellow-800/60"
+        : status === "DISCONNECTED"
+          ? "bg-gray-900/70"
+          : "bg-black/60"
 
   return (
     <Card className="relative overflow-hidden rounded-lg">
       {/* Background */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-      />
-      
+      <div className="absolute inset-0 bg-cover bg-center" />
 
       {/* Overlay */}
       <div className={`absolute inset-0 ${overlayClass}`} />
@@ -36,7 +35,6 @@ export function AhuSection({
         <div className="mb-2 text-sm font-semibold tracking-wide text-white/90">
           {title}
         </div>
-        
 
         {/* Rows */}
         <div className="grid gap-1">

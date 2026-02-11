@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 interface AirflowCardProps {
   airflow: number;
   title?: string;
-  status?: "OK" | "WARNING" | "ALARM";
+  status?: "OK" | "WARNING" | "ALARM" | "DISCONNECTED";
 }
 
 export default function AirflowCard({

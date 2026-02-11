@@ -4,9 +4,6 @@ import { useParams } from "react-router-dom";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAhuHistory } from "@/hooks/useAhuHistory";
 
-import type { HvacStatus } from "@/types/hvac-status";
-import { isHvacStatus } from "@/types/hvac-status";
-
 import AhuHeader from "./AhuHeader";
 import { AhuHealthSummary } from "@/components/ahu/AhuHealthSummary";
 import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
@@ -26,14 +23,10 @@ export default function AhuDetailPage() {
   if (!ahu)
     return <div className="text-muted-foreground">AHU no encontrado</div>;
 
-  const hvacStatus: HvacStatus | undefined = isHvacStatus(
-    ahu.points.status?.value,
-  )
-    ? ahu.points.status.value
-    : undefined;
-
   const history = useAhuHistory(ahu);
-  const health = getAhuHealth(ahu, hvacStatus);
+
+  // ✅ Dominio decide TODO
+  const health = getAhuHealth(ahu);
 
   return (
     <div className="h-screen grid grid-rows-[auto_auto_auto_1fr_auto] gap-2 p-2">
@@ -43,7 +36,8 @@ export default function AhuDetailPage() {
         lastUpdate={health.lastUpdate}
       />
 
-      <AhuHeader ahu={ahu} status={hvacStatus} />
+      {/* Header ahora debe aceptar AhuHealthStatus */}
+      <AhuHeader ahu={ahu} status={health.status} />
 
       {/* ========================= */}
       {/* CONDICIONES AMBIENTALES */}
@@ -58,7 +52,7 @@ export default function AhuDetailPage() {
             {renderAhuCard("humidity", ahu)}
             <AhuHistoryTemperatureChart
               data={history.temperature}
-              status={hvacStatus}
+              status={health.status}
             />
           </div>
         </section>
@@ -89,14 +83,14 @@ export default function AhuDetailPage() {
             {renderAhuCard("filter", ahu)}
             <AhuHistoryHumidityChart
               data={history.humidity}
-              status={hvacStatus}
+              status={health.status}
             />
           </div>
         </section>
       </section>
 
       <div className="text-[10px] text-muted-foreground text-right">
-        Última actualización: {new Date(ahu.timestamp).toLocaleString()}
+        Última actualización: {health.lastUpdate.toLocaleString()}
       </div>
     </div>
   );

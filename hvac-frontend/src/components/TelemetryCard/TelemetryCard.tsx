@@ -1,8 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import type { HvacTelemetry } from "@/types/telemetry";
-import type { HvacStatus } from "@/types/hvac-status";
-import { isHvacStatus } from "@/types/hvac-status";
 import { getPointIcon } from "../../Helpers/getPointIcon";
 
 import TelemetryCardHeader from "./TelemetryCardHeader";
@@ -11,7 +9,7 @@ import TelemetryCardFan from "./TelemetryCardFan";
 import TelemetryCardExtras from "./TelemertryCardExtras";
 import TelemetryCardTemperatureAverage from "./TelemetryCardTemperatureAverage";
 import TelemetryCardCore from "./TelemetryCardCore";
-
+import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
 const CORE_KEYS = ["temperature", "humidity", "fan_status", "status"];
 
 interface TelemetryCardProps {
@@ -23,15 +21,16 @@ export default function TelemetryCard({ ahu }: TelemetryCardProps) {
   const { stationId, points, timestamp, plantId } = ahu;
 
   // ✅ Status validado correctamente
-  const hvacStatus: HvacStatus | undefined = isHvacStatus(points.status?.value)
-    ? points.status.value
-    : undefined;
+const health = getAhuHealth(ahu)
 
-  const overlayClass =
-    hvacStatus === "ALARM"
-      ? "bg-red-900/70"
-      : hvacStatus === "WARNING"
-        ? "bg-yellow-900/60"
+
+const overlayClass =
+  health.status === "ALARM"
+    ? "bg-red-900/70"
+    : health.status === "WARNING"
+      ? "bg-yellow-900/60"
+      : health.status === "DISCONNECTED"
+        ? "bg-gray-900/70"
         : "bg-black/50";
 
   const extraPoints = Object.entries(points).filter(
@@ -54,7 +53,7 @@ export default function TelemetryCard({ ahu }: TelemetryCardProps) {
 
       {/* ---------- Content ---------- */}
       <div className="relative z-10 text-white">
-        <TelemetryCardHeader stationId={stationId} status={hvacStatus} />
+        <TelemetryCardHeader stationId={stationId} status={health.status} />
 
         <div className="px-6 pb-6 space-y-4">
           {/* ---------- Core Points ---------- */}

@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge"
+import type { AhuHealthStatus } from "@/domain/ahu/getAhuHealth"
 import type { HvacTelemetry } from "@/types/telemetry"
 
 export default function AhuHeader({
@@ -6,7 +7,7 @@ export default function AhuHeader({
   status,
 }: {
   ahu: HvacTelemetry
-  status?: "OK" | "WARNING" | "ALARM"
+  status: AhuHealthStatus
 }) {
   return (
     <div className="flex items-center justify-between">

@@ -4,16 +4,23 @@ import AhuEventsPage from "../AhuEventsPage/AhuEventsPage";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useParams } from "react-router-dom";
 import { useAhuEvents } from "@/hooks/useAhuEvents";
+import { getAhuOperationalStatus } from "@/domain/ahu/ahuSelectors";
 
 export default function AhuDetailTabs() {
   const { telemetry } = useTelemetry();
   const { ahuId, plantId } = useParams();
+
   const ahu = telemetry.find(
     (t) => t.stationId === ahuId && t.plantId === plantId,
   );
 
   const events = useAhuEvents(ahu);
-  const alarmActive = ahu?.points.status?.value === "ALARM";
+
+  const operationalStatus = ahu
+    ? getAhuOperationalStatus(ahu)
+    : undefined;
+
+  const alarmActive = operationalStatus === "ALARM";
 
   return (
     <Tabs defaultValue="detail" className="h-screen">
@@ -25,6 +32,7 @@ export default function AhuDetailTabs() {
           className={alarmActive ? "alarm-glow relative" : "relative"}
         >
           Eventos
+
           {events.length > 0 && (
             <span className="absolute -top-1 -right-3 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
               {events.length}

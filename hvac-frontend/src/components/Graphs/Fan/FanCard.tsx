@@ -22,7 +22,7 @@ export default function FanCardIndustrial({
         <img
           src={imgSrc}
           alt="Ventilador industrial"
-          className="w-[140px] h-[140px] object-contain"
+          className="w-35 h-35 object-contain"
         />
 
         <span

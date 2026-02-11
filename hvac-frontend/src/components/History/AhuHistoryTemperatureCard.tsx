@@ -9,12 +9,14 @@ import {
   ReferenceArea,
 } from "recharts";
 import type { HistoryPoint } from "@/types/history";
+import type { AhuHealthStatus } from "@/domain/ahu/getAhuHealth";
+
 import { Badge } from "../ui/badge";
 
 interface Props {
   title?: string;
   data: HistoryPoint[];
-  status?: "OK" | "WARNING" | "ALARM";
+  status?: AhuHealthStatus;
 }
 
 export function AhuHistoryTemperatureChart({

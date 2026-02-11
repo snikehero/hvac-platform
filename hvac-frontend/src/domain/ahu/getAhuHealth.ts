@@ -1,5 +1,5 @@
 import type { HvacTelemetry, HvacPoint } from "@/types/telemetry"
-import type { HvacStatus } from "@/types/hvac-status"
+
 import { STALE_THRESHOLD_MS } from "./constants"
 
 export type AhuHealthStatus =
@@ -11,7 +11,7 @@ export type AhuHealthStatus =
 
 export function getAhuHealth(
   ahu: HvacTelemetry,
-  hvacStatus?: HvacStatus
+  hvacStatus?: AhuHealthStatus
 ): {
   status: AhuHealthStatus
   badPoints: number

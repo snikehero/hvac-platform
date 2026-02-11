@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import AhuEventTimeline from "@/components/EventsPanel/AhuEventTimeLine";
-
 import { AhuSection } from "@/components/ahu/AhuSection";
-import type { HvacStatus } from "@/types/hvac-status";
+import type { AhuHealthStatus } from "@/domain/ahu/getAhuHealth";
+
 export default function AhuEventsSection({
   events,
   status,
 }: {
   events: any[];
-  status?: HvacStatus;
+  status: AhuHealthStatus;
 }) {
   return (
     <AhuSection title="Eventos recientes" status={status}>

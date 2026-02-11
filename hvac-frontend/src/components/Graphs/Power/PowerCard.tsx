@@ -24,7 +24,7 @@ export default function PowerCard({
         <img
           src={imgSrc}
           alt="Estado de energía"
-          className="w-[300px] h-[300px] object-contain"
+          className="w-75 h-75 object-contain"
         />
 
         <span
