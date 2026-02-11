@@ -195,6 +195,13 @@ export function WebSocketProvider({
       socket.disconnect();
     };
   }, []);
+useEffect(() => {
+  const interval = setInterval(() => {
+    setTelemetry(prev => [...prev]) // fuerza re-render
+  }, 1000); // cada segundo (o cada 2s)
+
+  return () => clearInterval(interval);
+}, []);
 
   return (
     <TelemetryContext.Provider

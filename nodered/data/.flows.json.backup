@@ -16,22 +16,6 @@
         "env": []
     },
     {
-        "id": "1389027caad582e5",
-        "type": "tab",
-        "label": "Flow 1",
-        "disabled": true,
-        "info": "",
-        "env": []
-    },
-    {
-        "id": "4e276229317f0606",
-        "type": "tab",
-        "label": "Bascula",
-        "disabled": false,
-        "info": "",
-        "env": []
-    },
-    {
         "id": "d9490cfb64c4ef60",
         "type": "group",
         "z": "06936ed9048da629",
@@ -599,42 +583,5 @@
                 "e5901737c76e356d"
             ]
         ]
-    },
-    {
-        "id": "0a44f8908efd7b7d",
-        "type": "mqtt in",
-        "z": "1389027caad582e5",
-        "name": "",
-        "topic": "hvac/#",
-        "qos": "2",
-        "datatype": "auto-detect",
-        "broker": "02177584e50b7846",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 230,
-        "y": 260,
-        "wires": [
-            [
-                "422b6c0f37d5083b"
-            ]
-        ]
-    },
-    {
-        "id": "422b6c0f37d5083b",
-        "type": "debug",
-        "z": "1389027caad582e5",
-        "name": "debug 2",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 500,
-        "y": 260,
-        "wires": []
     }
 ]

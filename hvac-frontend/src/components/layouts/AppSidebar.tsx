@@ -14,8 +14,8 @@ import { getAhuOperationalStatus } from "@/domain/ahu/ahuSelectors"
 
 const links = [
   { to: "/", label: "Home", icon: Home },
-  { to: "/dashboards", label: "DashboardOverviewPage", icon: LayoutDashboard },
-  { to: "/dashboardHVAC", label: "HVAC", icon: AirVent },
+  { to: "/dashboards", label: "Dashboard General", icon: LayoutDashboard },
+  { to: "/dashboardHVAC", label: "HVAC Activos", icon: AirVent },
   { to: "/alarms", label: "Alarmas", icon: Bell },
   { to: "/settings", label: "Configuración", icon: Settings },
 ]

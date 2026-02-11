@@ -9,6 +9,7 @@ import {
 } from "lucide-react"
 
 interface DashboardStats {
+  systemStatus: string
   alarms: number
   warnings: number
   avgTemp: number | null
@@ -32,20 +33,14 @@ export function DashboardWidgets({
 }: Props) {
   const noData = stats.totalAhus === 0
 
-  const systemStatus = noData
-    ? "SIN DATOS"
-    : stats.alarms > 0
-      ? "ALARM"
-      : stats.warnings > 0
-        ? "WARNING"
-        : "OK"
-
-  const systemColor =
-    systemStatus === "ALARM"
-      ? "text-red-500"
-      : systemStatus === "WARNING"
+const systemColor =
+  stats.systemStatus === "ALARM"
+    ? "text-red-500"
+    : stats.systemStatus === "DISCONNECTED"
+      ? "text-orange-500"
+      : stats.systemStatus === "WARNING"
         ? "text-yellow-500"
-        : systemStatus === "SIN DATOS"
+        : stats.systemStatus === "NO_DATA"
           ? "text-neutral-500"
           : "text-green-500"
 
@@ -74,21 +69,21 @@ export function DashboardWidgets({
     {
       icon: Activity,
       label: "Estado del sistema",
-      value: systemStatus,
+      value: stats.systemStatus,
       valueClass: systemColor,
       onClick:
-        systemStatus === "OK" ||
-        systemStatus === "WARNING" ||
-        systemStatus === "ALARM"
+        stats.systemStatus !== "NO_DATA"
           ? () =>
               onFilterStatus(
-                systemStatus as
+                stats.systemStatus as
                   | "OK"
                   | "WARNING"
                   | "ALARM"
+                  | "DISCONNECTED"
               )
           : undefined,
     },
+
     {
       icon: AlertTriangle,
       label: "Alarmas activas",
