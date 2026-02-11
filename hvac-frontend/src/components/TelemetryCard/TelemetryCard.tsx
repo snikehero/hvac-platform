@@ -10,6 +10,7 @@ import TelemetryCardExtras from "./TelemertryCardExtras";
 import TelemetryCardTemperatureAverage from "./TelemetryCardTemperatureAverage";
 import TelemetryCardCore from "./TelemetryCardCore";
 import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
+import { getAhuOperationalStatus } from "@/domain/ahu/ahuSelectors";
 const CORE_KEYS = ["temperature", "humidity", "fan_status", "status"];
 
 interface TelemetryCardProps {
@@ -22,20 +23,21 @@ export default function TelemetryCard({ ahu }: TelemetryCardProps) {
 
   // ✅ Status validado correctamente
 const health = getAhuHealth(ahu)
-
+const operationalStatus = getAhuOperationalStatus(ahu)
 
 const overlayClass =
-  health.status === "ALARM"
+  operationalStatus === "ALARM"
     ? "bg-red-900/70"
-    : health.status === "WARNING"
+    :  operationalStatus === "WARNING"
       ? "bg-yellow-900/60"
-      : health.status === "DISCONNECTED"
+      :  operationalStatus === "DISCONNECTED"
         ? "bg-gray-900/70"
         : "bg-black/50";
 
   const extraPoints = Object.entries(points).filter(
     ([key]) => !CORE_KEYS.includes(key),
   );
+
 
   return (
     <Card

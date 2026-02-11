@@ -195,7 +195,6 @@ export default function AlarmsPage() {
               status={
                 getAhuHealth(
                   selectedAhu,
-                  getAhuOperationalStatus(selectedAhu)
                 ).status
               }
             />

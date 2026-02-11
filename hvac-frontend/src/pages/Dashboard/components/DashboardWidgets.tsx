@@ -44,78 +44,87 @@ const systemColor =
           ? "text-neutral-500"
           : "text-green-500"
 
-  const widgets = [
-    {
-      icon: Building2,
-      label: "Total AHUs",
-      value: stats.totalAhus,
-      valueClass: "text-white",
-      onClick: onReset,
-    },
+  const hasActiveAhus =
+  stats.totalAhus > 0 &&
+  stats.disconnected < stats.totalAhus
+
+const widgets = [
+  {
+    icon: Building2,
+    label: "Total AHUs",
+    value: stats.totalAhus,
+    valueClass: "text-white",
+    onClick: onReset,
+  },
+  {
+    icon: PlugZap,
+    label: "AHUs desconectados",
+    value: noData ? "--" : stats.disconnected,
+    valueClass:
+      stats.disconnected > 0
+        ? "text-orange-500"
+        : "text-white",
+    onClick:
+      stats.disconnected > 0
+        ? () => onFilterStatus("DISCONNECTED")
+        : undefined,
+  },
+  {
+    icon: Activity,
+    label: "Estado del sistema",
+    value: stats.systemStatus,
+    valueClass: systemColor,
+    onClick:
+      stats.systemStatus !== "NO_DATA"
+        ? () =>
+            onFilterStatus(
+              stats.systemStatus as
+                | "OK"
+                | "WARNING"
+                | "ALARM"
+                | "DISCONNECTED"
+            )
+        : undefined,
+  },
+  {
+    icon: AlertTriangle,
+    label: "Alarmas activas",
+    value: noData ? "--" : stats.alarms,
+    valueClass:
+      stats.alarms > 0
+        ? "text-red-500"
+        : "text-white",
+    onClick:
+      stats.alarms > 0
+        ? () => onFilterStatus("ALARM")
+        : undefined,
+  },
+
+  // 👇 SOLO si hay AHUs activos
+  ...(hasActiveAhus
+    ? [
         {
-      icon: PlugZap,
-      label: "AHUs desconectados",
-      value: noData ? "--" : stats.disconnected,
-      valueClass:
-        stats.disconnected > 0
-          ? "text-orange-500"
-          : "text-white",
-      onClick:
-        stats.disconnected > 0
-          ? () => onFilterStatus("DISCONNECTED")
-          : undefined,
-    },
+          icon: Thermometer,
+          label: "Temperatura promedio",
+          value:
+            stats.avgTemp !== null
+              ? `${stats.avgTemp.toFixed(1)}°`
+              : "--",
+          valueClass: "text-white",
+        },
+        {
+          icon: Droplet,
+          label: "Humedad promedio",
+          value:
+            stats.avgHumidity !== null
+              ? `${stats.avgHumidity.toFixed(1)}%`
+              : "--",
+          valueClass: "text-white",
+        },
+      ]
+    : []),
+]
 
-    {
-      icon: Activity,
-      label: "Estado del sistema",
-      value: stats.systemStatus,
-      valueClass: systemColor,
-      onClick:
-        stats.systemStatus !== "NO_DATA"
-          ? () =>
-              onFilterStatus(
-                stats.systemStatus as
-                  | "OK"
-                  | "WARNING"
-                  | "ALARM"
-                  | "DISCONNECTED"
-              )
-          : undefined,
-    },
-
-    {
-      icon: AlertTriangle,
-      label: "Alarmas activas",
-      value: noData ? "--" : stats.alarms,
-      valueClass:
-        stats.alarms > 0
-          ? "text-red-500"
-          : "text-white",
-      onClick:
-        stats.alarms > 0
-          ? () => onFilterStatus("ALARM")
-          : undefined,
-    },
-    {
-      icon: Thermometer,
-      label: "Temperatura promedio",
-      value:
-        stats.avgTemp !== null && !noData
-          ? `${stats.avgTemp.toFixed(1)}°`
-          : "--",
-      valueClass: "text-white",
-    },
-    {
-      icon: Droplet,
-      label: "Humedad promedio",
-      value:
-        stats.avgHumidity !== null && !noData
-          ? `${stats.avgHumidity.toFixed(1)}%`
-          : "--",
-      valueClass: "text-white",
-    },
-  ]
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6">
