@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import type { HvacTelemetry } from "@/types/telemetry";
@@ -24,6 +23,7 @@ export default function TelemetryCard({ ahu }: TelemetryCardProps) {
   const { stationId, points, timestamp, plantId } = ahu;
   const now = useClock(1000);
   /* ✅ ÚNICA fuente de verdad */
+  console.log(now)
   const health = getAhuHealth(ahu);
 
   /* 🎨 Overlay basado SOLO en health */

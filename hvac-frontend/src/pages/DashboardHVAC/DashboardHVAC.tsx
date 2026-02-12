@@ -5,8 +5,8 @@ import { getAhuHealth } from "@/domain/ahu/getAhuHealth"
 import { useClock } from "@/domain/hooks/useClock"
 export default function DashboardHVAC() {
   const { telemetry } = useTelemetry()
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const now = useClock(1000);
+  console.log(now)
   // 🔥 Solo AHUs conectados
   const connectedAhus = telemetry.filter(
     (ahu) => getAhuHealth(ahu).status !== "DISCONNECTED"

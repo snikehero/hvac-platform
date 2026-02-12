@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useParams } from "react-router-dom";
 
@@ -17,6 +16,7 @@ export default function AhuDetailPage() {
   const { telemetry } = useTelemetry();
   const { ahuId, plantId } = useParams();
   const now = useClock(1000);
+  console.log(now)
   const ahu = telemetry.find(
     (t) => t.stationId === ahuId && t.plantId === plantId,
   );
