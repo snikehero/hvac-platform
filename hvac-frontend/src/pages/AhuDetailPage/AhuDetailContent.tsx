@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useParams } from "react-router-dom";
 
@@ -11,11 +12,11 @@ import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
 import { renderAhuCard } from "@/components/ahu/renderAhuCard";
 import { AhuHistoryTemperatureChart } from "@/components/History/AhuHistoryTemperatureCard";
 import { AhuHistoryHumidityChart } from "@/components/History/AhuHistoryHumidityChart";
-
+import { useClock } from "@/domain/hooks/useClock";
 export default function AhuDetailPage() {
   const { telemetry } = useTelemetry();
   const { ahuId, plantId } = useParams();
-
+  const now = useClock(1000);
   const ahu = telemetry.find(
     (t) => t.stationId === ahuId && t.plantId === plantId,
   );

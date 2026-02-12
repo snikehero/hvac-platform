@@ -1,11 +1,12 @@
 import { useEffect, useRef } from "react";
-import { useTelemetry } from "@/hooks/useTelemetry";
 import { STALE_THRESHOLD_MS } from "@/domain/ahu/constants";
+import type { HvacTelemetry } from "@/types/telemetry";
 import type { HvacEvent } from "@/types/event";
 
-export function useConnectivityMonitor() {
-  const { telemetry, setEvents } = useTelemetry();
-
+export function useConnectivityMonitor(
+  telemetry: HvacTelemetry[],
+  setEvents: React.Dispatch<React.SetStateAction<HvacEvent[]>>
+) {
   const lastConnectivityRef = useRef<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -23,7 +24,6 @@ export function useConnectivityMonitor() {
         const wasDisconnected =
           lastConnectivityRef.current[key] ?? false;
 
-        /* 🔴 Conectado → Desconectado */
         if (isDisconnected && !wasDisconnected) {
           newEvents.push({
             timestamp: new Date().toISOString(),
@@ -34,7 +34,6 @@ export function useConnectivityMonitor() {
           });
         }
 
-        /* 🟢 Desconectado → Conectado */
         if (!isDisconnected && wasDisconnected) {
           newEvents.push({
             timestamp: new Date().toISOString(),
@@ -49,8 +48,8 @@ export function useConnectivityMonitor() {
       });
 
       if (newEvents.length > 0) {
-        setEvents((prev: HvacEvent[]) =>
-          [...newEvents, ...prev].slice(0, 50),
+        setEvents((prev) =>
+          [...newEvents, ...prev].slice(0, 50)
         );
       }
     }, 10000);

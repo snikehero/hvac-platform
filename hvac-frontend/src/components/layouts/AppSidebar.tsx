@@ -8,7 +8,6 @@ import {
   AirVent,
 } from "lucide-react"
 import { useTelemetry } from "@/hooks/useTelemetry"
-import { Badge } from "@/components/ui/badge"
 import { useEffect, useState, useMemo } from "react"
 import { getAhuHealth } from "@/domain/ahu/getAhuHealth"
 
@@ -33,15 +32,11 @@ export default function AppSidebar() {
 
   /* ---------- Animación ---------- */
 
-  const [animate, setAnimate] = useState(false)
   const [prevCount, setPrevCount] = useState(activeAlarms)
 
   useEffect(() => {
     if (activeAlarms !== prevCount) {
-      setAnimate(true)
       setPrevCount(activeAlarms)
-      const timer = setTimeout(() => setAnimate(false), 300)
-      return () => clearTimeout(timer)
     }
   }, [activeAlarms, prevCount])
 
@@ -53,7 +48,6 @@ export default function AppSidebar() {
 
       <nav className="flex flex-col gap-1 px-2">
         {links.map(({ to, label, icon: Icon }) => {
-          const isAlarmLink = to === "/alarms"
 
           return (
             <NavLink
@@ -66,17 +60,6 @@ export default function AppSidebar() {
             >
               <Icon className="h-4 w-4" />
               <span className="flex-1">{label}</span>
-
-              {isAlarmLink && activeAlarms > 0 && (
-                <Badge
-                  variant="destructive"
-                  className={`ml-auto transition-transform duration-300 ${
-                    animate ? "animate-pulse" : ""
-                  }`}
-                >
-                  {activeAlarms}
-                </Badge>
-              )}
             </NavLink>
           )
         })}

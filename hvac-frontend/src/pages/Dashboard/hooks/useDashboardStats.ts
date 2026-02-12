@@ -1,6 +1,8 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useMemo } from "react";
 import type { HvacTelemetry } from "@/types/telemetry";
 import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
+import { useClock } from "@/domain/hooks/useClock";
 
 export type SystemStatus =
   | "OK"
@@ -10,6 +12,7 @@ export type SystemStatus =
   | "NO_DATA";
 
 export function useDashboardStats(telemetry: HvacTelemetry[]) {
+  const now = useClock(1000)
   return useMemo(() => {
     let alarms = 0;
     let warnings = 0;
@@ -38,7 +41,7 @@ export function useDashboardStats(telemetry: HvacTelemetry[]) {
         }
       }
     });
-
+    
     const systemStatus =
       telemetry.length === 0
         ? "NO_DATA"
@@ -49,6 +52,12 @@ export function useDashboardStats(telemetry: HvacTelemetry[]) {
             : warnings > 0
               ? "WARNING"
               : "OK";
+    
+    const affected = alarms + warnings
+    const operational = telemetry.length - disconnected
+    const operationalPercentage = telemetry.length
+      ? Math.round((operational / telemetry.length) * 100)
+      : 0
 
     return {
       alarms,
@@ -58,7 +67,10 @@ export function useDashboardStats(telemetry: HvacTelemetry[]) {
       avgHumidity: count ? humSum / count : null,
       totalAhus: telemetry.length,
       systemStatus,
+      affected,
+      operational,
+      operationalPercentage
     };
-  }, [telemetry]);
+  }, [telemetry, now]);
 }
 

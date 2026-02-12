@@ -4,7 +4,7 @@ import { io, type Socket } from "socket.io-client";
 import type { HvacTelemetry } from "@/types/telemetry";
 import type { HvacEvent, HvacEventType } from "@/types/event";
 import type { HistoryPoint } from "@/types/history";
-
+import { useConnectivityMonitor } from "@/domain/hooks/useConnectivityMonitor";
 const MAX_POINTS = 30;
 
 interface TelemetryContextValue {
@@ -195,13 +195,8 @@ export function WebSocketProvider({
       socket.disconnect();
     };
   }, []);
-useEffect(() => {
-  const interval = setInterval(() => {
-    setTelemetry(prev => [...prev]) // fuerza re-render
-  }, 1000); // cada segundo (o cada 2s)
 
-  return () => clearInterval(interval);
-}, []);
+useConnectivityMonitor(telemetry,setEvents);
 
   return (
     <TelemetryContext.Provider
@@ -230,5 +225,7 @@ function buildMessage(
     return "Unidad en condición de ADVERTENCIA";
   if (current === "OK")
     return "Unidad volvió a estado NORMAL";
+  if (current === "DISCONNECTED")
+    return "Unidad se desconectó"
   return `Cambio de estado: ${previous} → ${current}`;
 }
