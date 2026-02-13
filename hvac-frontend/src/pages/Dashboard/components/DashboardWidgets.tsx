@@ -35,8 +35,7 @@ export function DashboardWidgets({ stats, onFilterStatus }: Props) {
               ? () => onFilterStatus("ALARM")
               : undefined
           }
-          className={`bg-neutral-900 border border-neutral-800 
-            ${stats.affected > 0 ? "cursor-pointer hover:border-neutral-600" : ""}`}
+          
         >
           <CardContent className="p-5 space-y-2">
             <div className="text-xs text-neutral-400 uppercase">
@@ -58,8 +57,6 @@ export function DashboardWidgets({ stats, onFilterStatus }: Props) {
               ? () => onFilterStatus("DISCONNECTED")
               : undefined
           }
-          className={`bg-neutral-900 border border-neutral-800 
-            ${stats.disconnected > 0 ? "cursor-pointer hover:border-neutral-600" : ""}`}
         >
           <CardContent className="p-5 space-y-2">
             <div className="text-xs text-neutral-400 uppercase">
@@ -75,7 +72,7 @@ export function DashboardWidgets({ stats, onFilterStatus }: Props) {
         </Card>
 
         {/* Capacidad operativa */}
-        <Card className="bg-neutral-900 border border-neutral-800">
+        <Card>
           <CardContent className="p-5 space-y-2">
             <div className="text-xs text-neutral-400 uppercase">
               Capacidad operativa

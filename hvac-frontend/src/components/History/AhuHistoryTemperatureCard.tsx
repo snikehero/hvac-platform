@@ -34,7 +34,7 @@ export function AhuHistoryTemperatureChart({
 
   return (
     <Card
-      className={` text-white rounded-xl shadow-md ${
+      className={`rounded-xl shadow-md ${
         status === "ALARM" ? "alarm-glow" : ""
       }`}
     >
@@ -83,7 +83,7 @@ export function AhuHistoryTemperatureChart({
               />
 
               <Tooltip
-                contentStyle={{ backgroundColor: "#1e293b", border: "none" }}
+                contentStyle={{ border: "none" }}
                 formatter={(v: number) => [`${v} °C`, "Temperatura"]}
                 labelFormatter={(l) =>
                   `Hora: ${new Date(l).toLocaleTimeString()}`

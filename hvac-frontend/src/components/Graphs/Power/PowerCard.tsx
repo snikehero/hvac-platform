@@ -17,7 +17,7 @@ export default function PowerCard({
   return (
     <Card className={isAlarm ? "alarm-glow" : "border border-slate-700"}>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm text-muted-foreground">{title}</CardTitle>
+        <CardTitle className="text-2xl text-center">{title}</CardTitle>
       </CardHeader>
 
       <CardContent className="flex flex-col items-center">
@@ -26,14 +26,11 @@ export default function PowerCard({
           alt="Estado de energía"
           className="w-75 h-75 object-contain"
         />
-
-        <span
-          className={`mt-2 text-lg font-bold ${
+        <CardTitle  className={` text-2xl font-bold ${
             isAlarm ? "text-red-400" : "text-green-400"
-          }`}
-        >
-          {status}
-        </span>
+          }`}>
+                 {status}
+        </CardTitle>
       </CardContent>
     </Card>
   );

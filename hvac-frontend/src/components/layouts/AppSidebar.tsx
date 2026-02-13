@@ -17,6 +17,7 @@ const links = [
   { to: "/dashboardHVAC", label: "HVAC Activos", icon: AirVent },
   { to: "/alarms", label: "Alarmas", icon: Bell },
   { to: "/settings", label: "Configuración", icon: Settings },
+  {to: "/fan", label:"Ventilacion", icon: Settings},
 ]
 
 export default function AppSidebar() {

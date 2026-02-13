@@ -1,5 +1,13 @@
 "use client"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
+import { Label } from "@/components/ui/label"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
@@ -91,52 +99,70 @@ export default function DashboardOverviewPage() {
         onFilterStatus={handleFilterByStatus}
       />
 
-      {/* ================= FILTROS ================= */}
-      <div className="border-t border-neutral-800 pt-6">
-        <div className="flex flex-wrap gap-4 items-center">
 
-          <select
-            value={plantFilter ?? ""}
-            onChange={e =>
-              setPlantFilter(
-                e.target.value === "" ? null : e.target.value
-              )
-            }
-            className="bg-gray-800 text-white p-2 rounded"
-          >
-            <option value="">Todas las plantas</option>
-            {plants.map(plant => (
-              <option key={plant} value={plant}>
-                {plant}
-              </option>
-            ))}
-          </select>
+     {/* ================= FILTROS ================= */}
+<div className="border-t border-neutral-800 pt-6">
+  <div className="flex flex-wrap gap-6 items-end">
 
-          <select
-            value={statusFilter ?? ""}
-            onChange={e =>
-              setStatusFilter(
-                e.target.value === ""
-                  ? null
-                  : (e.target.value as
-                      | "OK"
-                      | "WARNING"
-                      | "ALARM"
-                      | "DISCONNECTED")
-              )
-            }
-            className="bg-gray-800 text-white p-2 rounded"
-          >
-            <option value="">Todos los estados</option>
-            <option value="OK">OK</option>
-            <option value="WARNING">WARNING</option>
-            <option value="ALARM">ALARM</option>
-            <option value="DISCONNECTED">DISCONNECTED</option>
-          </select>
+    {/* ----------- Plant Filter ----------- */}
+    <div className="flex flex-col gap-2 min-w-55">
+      <Label>Planta</Label>
+      <Select
+        value={plantFilter ?? "ALL"}
+        onValueChange={(value) =>
+          setPlantFilter(value === "ALL" ? null : value)
+        }
+      >
+        <SelectTrigger className="bg-neutral-900 border-neutral-700">
+          <SelectValue placeholder="Todas las plantas" />
+        </SelectTrigger>
 
-        </div>
-      </div>
+        <SelectContent>
+          <SelectItem value="ALL">Todas las plantas</SelectItem>
+          {plants.map((plant) => (
+            <SelectItem key={plant} value={plant}>
+              {plant}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
 
+    {/* ----------- Status Filter ----------- */}
+    <div className="flex flex-col gap-2 min-w-55">
+      <Label>Estado</Label>
+      <Select
+        value={statusFilter ?? "ALL"}
+        onValueChange={(value) =>
+          setStatusFilter(
+            value === "ALL"
+              ? null
+              : (value as
+                  | "OK"
+                  | "WARNING"
+                  | "ALARM"
+                  | "DISCONNECTED")
+          )
+        }
+      >
+        <SelectTrigger className="bg-neutral-900 border-neutral-700">
+          <SelectValue placeholder="Todos los estados" />
+        </SelectTrigger>
+
+        <SelectContent>
+          <SelectItem value="ALL">Todos los estados</SelectItem>
+          <SelectItem value="OK">OK</SelectItem>
+          <SelectItem value="WARNING">WARNING</SelectItem>
+          <SelectItem value="ALARM">ALARM</SelectItem>
+          <SelectItem value="DISCONNECTED">
+            DISCONNECTED
+          </SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+
+  </div>
+</div>
       {/* ================= GRID AHUs ================= */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
 
@@ -146,7 +172,7 @@ export default function DashboardOverviewPage() {
             ahu={ahu}
             onClick={() =>
               navigate(
-                `/plants/${ahu.plantId}/ahus/${ahu.stationId}`
+                `/plants/${ahu.plantId}/ahus/${ahu.stationId}/detail`
               )
             }
           />

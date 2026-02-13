@@ -11,12 +11,12 @@ import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
 import { renderAhuCard } from "@/components/ahu/renderAhuCard";
 import { AhuHistoryTemperatureChart } from "@/components/History/AhuHistoryTemperatureCard";
 import { AhuHistoryHumidityChart } from "@/components/History/AhuHistoryHumidityChart";
-import { useClock } from "@/domain/hooks/useClock";
+import { Label } from "@/components/ui/label";
+import { HousePlug, Sprout, Wind } from "lucide-react";
 export default function AhuDetailPage() {
   const { telemetry } = useTelemetry();
   const { ahuId, plantId } = useParams();
-  const now = useClock(1000);
-  console.log(now)
+
   const ahu = telemetry.find(
     (t) => t.stationId === ahuId && t.plantId === plantId,
   );
@@ -36,8 +36,6 @@ export default function AhuDetailPage() {
         badPoints={health.badPoints}
         lastUpdate={health.lastUpdate}
       />
-
-      {/* Header ahora debe aceptar AhuHealthStatus */}
       <AhuHeader ahu={ahu} status={health.status} />
 
       {/* ========================= */}
@@ -45,9 +43,10 @@ export default function AhuDetailPage() {
       {/* ========================= */}
       <section className="space-y-3">
         <section className="space-y-1">
-          <h3 className="text-sm font-semibold text-muted-foreground">
+          <Label>
+            <Sprout/>
             Condiciones Ambientales
-          </h3>
+          </Label>
           <div className="grid grid-cols-3 lg:grid-cols-3 gap-2 text-xs">
             {renderAhuCard("temperature", ahu)}
             {renderAhuCard("humidity", ahu)}
@@ -62,9 +61,10 @@ export default function AhuDetailPage() {
         {/* MOVIMIENTO DE AIRE */}
         {/* ========================= */}
         <section className="space-y-1">
-          <h3 className="text-sm font-semibold text-muted-foreground">
+          <Label>
+            <Wind/>
             Movimiento de Aire
-          </h3>
+          </Label>
           <div className="grid grid-cols-3 lg:grid-cols-3 gap-2 text-xs">
             {renderAhuCard("fan", ahu)}
             {renderAhuCard("airflow", ahu)}
@@ -76,9 +76,10 @@ export default function AhuDetailPage() {
         {/* ENERGÍA Y FILTRACIÓN */}
         {/* ========================= */}
         <section className="space-y-1">
-          <h3 className="text-sm font-semibold text-muted-foreground">
+          <Label className="">
+            <HousePlug/>
             Energía y Filtración
-          </h3>
+          </Label>
           <div className="grid grid-cols-3 lg:grid-cols-3 gap-2 text-xs">
             {renderAhuCard("power", ahu)}
             {renderAhuCard("filter", ahu)}
@@ -90,9 +91,9 @@ export default function AhuDetailPage() {
         </section>
       </section>
 
-      <div className="text-[10px] text-muted-foreground text-right">
+      <Label>
         Última actualización: {health.lastUpdate.toLocaleString()}
-      </div>
+      </Label>
     </div>
   );
 }

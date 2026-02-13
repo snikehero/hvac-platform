@@ -42,7 +42,7 @@ export default function FilterCard({
       `}
     >
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm text-muted-foreground">{title}</CardTitle>
+        <CardTitle className="text-2xl text-center">{title}</CardTitle>
       </CardHeader>
 
       <CardContent className="flex flex-col items-center">
@@ -72,14 +72,11 @@ export default function FilterCard({
             }}
           />
         </svg>
-
-        <span
-          className={`mt-2 text-lg font-bold ${
+        <CardTitle  className={` text-2xl font-bold ${
             isAlarm ? "text-red-400" : "text-slate-200"
-          }`}
-        >
-          {dpAnim.toFixed(1)} Pa
-        </span>
+          }`}>
+            {dpAnim.toFixed(1)} Pa
+        </CardTitle>
       </CardContent>
     </Card>
   );

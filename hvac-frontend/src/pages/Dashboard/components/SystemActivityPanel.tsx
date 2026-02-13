@@ -66,7 +66,7 @@ export function SystemActivityPanel() {
         : "text-red-500"
 
   return (
-    <Card className="bg-neutral-900 border border-neutral-800">
+    <Card >
       <CardContent className="p-6 space-y-5 text-white">
 
         {/* Header */}

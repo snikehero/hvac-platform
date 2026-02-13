@@ -35,7 +35,7 @@ export function AhuHistoryHumidityChart({
 
   return (
     <Card
-      className={`text-white rounded-xl shadow-md ${
+      className={` rounded-xl shadow-md ${
         status === "ALARM" ? "alarm-glow" : ""
       }`}
     >
@@ -50,7 +50,7 @@ export function AhuHistoryHumidityChart({
 
       <CardContent>
         {data.length === 0 ? (
-          <div className="text-sm text-gray-400">Sin datos históricos</div>
+          <div className="text-sm">Sin datos históricos</div>
         ) : (
           <ResponsiveContainer width="100%" height={220}>
             <LineChart
@@ -84,7 +84,7 @@ export function AhuHistoryHumidityChart({
               />
 
               <Tooltip
-                contentStyle={{ backgroundColor: "#1e293b", border: "none" }}
+                contentStyle={{ border: "none" }}
                 formatter={(v: number) => [`${v} %`, "Humedad"]}
                 labelFormatter={(l) =>
                   `Hora: ${new Date(l).toLocaleTimeString()}`

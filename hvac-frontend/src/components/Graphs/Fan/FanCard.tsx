@@ -15,7 +15,7 @@ export default function FanCardIndustrial({
   return (
     <Card className={isAlarm ? "alarm-glow" : "border border-slate-700"}>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm text-muted-foreground">{title}</CardTitle>
+        <CardTitle className="text-2xl text-center">{title}</CardTitle>
       </CardHeader>
 
       <CardContent className="flex flex-col items-center">
@@ -24,14 +24,11 @@ export default function FanCardIndustrial({
           alt="Ventilador industrial"
           className="w-35 h-35 object-contain"
         />
-
-        <span
-          className={`mt-2 text-lg font-bold ${
+         <CardTitle  className={` text-2xl font-bold ${
             isAlarm ? "text-red-400" : "text-green-400"
-          }`}
-        >
-          {status}
-        </span>
+          }`}>
+           {status}
+        </CardTitle>
       </CardContent>
     </Card>
   );

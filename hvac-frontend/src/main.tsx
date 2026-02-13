@@ -12,6 +12,8 @@ import AhuDetailTabs from "./pages/Tabs/AhuDetailTabs";
 import DashboardHVAC from "@/pages/DashboardHVAC/DashboardHVAC";
 import AlarmsPage from "./pages/Alarms/AlarmsPage";
 import DashboardOverviewPage from "./pages/Dashboard/DashboardOverviewPage";
+//import FanViewerPage from "./pages/Dashboard/3DDetailPage/FanViewerPage";
+import AhuDetailView from "./pages/Dashboard/3DDetailPage/AhuDetailView";
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
@@ -25,8 +27,13 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                 path="/plants/:plantId/ahus/:ahuId"
                 element={<AhuDetailTabs />}
               />
+              <Route
+                  path="/plants/:plantId/ahus/:ahuId/detail"
+                element={<AhuDetailView/>}
+              />
               <Route path="/alarms" element={<AlarmsPage />} />
               <Route path="/dashboards" element={<DashboardOverviewPage />} />
+              {/* <Route path ="/fan" element = {<FanViewerPage/>}/> */}
             </Routes>
           </AppLayout>
         </ThemeProvider>

@@ -29,7 +29,7 @@ export default function DamperCard({
   return (
     <Card className={isAlarm ? "alarm-glow" : "border border-slate-700"}>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm text-muted-foreground">{title}</CardTitle>
+        <CardTitle className="text-2xl text-center">{title}</CardTitle>
       </CardHeader>
 
       <CardContent className="flex flex-col items-center">
@@ -55,14 +55,11 @@ export default function DamperCard({
             style={{ transition: "height 0.8s ease, y 0.8s ease, fill 0.5s" }}
           />
         </svg>
-
-        <span
-          className={`mt-2 text-lg font-bold ${
+        <CardTitle  className={` text-2xl font-bold ${
             isAlarm ? "text-red-400" : "text-slate-200"
-          }`}
-        >
-          {posAnim.toFixed(0)}%
-        </span>
+          }`}>
+           {posAnim.toFixed(0)}%
+        </CardTitle>
       </CardContent>
     </Card>
   );

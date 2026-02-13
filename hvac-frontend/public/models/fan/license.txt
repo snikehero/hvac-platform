@@ -1,0 +1,11 @@
+Model Information:
+* title:	Ventilator - 14MB
+* source:	https://sketchfab.com/3d-models/ventilator-14mb-e691ef81c8a74ceabc49d701f1234672
+* author:	Mehdi Shahsavan (https://sketchfab.com/ahmagh2e)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Ventilator - 14MB" (https://sketchfab.com/3d-models/ventilator-14mb-e691ef81c8a74ceabc49d701f1234672) by Mehdi Shahsavan (https://sketchfab.com/ahmagh2e) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

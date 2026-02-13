@@ -170,7 +170,7 @@ export default function AlarmsPage() {
         })}
 
         {filteredActiveAhu.length === 0 && (
-          <p className="text-gray-400 col-span-full text-center mt-4">
+          <p>
             Sin AHUs activos
           </p>
         )}

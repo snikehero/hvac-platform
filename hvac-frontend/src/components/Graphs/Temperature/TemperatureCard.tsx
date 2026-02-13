@@ -47,7 +47,7 @@ export default function TemperatureCard({
       `}
     >
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm text-muted-foreground text-center">
+        <CardTitle className="text-2xl text-center">
           {title}
         </CardTitle>
       </CardHeader>
@@ -95,19 +95,11 @@ export default function TemperatureCard({
             fill={mercuryColor}
             style={{ transition: "fill 0.4s" }}
           />
-
-          {/* Valor */}
-          <text
-            x="60"
-            y="340"
-            textAnchor="middle"
-            fill="#e5e7eb"
-            fontSize="14"
-            fontWeight="bold"
-          >
-            {tempAnim.toFixed(1)} °C
-          </text>
         </svg>
+        {/* Valor */}
+        <CardTitle  className="text-2xl text-center">
+            {tempAnim.toFixed(1)} °C
+        </CardTitle>
       </CardContent>
     </Card>
   );

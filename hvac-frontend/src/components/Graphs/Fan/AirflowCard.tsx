@@ -34,7 +34,7 @@ export default function AirflowCard({
   return (
     <Card className={cn("transition-all", status === "ALARM" && "alarm-glow")}>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm text-muted-foreground">{title}</CardTitle>
+        <CardTitle className="text-2xl text-center">{title}</CardTitle>
       </CardHeader>
 
       <CardContent className="flex flex-col items-center">
@@ -62,10 +62,9 @@ export default function AirflowCard({
             }}
           />
         </svg>
-
-        <span className="mt-2 text-sm font-semibold">
-          {airAnim.toFixed(0)} m³/h
-        </span>
+        <CardTitle  className= "text-2xl font-bold" >
+           {airAnim.toFixed(0)} m³/h
+        </CardTitle>
       </CardContent>
     </Card>
   );

@@ -25,8 +25,6 @@ export function AhuCard({ ahu, onClick }: Props) {
     <Card
       onClick={onClick}
       className="
-        bg-gray-800
-        hover:bg-gray-700
         cursor-pointer
         transition
         border
