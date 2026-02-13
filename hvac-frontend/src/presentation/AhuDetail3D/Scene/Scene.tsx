@@ -8,7 +8,7 @@ interface SceneProps {
 
 export default function Scene({ children }: SceneProps) {
   return (
-    <div className="w-full h-100 rounded-xl overflow-hidden bg-black">
+    <div className="w-full h-300 rounded-xl overflow-hidden bg-black">
       <Canvas camera={{ fov: 50 }}>
         <ambientLight intensity={0.6} />
         <directionalLight position={[5, 5, 5]} intensity={1} />

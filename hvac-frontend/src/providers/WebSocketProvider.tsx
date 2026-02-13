@@ -5,6 +5,7 @@ import type { HvacTelemetry } from "@/types/telemetry";
 import type { HvacEvent, HvacEventType } from "@/types/event";
 import type { HistoryPoint } from "@/types/history";
 import { useConnectivityMonitor } from "@/domain/hooks/useConnectivityMonitor";
+import { toast } from "sonner";
 const MAX_POINTS = 30;
 
 interface TelemetryContextValue {
@@ -131,6 +132,28 @@ export function WebSocketProvider({
           };
 
           setEvents((prev) => [event, ...prev].slice(0, 50));
+          /* 🔥 TOAST GLOBAL */
+
+          if (status === "ALARM") {
+            toast.error(`🚨 AHU ${ahu.stationId} en ALARMA`, {
+              description: `Planta ${ahu.plantId}`,
+              duration: 8000,
+            });
+          }
+
+          if (status === "WARNING") {
+            toast.warning(`⚠ AHU ${ahu.stationId} en WARNING`, {
+              description: `Planta ${ahu.plantId}`,
+              duration: 6000,
+            });
+          }
+
+          if (status === "OK" && previousStatus === "ALARM") {
+            toast.success(`✅ AHU ${ahu.stationId} volvió a NORMAL`, {
+              description: `Planta ${ahu.plantId}`,
+              duration: 4000,
+            });
+          }
         }
 
         setActiveCounts((prev) => ({

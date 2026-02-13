@@ -16,6 +16,14 @@
         "env": []
     },
     {
+        "id": "59ee26d7d447743a",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
         "id": "d9490cfb64c4ef60",
         "type": "group",
         "z": "06936ed9048da629",
@@ -723,5 +731,42 @@
                 "70745ef2e644b323"
             ]
         ]
+    },
+    {
+        "id": "914af7edbd95ecb4",
+        "type": "mqtt in",
+        "z": "59ee26d7d447743a",
+        "name": "",
+        "topic": "#",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "8c44c13ea6274c19",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 370,
+        "y": 180,
+        "wires": [
+            [
+                "3e58b321fff0e940"
+            ]
+        ]
+    },
+    {
+        "id": "3e58b321fff0e940",
+        "type": "debug",
+        "z": "59ee26d7d447743a",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 660,
+        "y": 220,
+        "wires": []
     }
 ]

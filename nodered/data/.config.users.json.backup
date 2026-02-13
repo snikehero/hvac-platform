@@ -17,7 +17,7 @@
                 "welcome": "4.1.0"
             },
             "context": {
-                "flowRefresh": true
+                "flowRefresh": false
             }
         },
         "debug": {

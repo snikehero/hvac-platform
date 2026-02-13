@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { STALE_THRESHOLD_MS } from "@/domain/ahu/constants";
 import type { HvacTelemetry } from "@/types/telemetry";
 import type { HvacEvent } from "@/types/event";
-
+import { toast } from "sonner";
 export function useConnectivityMonitor(
   telemetry: HvacTelemetry[],
   setEvents: React.Dispatch<React.SetStateAction<HvacEvent[]>>
@@ -42,6 +42,11 @@ export function useConnectivityMonitor(
             type: "OK",
             message: "Unidad restableció comunicación",
           });
+           toast.success(`🟢 AHU ${ahu.stationId} reconectado`, {
+            description: `Planta ${ahu.plantId}`,
+            duration: 2000,
+          });
+          
         }
 
         lastConnectivityRef.current[key] = isDisconnected;
@@ -52,7 +57,7 @@ export function useConnectivityMonitor(
           [...newEvents, ...prev].slice(0, 50)
         );
       }
-    }, 10000);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [telemetry, setEvents]);

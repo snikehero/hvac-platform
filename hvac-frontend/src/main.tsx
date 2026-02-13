@@ -13,12 +13,20 @@ import DashboardHVAC from "@/pages/DashboardHVAC/DashboardHVAC";
 import AlarmsPage from "./pages/Alarms/AlarmsPage";
 import DashboardOverviewPage from "./pages/Dashboard/DashboardOverviewPage";
 //import FanViewerPage from "./pages/Dashboard/3DDetailPage/FanViewerPage";
+import { Toaster } from "sonner";
+
 import AhuDetailView from "./pages/Dashboard/3DDetailPage/AhuDetailView";
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
       <WebSocketProvider>
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+          <Toaster
+            position="top-right"
+            richColors
+            expand
+          />
+
           <AppLayout>
             <Routes>
               <Route path="/" element={<HomePage />} />
@@ -33,7 +41,6 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
               />
               <Route path="/alarms" element={<AlarmsPage />} />
               <Route path="/dashboards" element={<DashboardOverviewPage />} />
-              {/* <Route path ="/fan" element = {<FanViewerPage/>}/> */}
             </Routes>
           </AppLayout>
         </ThemeProvider>
