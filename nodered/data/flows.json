@@ -674,5 +674,54 @@
                 "70745ef2e644b323"
             ]
         ]
+    },
+    {
+        "id": "5c01d06e3202d46d",
+        "type": "inject",
+        "z": "06936ed9048da629",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1100,
+        "y": 300,
+        "wires": [
+            [
+                "f6517327530df467"
+            ]
+        ]
+    },
+    {
+        "id": "f6517327530df467",
+        "type": "function",
+        "z": "06936ed9048da629",
+        "name": "function 4",
+        "func": "msg.topic = \"hvac/planta1/AHU-03\"\nmsg.payload = {\n    plantId: \"hola\"\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1340,
+        "y": 300,
+        "wires": [
+            [
+                "70745ef2e644b323"
+            ]
+        ]
     }
 ]

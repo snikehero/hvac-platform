@@ -86,13 +86,11 @@ export default function DashboardOverviewPage() {
           />
         </div>
 
-        {/* Actividad reciente */}
-        <div>
-          <SystemActivityPanel />
-        </div>
-
       </div>
+      
+        {/* Actividad reciente */}
 
+          <SystemActivityPanel />
       {/* ================= KPIs SECUNDARIOS ================= */}
       <DashboardWidgets
         stats={stats}
