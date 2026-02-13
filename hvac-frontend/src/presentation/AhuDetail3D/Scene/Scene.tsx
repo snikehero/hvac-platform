@@ -1,6 +1,8 @@
-import { Canvas } from "@react-three/fiber"
+import { Canvas, useThree } from "@react-three/fiber"
 import { OrbitControls, Environment, Bounds } from "@react-three/drei"
 import { Suspense } from "react"
+import { useEffect } from "react"
+import { audioManager } from "@/presentation/Audio/AudioManager"
 
 interface SceneProps {
   children: React.ReactNode
@@ -8,13 +10,14 @@ interface SceneProps {
 
 export default function Scene({ children }: SceneProps) {
   return (
-    <div className="w-full h-300 rounded-xl overflow-hidden bg-black">
+    <div className="w-full h-100 rounded-xl overflow-hidden bg-black">
       <Canvas camera={{ fov: 50 }}>
         <ambientLight intensity={0.6} />
         <directionalLight position={[5, 5, 5]} intensity={1} />
 
         <Suspense fallback={null}>
           <Bounds fit clip observe margin={1.2}>
+             <InitAudio />
             {children}
           </Bounds>
         </Suspense>
@@ -24,4 +27,13 @@ export default function Scene({ children }: SceneProps) {
       </Canvas>
     </div>
   )
+}
+function InitAudio() {
+  const { camera } = useThree()
+
+  useEffect(() => {
+    audioManager.init(camera)
+  }, [camera])
+
+  return null
 }
