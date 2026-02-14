@@ -5,7 +5,10 @@ import type { HvacEvent } from "@/types/event";
 import { toast } from "sonner";
 export function useConnectivityMonitor(
   telemetry: HvacTelemetry[],
-  setEvents: React.Dispatch<React.SetStateAction<HvacEvent[]>>
+  setEvents: React.Dispatch<React.SetStateAction<HvacEvent[]>>,
+  setActiveCounts: React.Dispatch<
+    React.SetStateAction<Record<string, { alarms: number; warnings: number }>>
+  >,
 ) {
   const lastConnectivityRef = useRef<Record<string, boolean>>({});
 
@@ -18,11 +21,9 @@ export function useConnectivityMonitor(
         const key = `${ahu.plantId}-${ahu.stationId}`;
         const lastUpdate = new Date(ahu.timestamp).getTime();
 
-        const isDisconnected =
-          now - lastUpdate > STALE_THRESHOLD_MS;
+        const isDisconnected = now - lastUpdate > STALE_THRESHOLD_MS;
 
-        const wasDisconnected =
-          lastConnectivityRef.current[key] ?? false;
+        const wasDisconnected = lastConnectivityRef.current[key] ?? false;
 
         if (isDisconnected && !wasDisconnected) {
           newEvents.push({
@@ -32,6 +33,11 @@ export function useConnectivityMonitor(
             type: "DISCONNECTED",
             message: "Unidad perdió comunicación",
           });
+          // 🔥 LIMPIAR ALARMAS
+          setActiveCounts((prev) => ({
+            ...prev,
+            [key]: { alarms: 0, warnings: 0 },
+          }));
         }
 
         if (!isDisconnected && wasDisconnected) {
@@ -42,23 +48,20 @@ export function useConnectivityMonitor(
             type: "OK",
             message: "Unidad restableció comunicación",
           });
-           toast.success(`🟢 AHU ${ahu.stationId} reconectado`, {
+          toast.success(`🟢 AHU ${ahu.stationId} reconectado`, {
             description: `Planta ${ahu.plantId}`,
             duration: 2000,
           });
-          
         }
 
         lastConnectivityRef.current[key] = isDisconnected;
       });
 
       if (newEvents.length > 0) {
-        setEvents((prev) =>
-          [...newEvents, ...prev].slice(0, 50)
-        );
+        setEvents((prev) => [...newEvents, ...prev].slice(0, 50));
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [telemetry, setEvents]);
+  }, [telemetry, setEvents, setActiveCounts]);
 }

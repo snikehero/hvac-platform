@@ -4,43 +4,55 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
-
+import HomeGlobal from "./pages/HomeGlobal/HomeGlobal";
 import AppLayout from "@/components/layouts/AppLayout";
-import HomePage from "./pages/HomePage/Homepage";
+import HomePageHVAC from "./pages/HVAC/HomePage/HomepageHVAC";
 import { WebSocketProvider } from "./providers/WebSocketProvider";
-import AhuDetailTabs from "./pages/Tabs/AhuDetailTabs";
-import DashboardHVAC from "@/pages/DashboardHVAC/DashboardHVAC";
-import AlarmsPage from "./pages/Alarms/AlarmsPage";
-import DashboardOverviewPage from "./pages/Dashboard/DashboardOverviewPage";
-//import FanViewerPage from "./pages/Dashboard/3DDetailPage/FanViewerPage";
+import AhuDetailTabs from "./pages/HVAC/Tabs/AhuDetailTabs";
+import DashboardHVAC from "@/pages/HVAC/DashboardHVAC/DashboardHVAC";
+import AlarmsPage from "./pages/HVAC/Alarms/AlarmsPage";
+import DashboardOverviewPage from "./pages/HVAC/Dashboard/DashboardOverviewPage";
 import { Toaster } from "sonner";
+import AhuDetailView from "./pages/HVAC/Dashboard/3DDetailPage/AhuDetailView";
+import { routes } from "@/router/routes";
 
-import AhuDetailView from "./pages/Dashboard/3DDetailPage/AhuDetailView";
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
       <WebSocketProvider>
         <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-          <Toaster
-            position="top-right"
-            richColors
-            expand
-          />
+          <Toaster position="top-right" richColors expand />
 
           <AppLayout>
             <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/dashboardHVAC" element={<DashboardHVAC />} />
+              {/* ========================= */}
+              {/* 🔹 CORE - Plataforma     */}
+              {/* ========================= */}
+              <Route path="/" element={<HomeGlobal />} />
+
+              {/* ========================= */}
+              {/* 🔹 HVAC MODULE            */}
+              {/* ========================= */}
+              <Route path={routes.hvac.home} element={<HomePageHVAC />} />
+
+              <Route path={routes.hvac.dashboard} element={<DashboardHVAC />} />
+
+              <Route path={routes.hvac.alarms} element={<AlarmsPage />} />
+
               <Route
-                path="/plants/:plantId/ahus/:ahuId"
+                path={routes.hvac.ejecutivo}
+                element={<DashboardOverviewPage />}
+              />
+
+              <Route
+                path={routes.hvac.ahuDetailPattern}
                 element={<AhuDetailTabs />}
               />
+
               <Route
-                  path="/plants/:plantId/ahus/:ahuId/detail"
-                element={<AhuDetailView/>}
+                path={routes.hvac.ahuDetail3DPattern}
+                element={<AhuDetailView />}
               />
-              <Route path="/alarms" element={<AlarmsPage />} />
-              <Route path="/dashboards" element={<DashboardOverviewPage />} />
             </Routes>
           </AppLayout>
         </ThemeProvider>

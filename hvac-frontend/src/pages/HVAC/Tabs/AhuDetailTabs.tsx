@@ -1,25 +1,25 @@
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import AhuDetailPage from "../AhuDetailPage/AhuDetailContent"
-import AhuEventsPage from "../AhuEventsPage/AhuEventsPage"
-import { useTelemetry } from "@/hooks/useTelemetry"
-import { useParams } from "react-router-dom"
-import { useAhuEvents } from "@/hooks/useAhuEvents"
-import { getAhuHealth } from "@/domain/ahu/getAhuHealth"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import AhuDetailPage from "../AhuDetailPage/AhuDetailContent";
+import AhuEventsPage from "../AhuEventsPage/AhuEventsPage";
+import { useTelemetry } from "@/hooks/useTelemetry";
+import { useParams } from "react-router-dom";
+import { useAhuEvents } from "@/hooks/useAhuEvents";
+import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
 
 export default function AhuDetailTabs() {
-  const { telemetry } = useTelemetry()
-  const { ahuId, plantId } = useParams()
+  const { telemetry } = useTelemetry();
+  const { ahuId, plantId } = useParams();
 
   const ahu = telemetry.find(
-    (t) => t.stationId === ahuId && t.plantId === plantId
-  )
+    (t) => t.stationId === ahuId && t.plantId === plantId,
+  );
 
-  const events = useAhuEvents(ahu)
+  const events = useAhuEvents(ahu);
 
-  const health = ahu ? getAhuHealth(ahu) : undefined
+  const health = ahu ? getAhuHealth(ahu) : undefined;
 
   // 🔥 Glow solo si realmente está en ALARM
-  const alarmActive = health?.status === "ALARM"
+  const alarmActive = health?.status === "ALARM";
 
   return (
     <Tabs defaultValue="detail" className="h-screen">
@@ -31,7 +31,6 @@ export default function AhuDetailTabs() {
           className={alarmActive ? "alarm-glow relative" : "relative"}
         >
           Eventos
-
           {events.length > 0 && (
             <span className="absolute -top-1 -right-3 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
               {events.length}
@@ -48,5 +47,5 @@ export default function AhuDetailTabs() {
         <AhuEventsPage />
       </TabsContent>
     </Tabs>
-  )
+  );
 }

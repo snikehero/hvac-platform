@@ -29,14 +29,11 @@ interface TelemetryContextValue {
   setEvents: React.Dispatch<React.SetStateAction<HvacEvent[]>>;
 }
 
-export const TelemetryContext =
-  createContext<TelemetryContextValue | null>(null);
+export const TelemetryContext = createContext<TelemetryContextValue | null>(
+  null,
+);
 
-export function WebSocketProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const [telemetry, setTelemetry] = useState<HvacTelemetry[]>([]);
   const [events, setEvents] = useState<HvacEvent[]>([]);
   const [history, setHistory] = useState<
@@ -115,11 +112,7 @@ export function WebSocketProvider({
       const previousStatus = lastStatusRef.current[key];
       const status = ahu.points.status?.value;
 
-      if (
-        status === "ALARM" ||
-        status === "WARNING" ||
-        status === "OK"
-      ) {
+      if (status === "ALARM" || status === "WARNING" || status === "OK") {
         if (status !== previousStatus) {
           lastStatusRef.current[key] = status;
 
@@ -199,9 +192,7 @@ export function WebSocketProvider({
 
       setTelemetry((prev) => {
         const idx = prev.findIndex(
-          (p) =>
-            p.stationId === ahu.stationId &&
-            p.plantId === ahu.plantId,
+          (p) => p.stationId === ahu.stationId && p.plantId === ahu.plantId,
         );
 
         if (idx >= 0) {
@@ -219,7 +210,7 @@ export function WebSocketProvider({
     };
   }, []);
 
-useConnectivityMonitor(telemetry,setEvents);
+  useConnectivityMonitor(telemetry, setEvents, setActiveCounts);
 
   return (
     <TelemetryContext.Provider
@@ -239,16 +230,10 @@ useConnectivityMonitor(telemetry,setEvents);
 
 /* ---------------- HELPERS ---------------- */
 
-function buildMessage(
-  current: HvacEventType,
-  previous: HvacEventType,
-) {
+function buildMessage(current: HvacEventType, previous: HvacEventType) {
   if (current === "ALARM") return "Unidad entró en ALARMA";
-  if (current === "WARNING")
-    return "Unidad en condición de ADVERTENCIA";
-  if (current === "OK")
-    return "Unidad volvió a estado NORMAL";
-  if (current === "DISCONNECTED")
-    return "Unidad se desconectó"
+  if (current === "WARNING") return "Unidad en condición de ADVERTENCIA";
+  if (current === "OK") return "Unidad volvió a estado NORMAL";
+  if (current === "DISCONNECTED") return "Unidad se desconectó";
   return `Cambio de estado: ${previous} → ${current}`;
 }

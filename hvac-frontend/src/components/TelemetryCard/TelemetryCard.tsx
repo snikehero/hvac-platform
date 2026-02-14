@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import type { HvacTelemetry } from "@/types/telemetry";
 import { getPointIcon } from "../../Helpers/getPointIcon";
+import { routes } from "@/router/routes";
 
 import TelemetryCardHeader from "./TelemetryCardHeader";
 import TelemetryCardRow from "./TelemetryCardRow";
@@ -23,7 +24,7 @@ export default function TelemetryCard({ ahu }: TelemetryCardProps) {
   const { stationId, points, timestamp, plantId } = ahu;
   const now = useClock(1000);
   /* ✅ ÚNICA fuente de verdad */
-  console.log(now)
+  console.log(now);
   const health = getAhuHealth(ahu);
 
   /* 🎨 Overlay basado SOLO en health */
@@ -31,18 +32,18 @@ export default function TelemetryCard({ ahu }: TelemetryCardProps) {
     health.status === "ALARM"
       ? "bg-red-900/70"
       : health.status === "WARNING"
-      ? "bg-yellow-900/60"
-      : health.status === "DISCONNECTED"
-      ? "bg-gray-900/70"
-      : "bg-black/50";
+        ? "bg-yellow-900/60"
+        : health.status === "DISCONNECTED"
+          ? "bg-gray-900/70"
+          : "bg-black/50";
 
   const extraPoints = Object.entries(points).filter(
-    ([key]) => !CORE_KEYS.includes(key)
+    ([key]) => !CORE_KEYS.includes(key),
   );
 
   return (
     <Card
-      onClick={() => navigate(`/plants/${plantId}/ahus/${stationId}`)}
+      onClick={() => navigate(routes.hvac.ahuDetail(plantId, stationId))}
       className="relative overflow-hidden cursor-pointer transition hover:shadow-lg hover:-translate-y-0.5"
     >
       {/* Background */}
@@ -56,10 +57,7 @@ export default function TelemetryCard({ ahu }: TelemetryCardProps) {
 
       {/* Content */}
       <div className="relative z-10 text-white">
-        <TelemetryCardHeader
-          stationId={stationId}
-          status={health.status}
-        />
+        <TelemetryCardHeader stationId={stationId} status={health.status} />
 
         <div className="px-6 pb-6 space-y-4">
           <TelemetryCardCore points={points} />
@@ -77,8 +75,7 @@ export default function TelemetryCard({ ahu }: TelemetryCardProps) {
           )}
 
           <div className="pt-2 text-xs text-white/60">
-            Última actualización:{" "}
-            {new Date(timestamp).toLocaleTimeString()}
+            Última actualización: {new Date(timestamp).toLocaleTimeString()}
           </div>
         </div>
       </div>

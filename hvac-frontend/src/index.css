@@ -114,6 +114,98 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
+
+.violet {
+  --background: oklch(0.95 0.02 280);
+  --foreground: oklch(0.2 0.04 280);
+
+  --card: oklch(0.98 0.01 280);
+  --card-foreground: oklch(0.2 0.04 280);
+
+  --primary: oklch(0.6 0.25 280);
+  --primary-foreground: oklch(0.98 0 0);
+
+  --secondary: oklch(0.9 0.05 280);
+  --secondary-foreground: oklch(0.2 0.04 280);
+
+  --muted: oklch(0.9 0.03 280);
+  --muted-foreground: oklch(0.45 0.04 280);
+
+  --accent: oklch(0.85 0.15 280);
+  --accent-foreground: oklch(0.2 0.04 280);
+
+  --border: oklch(0.85 0.02 280);
+  --input: oklch(0.85 0.02 280);
+  --ring: oklch(0.6 0.25 280);
+
+  --sidebar: oklch(0.92 0.02 280);
+  --sidebar-foreground: oklch(0.2 0.04 280);
+  --sidebar-primary: oklch(0.6 0.25 280);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+}
+.hvac {
+  /* Fondo principal (azul acero oscuro) */
+  --background: oklch(0.18 0.04 250);
+  --foreground: oklch(0.92 0.01 250);
+
+  /* Cards */
+  --card: oklch(0.23 0.04 250);
+  --card-foreground: oklch(0.95 0.01 250);
+
+  --popover: oklch(0.23 0.04 250);
+  --popover-foreground: oklch(0.95 0.01 250);
+
+  /* Azul eléctrico principal */
+  --primary: oklch(0.62 0.18 250);
+  --primary-foreground: oklch(0.98 0 0);
+
+  /* Secundario más apagado */
+  --secondary: oklch(0.32 0.05 250);
+  --secondary-foreground: oklch(0.95 0.01 250);
+
+  /* Elementos muted */
+  --muted: oklch(0.3 0.04 250);
+  --muted-foreground: oklch(0.65 0.03 250);
+
+  /* Acento cian técnico */
+  --accent: oklch(0.7 0.16 210);
+  --accent-foreground: oklch(0.1 0 0);
+
+  /* Alarmas */
+  --destructive: oklch(0.65 0.25 25);
+  --destructive-foreground: oklch(0.98 0 0);
+
+  /* Bordes */
+  --border: oklch(0.35 0.03 250);
+  --input: oklch(0.35 0.03 250);
+  --ring: oklch(0.62 0.18 250);
+
+  /* Charts (telemetría) */
+  --chart-1: oklch(0.62 0.18 250);
+  --chart-2: oklch(0.7 0.16 210);
+  --chart-3: oklch(0.55 0.15 180);
+  --chart-4: oklch(0.6 0.2 300);
+  --chart-5: oklch(0.65 0.22 40);
+
+  /* Sidebar */
+  --sidebar: oklch(0.22 0.04 250);
+  --sidebar-foreground: oklch(0.92 0.01 250);
+  --sidebar-primary: oklch(0.62 0.18 250);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.3 0.04 250);
+  --sidebar-accent-foreground: oklch(0.92 0.01 250);
+  --sidebar-border: oklch(0.35 0.03 250);
+  --sidebar-ring: oklch(0.62 0.18 250);
+}
+.hvac body {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    rgba(255, 255, 255, 0.03) 1px,
+    transparent 0
+  );
+  background-size: 20px 20px;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
