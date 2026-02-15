@@ -20,24 +20,29 @@ import { Separator } from "@/components/ui/separator";
 
 export default function HomeGlobal() {
   const navigate = useNavigate();
-  const { telemetry } = useTelemetry();
+  const { telemetry, ahuConnectionStatus } = useTelemetry();
 
   const metrics = useMemo(() => {
-    const totalDevices = telemetry.length;
+    const activeAhus = telemetry.filter((ahu) => {
+      const key = `${ahu.plantId}-${ahu.stationId}`;
+      return ahuConnectionStatus[key]?.isConnected;
+    });
 
-    const activeAlarms = telemetry.reduce((acc, ahu) => {
+    const totalDevices = activeAhus.length;
+
+    const activeAlarms = activeAhus.reduce((acc, ahu) => {
       const health = getAhuHealth(ahu);
       return acc + (health.status === "ALARM" ? 1 : 0);
     }, 0);
 
-    const plants = new Set(telemetry.map((t) => t.plantId)).size;
+    const plants = new Set(activeAhus.map((t) => t.plantId)).size;
 
     return {
       totalDevices,
       activeAlarms,
       plants,
     };
-  }, [telemetry]);
+  }, [telemetry, ahuConnectionStatus]);
 
   return (
     <div className="min-h-screen bg-background text-foreground p-10 space-y-16">

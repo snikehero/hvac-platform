@@ -22,7 +22,7 @@ import { HeroPlantPanel } from "./components/HeroPlantPanel";
 import { SystemActivityPanel } from "./components/SystemActivityPanel";
 import { routes } from "@/router/routes";
 
-export default function DashboardOverviewPage() {
+export default function DashboardEjecutivoPage() {
   const { telemetry } = useTelemetry();
   const navigate = useNavigate();
 

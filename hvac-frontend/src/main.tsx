@@ -11,9 +11,9 @@ import { WebSocketProvider } from "./providers/WebSocketProvider";
 import AhuDetailTabs from "./pages/HVAC/AhuDetailPage/Tabs/AhuDetailTabs";
 import DashboardHVAC from "@/pages/HVAC/DashboardHVAC/DashboardHVAC";
 import AlarmsPage from "./pages/HVAC/Alarms/AlarmsPage";
-import DashboardOverviewPage from "./pages/HVAC/Dashboard/DashboardOverviewPage";
+import DashboardEjecutivoPage from "./pages/HVAC/DashboardEjecutivoPage/DashboardEjecutivoPage";
 import { Toaster } from "sonner";
-import AhuDetailView from "./pages/HVAC/Dashboard/3DDetailPage/AhuDetailView";
+import AhuDetailView from "./pages/HVAC/DashboardEjecutivoPage/3DDetailPage/AhuDetailView";
 import { routes } from "@/router/routes";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
@@ -41,7 +41,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
 
               <Route
                 path={routes.hvac.ejecutivo}
-                element={<DashboardOverviewPage />}
+                element={<DashboardEjecutivoPage />}
               />
 
               <Route
