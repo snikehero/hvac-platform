@@ -1,5 +1,5 @@
 import type { HvacPoint } from "@/types/telemetry";
-import { getPointIcon } from "@/Helpers/getPointIcon";
+import { getPointIcon } from "@/components/TelemetryCard/Helpers/getPointIcon";
 
 export function AhuDataRow({
   label,

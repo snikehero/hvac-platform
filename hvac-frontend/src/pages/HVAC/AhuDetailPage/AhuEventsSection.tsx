@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import AhuEventTimeline from "@/components/EventsPanel/AhuEventTimeLine";
-import { AhuSection } from "@/components/ahu/AhuSection";
+import AhuEventTimeline from "@/pages/HVAC/AhuDetailPage/EventsPanel/AhuEventTimeLine";
+import { AhuSection } from "@/pages/HVAC/AhuDetailPage/ahu/AhuSection";
 import type { AhuHealthStatus } from "@/domain/ahu/getAhuHealth";
 
 export default function AhuEventsSection({

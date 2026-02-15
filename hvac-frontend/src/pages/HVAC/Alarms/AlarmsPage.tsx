@@ -2,7 +2,7 @@
 import { useState, useMemo } from "react";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAhuHistory } from "@/hooks/useAhuHistory";
-import { AhuHistoryTemperatureChart } from "@/components/History/AhuHistoryTemperatureCard";
+import { AhuHistoryTemperatureChart } from "@/components/Graphs/AhuHistoryTemperatureCard";
 
 import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
 

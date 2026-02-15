@@ -5,12 +5,12 @@ import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAhuHistory } from "@/hooks/useAhuHistory";
 
 import AhuHeader from "./AhuHeader";
-import { AhuHealthSummary } from "@/components/ahu/AhuHealthSummary";
+import { AhuHealthSummary } from "@/pages/HVAC/AhuDetailPage/ahu/AhuHealthSummary";
 import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
 
-import { renderAhuCard } from "@/components/ahu/renderAhuCard";
-import { AhuHistoryTemperatureChart } from "@/components/History/AhuHistoryTemperatureCard";
-import { AhuHistoryHumidityChart } from "@/components/History/AhuHistoryHumidityChart";
+import { renderAhuCard } from "@/pages/HVAC/AhuDetailPage/ahu/renderAhuCard";
+import { AhuHistoryTemperatureChart } from "@/components/Graphs/AhuHistoryTemperatureCard";
+import { AhuHistoryHumidityChart } from "@/components/Graphs/AhuHistoryHumidityChart";
 import { Label } from "@/components/ui/label";
 import { HousePlug, Sprout, Wind } from "lucide-react";
 export default function AhuDetailPage() {
@@ -44,7 +44,7 @@ export default function AhuDetailPage() {
       <section className="space-y-3">
         <section className="space-y-1">
           <Label>
-            <Sprout/>
+            <Sprout />
             Condiciones Ambientales
           </Label>
           <div className="grid grid-cols-3 lg:grid-cols-3 gap-2 text-xs">
@@ -62,7 +62,7 @@ export default function AhuDetailPage() {
         {/* ========================= */}
         <section className="space-y-1">
           <Label>
-            <Wind/>
+            <Wind />
             Movimiento de Aire
           </Label>
           <div className="grid grid-cols-3 lg:grid-cols-3 gap-2 text-xs">
@@ -77,7 +77,7 @@ export default function AhuDetailPage() {
         {/* ========================= */}
         <section className="space-y-1">
           <Label className="">
-            <HousePlug/>
+            <HousePlug />
             Energía y Filtración
           </Label>
           <div className="grid grid-cols-3 lg:grid-cols-3 gap-2 text-xs">
@@ -91,9 +91,7 @@ export default function AhuDetailPage() {
         </section>
       </section>
 
-      <Label>
-        Última actualización: {health.lastUpdate.toLocaleString()}
-      </Label>
+      <Label>Última actualización: {health.lastUpdate.toLocaleString()}</Label>
     </div>
   );
 }

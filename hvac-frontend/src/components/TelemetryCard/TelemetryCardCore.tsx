@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import TelemetryCardRow from "./TelemetryCardRow";
-import { getPointIcon } from "../../Helpers/getPointIcon";
+import { getPointIcon } from "./Helpers/getPointIcon";
 
 export default function TelemetryCardCore({ points }: { points: any }) {
   return (

@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import type { HvacTelemetry } from "@/types/telemetry";
-import { getPointIcon } from "../../Helpers/getPointIcon";
+import { getPointIcon } from "./Helpers/getPointIcon";
 import { routes } from "@/router/routes";
 
 import TelemetryCardHeader from "./TelemetryCardHeader";

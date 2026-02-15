@@ -1,6 +1,6 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import AhuDetailPage from "../AhuDetailPage/AhuDetailContent";
-import AhuEventsPage from "../AhuEventsPage/AhuEventsPage";
+import AhuDetailPage from "../AhuDetailContent";
+import AhuEventsPage from "../../AhuEventsPage/AhuEventsPage";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useParams } from "react-router-dom";
 import { useAhuEvents } from "@/hooks/useAhuEvents";

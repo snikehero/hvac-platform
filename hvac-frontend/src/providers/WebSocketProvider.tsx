@@ -52,7 +52,7 @@ interface TelemetryContextValue {
 }
 
 export const TelemetryContext = createContext<TelemetryContextValue | null>(
-  null
+  null,
 );
 
 /* ---------------- HELPERS ---------------- */
@@ -117,7 +117,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       if (!status) return false;
       return status.isConnected;
     },
-    [ahuConnectionStatus]
+    [ahuConnectionStatus],
   );
 
   // Handle AHU disconnection
@@ -157,7 +157,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         });
       }
     },
-    []
+    [],
   );
 
   // Handle AHU reconnection
@@ -183,7 +183,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         });
       }
     },
-    []
+    [],
   );
 
   // Process status change for an AHU
@@ -240,7 +240,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         }));
       }
     },
-    [handleAhuReconnected]
+    [handleAhuReconnected],
   );
 
   // Update history for an AHU
@@ -288,7 +288,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         if (isStale) {
           // Find the AHU info from current telemetry
           const ahu = telemetryRef.current.find(
-            (t) => getAhuKey(t.plantId, t.stationId) === key
+            (t) => getAhuKey(t.plantId, t.stationId) === key,
           );
 
           if (ahu) {
@@ -300,7 +300,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
     const intervalId = setInterval(
       checkConnectivity,
-      CONNECTIVITY_CHECK_INTERVAL
+      CONNECTIVITY_CHECK_INTERVAL,
     );
 
     return () => clearInterval(intervalId);
@@ -411,7 +411,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       // Update telemetry state
       setTelemetry((prev) => {
         const idx = prev.findIndex(
-          (p) => p.stationId === ahu.stationId && p.plantId === ahu.plantId
+          (p) => p.stationId === ahu.stationId && p.plantId === ahu.plantId,
         );
 
         if (idx >= 0) {
@@ -450,7 +450,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       connected,
       ahuConnectionStatus,
       isAhuConnected,
-    ]
+    ],
   );
 
   return (

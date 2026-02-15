@@ -8,7 +8,7 @@ import HomeGlobal from "./pages/HomeGlobal/HomeGlobal";
 import AppLayout from "@/components/layouts/AppLayout";
 import HomePageHVAC from "./pages/HVAC/HomePage/HomepageHVAC";
 import { WebSocketProvider } from "./providers/WebSocketProvider";
-import AhuDetailTabs from "./pages/HVAC/Tabs/AhuDetailTabs";
+import AhuDetailTabs from "./pages/HVAC/AhuDetailPage/Tabs/AhuDetailTabs";
 import DashboardHVAC from "@/pages/HVAC/DashboardHVAC/DashboardHVAC";
 import AlarmsPage from "./pages/HVAC/Alarms/AlarmsPage";
 import DashboardOverviewPage from "./pages/HVAC/Dashboard/DashboardOverviewPage";

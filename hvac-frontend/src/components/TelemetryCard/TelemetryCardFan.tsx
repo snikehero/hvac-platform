@@ -1,19 +1,17 @@
-import { Badge } from "@/components/ui/badge"
-import type { HvacPoint } from "@/types/telemetry"
-import { getPointIcon } from "../../Helpers/getPointIcon"
+import { Badge } from "@/components/ui/badge";
+import type { HvacPoint } from "@/types/telemetry";
+import { getPointIcon } from "./Helpers/getPointIcon";
 
 interface Props {
-  fan?: HvacPoint
+  fan?: HvacPoint;
 }
 
 export default function TelemetryCardFan({ fan }: Props) {
   // Narrowing seguro del valor
   const fanValue =
-    fan?.value === "ON" || fan?.value === "OFF"
-      ? fan.value
-      : undefined
+    fan?.value === "ON" || fan?.value === "OFF" ? fan.value : undefined;
 
-  const isOn = fanValue === "ON"
+  const isOn = fanValue === "ON";
 
   return (
     <div className="flex items-center justify-between">
@@ -25,14 +23,10 @@ export default function TelemetryCardFan({ fan }: Props) {
 
       {/* Estado */}
       <Badge
-        className={
-          isOn
-            ? "bg-green-600 text-white"
-            : "bg-gray-600 text-white"
-        }
+        className={isOn ? "bg-green-600 text-white" : "bg-gray-600 text-white"}
       >
         {fanValue ?? "--"}
       </Badge>
     </div>
-  )
+  );
 }
