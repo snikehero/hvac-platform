@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
-
+import { routes } from "@/router/routes";
 export default function HomePageHVAC() {
   const { telemetry, ahuConnectionStatus } = useTelemetry();
   const connected = useWebSocket();
@@ -123,7 +123,7 @@ export default function HomePageHVAC() {
   const widgets = [
     {
       icon: Activity,
-      title: "Estado del sistema",
+      title: "Estado del Servidor",
       value: connected ? "ONLINE" : "OFFLINE",
       subtitle: connected ? "Conexión establecida" : "Sin conexión al servidor",
       color: connected ? "text-green-600" : "text-red-600",
@@ -175,12 +175,17 @@ export default function HomePageHVAC() {
 
   const quickLinks = [
     {
-      to: "/dashboardHVAC",
+      to: routes.hvac.dashboard,
       label: "HVAC",
       icon: AirVent,
       color: "text-blue-500",
     },
-    { to: "/alarms", label: "Alarmas", icon: Bell, color: "text-red-500" },
+    {
+      to: routes.hvac.alarms,
+      label: "Alarmas",
+      icon: Bell,
+      color: "text-red-500",
+    },
   ];
 
   return (

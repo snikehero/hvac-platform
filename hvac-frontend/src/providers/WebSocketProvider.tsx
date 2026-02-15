@@ -153,7 +153,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
         toast.error(`🔴 AHU ${ahu.stationId} desconectado`, {
           description: `Planta ${ahu.plantId} - Sin datos por más de 2 minutos`,
-          duration: 10000,
+          duration: 3000,
         });
       }
     },
@@ -216,17 +216,17 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
           if (status === "ALARM") {
             toast.error(`🚨 AHU ${ahu.stationId} en ALARMA`, {
               description: `Planta ${ahu.plantId}`,
-              duration: 8000,
+              duration: 3000,
             });
           } else if (status === "WARNING") {
             toast.warning(`⚠ AHU ${ahu.stationId} en WARNING`, {
               description: `Planta ${ahu.plantId}`,
-              duration: 6000,
+              duration: 3000,
             });
           } else if (status === "OK" && previousStatus === "ALARM") {
             toast.success(`✅ AHU ${ahu.stationId} volvió a NORMAL`, {
               description: `Planta ${ahu.plantId}`,
-              duration: 4000,
+              duration: 3000,
             });
           }
         }
