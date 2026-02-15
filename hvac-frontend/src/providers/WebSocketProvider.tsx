@@ -146,8 +146,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         setAhuConnectionStatus((prev) => ({
           ...prev,
           [key]: {
-            ...prev[key],
             isConnected: false,
+            lastSeen: prev[key]?.lastSeen ?? Date.now(),
           },
         }));
 
