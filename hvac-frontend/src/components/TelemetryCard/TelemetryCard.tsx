@@ -193,7 +193,7 @@ export default function TelemetryCard({ ahu }: TelemetryCardProps) {
             <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Additional Data
             </div>
-            {extraPoints.slice(0, 3).map(([key, point]) => (
+            {extraPoints.slice(0, 4).map(([key, point]) => (
               <div
                 key={key}
                 className="flex items-center justify-between text-sm"
