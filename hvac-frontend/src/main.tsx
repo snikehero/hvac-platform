@@ -8,13 +8,13 @@ import HomeGlobal from "./pages/HomeGlobal/HomeGlobal";
 import AppLayout from "@/components/layouts/AppLayout";
 import HomePageHVAC from "./pages/HVAC/HomePage/HomepageHVAC";
 import { WebSocketProvider } from "./providers/WebSocketProvider";
-import AhuDetailTabs from "./pages/HVAC/AhuDetailPage/Tabs/AhuDetailTabs";
 import DashboardHVAC from "@/pages/HVAC/DashboardHVAC/DashboardHVAC";
 import AlarmsPage from "./pages/HVAC/Alarms/AlarmsPage";
 import DashboardEjecutivoPage from "./pages/HVAC/DashboardEjecutivoPage/DashboardEjecutivoPage";
 import { Toaster } from "sonner";
 import AhuDetailView from "./pages/HVAC/DashboardEjecutivoPage/3DDetailPage/AhuDetailView";
 import { routes } from "@/router/routes";
+import AhuDetailPage from "./pages/HVAC/AhuDetailPage/AhuDetailContent";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
@@ -46,7 +46,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
 
               <Route
                 path={routes.hvac.ahuDetailPattern}
-                element={<AhuDetailTabs />}
+                element={<AhuDetailPage />}
               />
 
               <Route

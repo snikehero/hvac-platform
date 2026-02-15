@@ -44,7 +44,10 @@ export default function AppHeader() {
               Violet
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setTheme("hvac")}>
-              HVAC Industrial
+              HVAC
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setTheme("industrial")}>
+              Industrial
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

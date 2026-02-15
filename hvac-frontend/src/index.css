@@ -143,6 +143,7 @@
   --sidebar-primary: oklch(0.6 0.25 280);
   --sidebar-primary-foreground: oklch(0.98 0 0);
 }
+
 .hvac {
   /* Fondo principal (azul acero oscuro) */
   --background: oklch(0.18 0.04 250);
@@ -206,6 +207,74 @@
   background-size: 20px 20px;
 }
 
+/* ============================================ */
+/*     NUEVO TEMA: INDUSTRIAL                  */
+/* ============================================ */
+.industrial {
+  /* Fondo casi negro con tono azul frío */
+  --background: oklch(0.09 0.02 250);
+  --foreground: oklch(0.98 0.01 250);
+
+  /* Cards con glassmorphism */
+  --card: oklch(0.15 0.03 250);
+  --card-foreground: oklch(0.96 0.01 250);
+
+  --popover: oklch(0.15 0.03 250);
+  --popover-foreground: oklch(0.96 0.01 250);
+
+  /* Cyan eléctrico como primary */
+  --primary: oklch(0.72 0.14 195);
+  --primary-foreground: oklch(0.05 0 0);
+
+  /* Secundario slate */
+  --secondary: oklch(0.25 0.02 250);
+  --secondary-foreground: oklch(0.96 0.01 250);
+
+  /* Muted más oscuro */
+  --muted: oklch(0.22 0.02 250);
+  --muted-foreground: oklch(0.55 0.02 250);
+
+  /* Accent blue brillante */
+  --accent: oklch(0.65 0.18 250);
+  --accent-foreground: oklch(0.98 0 0);
+
+  /* Destructive en rojo neón */
+  --destructive: oklch(0.62 0.26 25);
+  --destructive-foreground: oklch(0.98 0 0);
+
+  /* Bordes sutiles con alpha */
+  --border: oklch(0.32 0.02 250);
+  --input: oklch(0.32 0.02 250);
+  --ring: oklch(0.72 0.14 195);
+
+  /* Charts con colores tech */
+  --chart-1: oklch(0.72 0.14 195);
+  --chart-2: oklch(0.65 0.18 250);
+  --chart-3: oklch(0.68 0.15 160);
+  --chart-4: oklch(0.7 0.2 290);
+  --chart-5: oklch(0.66 0.24 40);
+
+  /* Sidebar oscuro */
+  --sidebar: oklch(0.12 0.02 250);
+  --sidebar-foreground: oklch(0.96 0.01 250);
+  --sidebar-primary: oklch(0.72 0.14 195);
+  --sidebar-primary-foreground: oklch(0.05 0 0);
+  --sidebar-accent: oklch(0.22 0.02 250);
+  --sidebar-accent-foreground: oklch(0.96 0.01 250);
+  --sidebar-border: oklch(0.32 0.02 250);
+  --sidebar-ring: oklch(0.72 0.14 195);
+}
+
+.industrial body {
+  /* Grid más denso */
+  background-size: 2rem 2rem;
+
+  /* Grid menos visible */
+  background-image:
+    linear-gradient(to right, oklch(0.15 0.02 250) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.15 0.02 250) 1px, transparent 1px);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -243,4 +312,58 @@
 
 .alarm-blink-dot {
   animation: alarmBlink 1s infinite;
+}
+
+/* Animaciones para el tema industrial */
+@keyframes scan {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes pulse-slow {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-scan {
+  animation: scan 8s linear infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-spin-slow {
+  animation: spin 3s linear infinite;
 }
