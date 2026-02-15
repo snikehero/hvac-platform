@@ -10,7 +10,6 @@ import TelemetryCardFan from "./TelemetryCardFan";
 import TelemetryCardExtras from "./TelemertryCardExtras";
 import TelemetryCardTemperatureAverage from "./TelemetryCardTemperatureAverage";
 import TelemetryCardCore from "./TelemetryCardCore";
-import { useClock } from "@/domain/hooks/useClock";
 import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
 
 const CORE_KEYS = ["temperature", "humidity", "fan_status", "status"];
@@ -22,9 +21,6 @@ interface TelemetryCardProps {
 export default function TelemetryCard({ ahu }: TelemetryCardProps) {
   const navigate = useNavigate();
   const { stationId, points, timestamp, plantId } = ahu;
-  const now = useClock(1000);
-  /* ✅ ÚNICA fuente de verdad */
-  console.log(now);
   const health = getAhuHealth(ahu);
 
   /* 🎨 Overlay basado SOLO en health */

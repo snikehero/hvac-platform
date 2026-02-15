@@ -16,7 +16,7 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
 
 export default function HomePageHVAC() {
-  const { telemetry } = useTelemetry();
+  const { telemetry, ahuConnectionStatus } = useTelemetry();
   const connected = useWebSocket();
 
   /* -------------------------------- */
@@ -26,8 +26,15 @@ export default function HomePageHVAC() {
   const { activeAlarms, activeWarnings } = useMemo(() => {
     let alarms = 0;
     let warnings = 0;
-
+    // Helper to check if AHU is connected
+    const isAhuConnected = (ahu: { plantId: string; stationId: string }) => {
+      const key = `${ahu.plantId}-${ahu.stationId}`;
+      return ahuConnectionStatus[key]?.isConnected ?? false;
+    };
     telemetry.forEach((ahu) => {
+      // Skip disconnected AHUs
+      if (!isAhuConnected(ahu)) return;
+
       const health = getAhuHealth(ahu);
 
       if (health.status === "ALARM") alarms++;
@@ -35,7 +42,7 @@ export default function HomePageHVAC() {
     });
 
     return { activeAlarms: alarms, activeWarnings: warnings };
-  }, [telemetry]);
+  }, [telemetry, ahuConnectionStatus]);
 
   /* -------------------------------- */
   /* Salud Operacional Global */
@@ -47,20 +54,30 @@ export default function HomePageHVAC() {
     let hasAlarm = false;
     let hasWarning = false;
     let hasDisconnected = false;
-
+    // Helper to check if AHU is connected
+    const isAhuConnected = (ahu: { plantId: string; stationId: string }) => {
+      const key = `${ahu.plantId}-${ahu.stationId}`;
+      return ahuConnectionStatus[key]?.isConnected ?? false;
+    };
     telemetry.forEach((ahu) => {
+      const ahuConnected = isAhuConnected(ahu);
+
+      if (!ahuConnected) {
+        hasDisconnected = true;
+        return;
+      }
+
       const health = getAhuHealth(ahu);
 
       if (health.status === "ALARM") hasAlarm = true;
       else if (health.status === "WARNING") hasWarning = true;
-      else if (health.status === "DISCONNECTED") hasDisconnected = true;
     });
 
     if (hasAlarm) return "CRITICAL";
     if (hasWarning || hasDisconnected) return "DEGRADED";
 
     return "HEALTHY";
-  }, [telemetry]);
+  }, [telemetry, ahuConnectionStatus]);
 
   const healthColor =
     systemHealth === "CRITICAL"
@@ -76,13 +93,16 @@ export default function HomePageHVAC() {
   /* -------------------------------- */
 
   const avgTemperature = useMemo(() => {
+    // Helper to check if AHU is connected
+    const isAhuConnected = (ahu: { plantId: string; stationId: string }) => {
+      const key = `${ahu.plantId}-${ahu.stationId}`;
+      return ahuConnectionStatus[key]?.isConnected ?? false;
+    };
     const temps: number[] = [];
 
     telemetry.forEach((ahu) => {
-      const health = getAhuHealth(ahu);
-
-      // 🚫 Ignorar desconectados
-      if (health.status === "DISCONNECTED") return;
+      // Skip disconnected AHUs
+      if (!isAhuConnected(ahu)) return;
 
       const t = ahu.points.temperature?.value;
       if (typeof t === "number") temps.push(t);
@@ -91,7 +111,7 @@ export default function HomePageHVAC() {
     return temps.length
       ? temps.reduce((a, b) => a + b, 0) / temps.length
       : null;
-  }, [telemetry]);
+  }, [telemetry, ahuConnectionStatus]);
 
   const avgTemperatureDisplay =
     avgTemperature !== null ? `${avgTemperature.toFixed(1)} °C` : "--";
@@ -126,7 +146,10 @@ export default function HomePageHVAC() {
       icon: AlertTriangle,
       title: "Alarmas activas",
       value: (
-        <Badge variant="destructive" className="animate-pulse">
+        <Badge
+          variant="destructive"
+          className={activeAlarms > 0 ? "animate-pulse" : ""}
+        >
           {activeAlarms}
         </Badge>
       ),

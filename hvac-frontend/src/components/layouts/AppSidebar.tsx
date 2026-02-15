@@ -52,15 +52,20 @@ const categories = [
 ];
 
 export default function AppSidebar() {
-  const { telemetry } = useTelemetry();
+  const { telemetry, ahuConnectionStatus } = useTelemetry();
   const navigate = useNavigate();
   const activeAlarms = useMemo(() => {
     return telemetry.reduce((acc, ahu) => {
+      const key = `${ahu.plantId}-${ahu.stationId}`;
+      const isConnected = ahuConnectionStatus[key]?.isConnected ?? false;
+
+      // Don't count alarms from disconnected AHUs
+      if (!isConnected) return acc;
+
       const health = getAhuHealth(ahu);
-      console.log(ahu.plantId, getAhuHealth(ahu).status);
       return acc + (health.status === "ALARM" ? 1 : 0);
     }, 0);
-  }, [telemetry]);
+  }, [telemetry, ahuConnectionStatus]);
 
   const [prevCount, setPrevCount] = useState(activeAlarms);
 

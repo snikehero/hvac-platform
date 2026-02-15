@@ -26,10 +26,10 @@ import { Bell, AlertTriangle } from "lucide-react";
 import type { HvacTelemetry } from "@/types/telemetry";
 
 export default function AlarmsPage() {
-  const { telemetry } = useTelemetry();
+  const { telemetry, ahuConnectionStatus } = useTelemetry();
   const [selectedAhu, setSelectedAhu] = useState<HvacTelemetry | null>(null);
   const [filterType, setFilterType] = useState<"ALL" | "ALARM" | "WARNING">(
-    "ALL"
+    "ALL",
   );
   const [searchAhu, setSearchAhu] = useState("");
 
@@ -39,18 +39,25 @@ export default function AlarmsPage() {
   /* Contadores usando HEALTH */
   /* -------------------------------- */
   const { activeAlarms, activeWarnings } = useMemo(() => {
+    const isAhuConnected = (ahu: { plantId: string; stationId: string }) => {
+      const key = `${ahu.plantId}-${ahu.stationId}`;
+      return ahuConnectionStatus[key]?.isConnected ?? false;
+    };
     let alarms = 0;
     let warnings = 0;
 
     telemetry.forEach((ahu) => {
+      // Skip disconnected AHUs
+      if (!isAhuConnected(ahu)) return;
+
       const health = getAhuHealth(ahu);
 
       if (health.status === "ALARM") alarms++;
-      if (health.status === "WARNING") warnings++;
+      else if (health.status === "WARNING") warnings++;
     });
 
     return { activeAlarms: alarms, activeWarnings: warnings };
-  }, [telemetry]);
+  }, [telemetry, ahuConnectionStatus]);
 
   /* -------------------------------- */
   /* Filtrar solo activos (no disconnected) */
@@ -62,8 +69,7 @@ export default function AlarmsPage() {
       // 🚫 Ignorar desconectados completamente
       if (health.status === "DISCONNECTED") return false;
 
-      const matchesType =
-        filterType === "ALL" || health.status === filterType;
+      const matchesType = filterType === "ALL" || health.status === filterType;
 
       const matchesSearch =
         searchAhu === "" ||
@@ -132,7 +138,7 @@ export default function AlarmsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredActiveAhu.map((ahu) => {
           const health = getAhuHealth(ahu);
-
+          if (!activeAlarms && !activeWarnings) return null; // No mostrar si no hay alarmas ni warnings
           return (
             <Card
               key={`${ahu.plantId}-${ahu.stationId}`}
@@ -148,9 +154,7 @@ export default function AlarmsPage() {
                   {ahu.stationId}
                   <Badge
                     variant={
-                      health.status === "ALARM"
-                        ? "destructive"
-                        : "secondary"
+                      health.status === "ALARM" ? "destructive" : "secondary"
                     }
                   >
                     {health.status}
@@ -169,30 +173,20 @@ export default function AlarmsPage() {
           );
         })}
 
-        {filteredActiveAhu.length === 0 && (
-          <p>
-            Sin AHUs activos
-          </p>
-        )}
+        {filteredActiveAhu.length === 0 && <p>Sin AHUs activos</p>}
       </div>
 
       {/* Modal */}
       <Dialog open={!!selectedAhu} onOpenChange={() => setSelectedAhu(null)}>
         <DialogContent className="max-w-5xl w-[90vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              Detalle AHU: {selectedAhu?.stationId}
-            </DialogTitle>
+            <DialogTitle>Detalle AHU: {selectedAhu?.stationId}</DialogTitle>
           </DialogHeader>
 
           {selectedAhu && (
             <AhuHistoryTemperatureChart
               data={selectedAhuHistory.temperature}
-              status={
-                getAhuHealth(
-                  selectedAhu,
-                ).status
-              }
+              status={getAhuHealth(selectedAhu).status}
             />
           )}
         </DialogContent>

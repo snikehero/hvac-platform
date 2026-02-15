@@ -1,18 +1,15 @@
-import TelemetryCard from "@/components/TelemetryCard/TelemetryCard"
-import { useTelemetry } from "@/hooks/useTelemetry"
-import type { HvacTelemetry } from "@/types/telemetry"
-import { getAhuHealth } from "@/domain/ahu/getAhuHealth"
-import { useClock } from "@/domain/hooks/useClock"
+import TelemetryCard from "@/components/TelemetryCard/TelemetryCard";
+import { useTelemetry } from "@/hooks/useTelemetry";
+import type { HvacTelemetry } from "@/types/telemetry";
+import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
 export default function DashboardHVAC() {
-  const { telemetry } = useTelemetry()
-  const now = useClock(1000);
-  console.log(now)
+  const { telemetry } = useTelemetry();
   // 🔥 Solo AHUs conectados
   const connectedAhus = telemetry.filter(
-    (ahu) => getAhuHealth(ahu).status !== "DISCONNECTED"
-  )
+    (ahu) => getAhuHealth(ahu).status !== "DISCONNECTED",
+  );
 
-  const groupedByPlant = groupByPlant(connectedAhus)
+  const groupedByPlant = groupByPlant(connectedAhus);
 
   return (
     <div className="space-y-8">
@@ -24,7 +21,7 @@ export default function DashboardHVAC() {
       </div>
 
       {Object.entries(groupedByPlant).map(([plantId, ahus]) => {
-        const alarmActive = hasAlarm(ahus)
+        const alarmActive = hasAlarm(ahus);
 
         return (
           <section
@@ -33,9 +30,7 @@ export default function DashboardHVAC() {
           >
             {/* Header de planta */}
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">
-                Planta {plantId}
-              </h2>
+              <h2 className="text-xl font-semibold">Planta {plantId}</h2>
 
               <span className="text-xs text-muted-foreground">
                 {ahus.length} AHU{ahus.length !== 1 ? "s" : ""}
@@ -50,13 +45,12 @@ export default function DashboardHVAC() {
                   ahu={ahu}
                 />
               ))}
-
             </div>
           </section>
-        )
+        );
       })}
     </div>
-  )
+  );
 }
 
 /* ---------- helpers ---------- */
@@ -64,15 +58,13 @@ export default function DashboardHVAC() {
 function groupByPlant(telemetry: HvacTelemetry[]) {
   return telemetry.reduce<Record<string, HvacTelemetry[]>>((acc, ahu) => {
     if (!acc[ahu.plantId]) {
-      acc[ahu.plantId] = []
+      acc[ahu.plantId] = [];
     }
-    acc[ahu.plantId].push(ahu)
-    return acc
-  }, {})
+    acc[ahu.plantId].push(ahu);
+    return acc;
+  }, {});
 }
 
 function hasAlarm(ahus: HvacTelemetry[]) {
-  return ahus.some(
-    (ahu) => getAhuHealth(ahu).status === "ALARM"
-  )
+  return ahus.some((ahu) => getAhuHealth(ahu).status === "ALARM");
 }
