@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable react-hooks/preserve-manual-memoization */
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useCallback, useEffect, useMemo } from "react";
 import type { HvacTelemetry } from "@/types/telemetry";
