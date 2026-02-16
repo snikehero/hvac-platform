@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import {
@@ -11,10 +12,13 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useTelemetry } from "@/hooks/useTelemetry";
-import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
+import { useAhuHealth } from "@/hooks/useAhuHealth";
+import { useClock } from "@/domain/hooks/useClock";
 
 export function HeroSystemStatus() {
   const { telemetry } = useTelemetry();
+  const getHealth = useAhuHealth();
+  const now = useClock(1000); // Force re-render every second to recalculate health states
 
   const stats = useMemo(() => {
     let alarms = 0;
@@ -23,7 +27,7 @@ export function HeroSystemStatus() {
     let ok = 0;
 
     telemetry.forEach((ahu) => {
-      const health = getAhuHealth(ahu);
+      const health = getHealth(ahu);
 
       switch (health.status) {
         case "ALARM":
@@ -72,7 +76,7 @@ export function HeroSystemStatus() {
       operationalPercentage,
       systemStatus,
     };
-  }, [telemetry]);
+  }, [telemetry, getHealth, now]);
 
   // Configuración por estado del sistema
   const statusConfig = {
@@ -120,14 +124,14 @@ export function HeroSystemStatus() {
     <Card
       className={`
         relative overflow-hidden border-0
-        bg-gradient-to-r ${config.gradient}
+        bg-linear-to-r ${config.gradient}
         shadow-2xl
         ${config.pulse ? "animate-pulse" : ""}
       `}
     >
       {/* Animated Background Pattern */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.2)_1px,transparent_1px)] bg-[size:20px_20px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.2)_1px,transparent_1px)] bg-size-[20px_20px]" />
       </div>
 
       {/* Glow Effect */}

@@ -266,7 +266,7 @@ export default function AhuDetailView() {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="h-[400px] lg:h-[480px] p-2 pt-0">
+          <CardContent className="h-100 lg:h-120 p-2 pt-0">
             <Scene status={health.status}>
               <FanModel
                 fanStatus={fanStatus}

@@ -9,10 +9,19 @@ import {
   WifiOff,
   ArrowRight,
 } from "lucide-react";
-import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
+import { useAhuHealth } from "@/hooks/useAhuHealth";
+import { useClock } from "@/domain/hooks/useClock";
 import type { HvacTelemetry } from "@/types/telemetry";
 
 type PlantStatus = "OK" | "WARNING" | "ALARM" | "DISCONNECTED";
+
+// Severity order for sorting plants (defined outside component to avoid recreation)
+const SEVERITY_ORDER: Record<PlantStatus, number> = {
+  ALARM: 0,
+  DISCONNECTED: 1,
+  WARNING: 2,
+  OK: 3,
+};
 
 interface Props {
   telemetry: HvacTelemetry[];
@@ -20,6 +29,9 @@ interface Props {
 }
 
 export function HeroPlantPanel({ telemetry, onSelectPlant }: Props) {
+  const getHealth = useAhuHealth();
+  const now = useClock(1000); // Force re-render every second to recalculate health states
+
   const grouped = useMemo(() => {
     return telemetry.reduce<Record<string, HvacTelemetry[]>>((acc, ahu) => {
       if (!acc[ahu.plantId]) acc[ahu.plantId] = [];
@@ -28,13 +40,6 @@ export function HeroPlantPanel({ telemetry, onSelectPlant }: Props) {
     }, {});
   }, [telemetry]);
 
-  const SEVERITY_ORDER: Record<PlantStatus, number> = {
-    ALARM: 0,
-    DISCONNECTED: 1,
-    WARNING: 2,
-    OK: 3,
-  };
-
   const plantSummaries = useMemo(() => {
     const summaries = Object.entries(grouped).map(([plantId, ahus]) => {
       let alarms = 0;
@@ -42,7 +47,7 @@ export function HeroPlantPanel({ telemetry, onSelectPlant }: Props) {
       let disconnected = 0;
 
       ahus.forEach((ahu) => {
-        const health = getAhuHealth(ahu);
+        const health = getHealth(ahu);
 
         if (health.status === "ALARM") alarms++;
         else if (health.status === "WARNING") warnings++;
@@ -73,7 +78,7 @@ export function HeroPlantPanel({ telemetry, onSelectPlant }: Props) {
     return summaries.sort(
       (a, b) => SEVERITY_ORDER[a.status] - SEVERITY_ORDER[b.status],
     );
-  }, [grouped, SEVERITY_ORDER]);
+  }, [grouped, getHealth, now]);
 
   const statusConfig = {
     ALARM: {
@@ -138,11 +143,11 @@ export function HeroPlantPanel({ telemetry, onSelectPlant }: Props) {
             >
               {/* Gradient Top Border */}
               <div
-                className={`absolute top-0 inset-x-0 h-1 bg-gradient-to-r ${config.gradient}`}
+                className={`absolute top-0 inset-x-0 h-1 bg-linear-to-r ${config.gradient}`}
               />
 
               {/* Hover Gradient Overlay */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-linear-to-br from-primary/5 to-transparent pointer-events-none" />
 
               <div className="relative z-10 p-6 space-y-4">
                 {/* Header */}
@@ -208,7 +213,7 @@ export function HeroPlantPanel({ telemetry, onSelectPlant }: Props) {
 
                   <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
                     <div
-                      className={`h-full bg-gradient-to-r ${config.gradient} transition-all duration-1000`}
+                      className={`h-full bg-linear-to-r ${config.gradient} transition-all duration-1000`}
                       style={{ width: `${plant.operationalPercentage}%` }}
                     />
                   </div>

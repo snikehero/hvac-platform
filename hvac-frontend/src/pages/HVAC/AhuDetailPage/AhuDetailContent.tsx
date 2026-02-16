@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAhuHistory } from "@/hooks/useAhuHistory";
 import { useAhuEvents } from "@/hooks/useAhuEvents";
-import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
+import { useAhuHealth } from "@/hooks/useAhuHealth";
 import type { AhuHealthStatus } from "@/domain/ahu/getAhuHealth";
 import type { HvacEvent } from "@/types/event";
 
@@ -54,13 +54,15 @@ export default function AhuDetailPage() {
     setMounted(true);
   }, []);
 
+  const getHealth = useAhuHealth();
+
   const ahu = telemetry.find(
     (t) => t.stationId === ahuId && t.plantId === plantId,
   );
 
   const history = useAhuHistory(ahu);
   const events = useAhuEvents(ahu);
-  const health = ahu ? getAhuHealth(ahu) : undefined;
+  const health = ahu ? getHealth(ahu) : undefined;
 
   if (!ahu || !health) {
     return (

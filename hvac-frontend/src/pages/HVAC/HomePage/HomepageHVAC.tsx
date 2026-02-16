@@ -16,7 +16,7 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useWebSocket } from "@/hooks/useWebSocket";
-import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
+import { useAhuHealth } from "@/hooks/useAhuHealth";
 import { routes } from "@/router/routes";
 import type { LucideIcon } from "lucide-react";
 
@@ -28,6 +28,8 @@ export default function HomePageHVAC() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const getHealth = useAhuHealth();
 
   /* -------------------------------- */
   /* Contadores usando HEALTH */
@@ -45,14 +47,14 @@ export default function HomePageHVAC() {
     telemetry.forEach((ahu) => {
       if (!isAhuConnected(ahu)) return;
 
-      const health = getAhuHealth(ahu);
+      const health = getHealth(ahu);
 
       if (health.status === "ALARM") alarms++;
       else if (health.status === "WARNING") warnings++;
     });
 
     return { activeAlarms: alarms, activeWarnings: warnings };
-  }, [telemetry, ahuConnectionStatus]);
+  }, [telemetry, ahuConnectionStatus, getHealth]);
 
   /* -------------------------------- */
   /* Salud Operacional Global */
@@ -78,7 +80,7 @@ export default function HomePageHVAC() {
         return;
       }
 
-      const health = getAhuHealth(ahu);
+      const health = getHealth(ahu);
 
       if (health.status === "ALARM") hasAlarm = true;
       else if (health.status === "WARNING") hasWarning = true;
@@ -88,7 +90,7 @@ export default function HomePageHVAC() {
     if (hasWarning || hasDisconnected) return "DEGRADED";
 
     return "HEALTHY";
-  }, [telemetry, ahuConnectionStatus]);
+  }, [telemetry, ahuConnectionStatus, getHealth]);
 
   const healthConfig = {
     CRITICAL: {
@@ -141,7 +143,7 @@ export default function HomePageHVAC() {
     return temps.length
       ? temps.reduce((a, b) => a + b, 0) / temps.length
       : null;
-  }, [telemetry, ahuConnectionStatus]);
+  }, [telemetry, ahuConnectionStatus, getHealth]);
 
   /* -------------------------------- */
   /* AHUs Conectados */
@@ -152,7 +154,7 @@ export default function HomePageHVAC() {
       const key = `${ahu.plantId}-${ahu.stationId}`;
       return ahuConnectionStatus[key]?.isConnected ?? false;
     }).length;
-  }, [telemetry, ahuConnectionStatus]);
+  }, [telemetry, ahuConnectionStatus, getHealth]);
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">

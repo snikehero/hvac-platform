@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import type { HvacTelemetry } from "@/types/telemetry";
 import { routes } from "@/router/routes";
-import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
+import { useAhuHealth } from "@/hooks/useAhuHealth";
 import { Badge } from "@/components/ui/badge";
 import {
   Thermometer,
@@ -25,7 +25,8 @@ interface TelemetryCardProps {
 export default function TelemetryCard({ ahu }: TelemetryCardProps) {
   const navigate = useNavigate();
   const { stationId, points, timestamp, plantId } = ahu;
-  const health = getAhuHealth(ahu);
+  const getHealth = useAhuHealth();
+  const health = getHealth(ahu);
   const ahuHistory = useAhuHistory(ahu);
 
   // Temperatura promedio últimos 60s
@@ -106,7 +107,7 @@ export default function TelemetryCard({ ahu }: TelemetryCardProps) {
       `}
     >
       {/* Hover gradient effect */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-linear-to-br from-primary/5 to-transparent pointer-events-none" />
 
       {/* Content */}
       <div className="relative z-10 p-6 space-y-4">

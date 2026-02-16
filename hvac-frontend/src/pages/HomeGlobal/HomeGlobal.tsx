@@ -14,7 +14,7 @@ import {
 
 import { routes } from "@/router/routes";
 import { useTelemetry } from "@/hooks/useTelemetry";
-import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
+import { useAhuHealth } from "@/hooks/useAhuHealth";
 
 import {
   Card,
@@ -35,6 +35,8 @@ export default function HomeGlobal() {
     setMounted(true);
   }, []);
 
+  const getHealth = useAhuHealth();
+
   const metrics = useMemo(() => {
     const activeAhus = telemetry.filter((ahu) => {
       const key = `${ahu.plantId}-${ahu.stationId}`;
@@ -44,12 +46,12 @@ export default function HomeGlobal() {
     const totalDevices = activeAhus.length;
 
     const activeAlarms = activeAhus.reduce((acc, ahu) => {
-      const health = getAhuHealth(ahu);
+      const health = getHealth(ahu);
       return acc + (health.status === "ALARM" ? 1 : 0);
     }, 0);
 
     const warnings = activeAhus.reduce((acc, ahu) => {
-      const health = getAhuHealth(ahu);
+      const health = getHealth(ahu);
       return acc + (health.status === "WARNING" ? 1 : 0);
     }, 0);
 
@@ -71,7 +73,7 @@ export default function HomeGlobal() {
       avgTemp,
       healthy: totalDevices - activeAlarms - warnings,
     };
-  }, [telemetry, ahuConnectionStatus]);
+  }, [telemetry, ahuConnectionStatus, getHealth]);
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">

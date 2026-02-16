@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import TelemetryCard from "@/components/TelemetryCard/TelemetryCard";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import type { HvacTelemetry } from "@/types/telemetry";
-import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
+import { useAhuHealth } from "@/hooks/useAhuHealth";
 import { Badge } from "@/components/ui/badge";
 import {
   Factory,
@@ -18,6 +18,7 @@ type FilterStatus = "ALL" | "OK" | "WARNING" | "ALARM";
 
 export default function DashboardHVAC() {
   const { telemetry } = useTelemetry();
+  const getHealth = useAhuHealth();
   const [mounted, setMounted] = useState(false);
   const [filter, setFilter] = useState<FilterStatus>("ALL");
 
@@ -28,15 +29,15 @@ export default function DashboardHVAC() {
   // 🔥 Solo AHUs conectados
   const connectedAhus = useMemo(
     () =>
-      telemetry.filter((ahu) => getAhuHealth(ahu).status !== "DISCONNECTED"),
-    [telemetry],
+      telemetry.filter((ahu) => getHealth(ahu).status !== "DISCONNECTED"),
+    [telemetry, getHealth],
   );
 
   // Filtrado por estado
   const filteredAhus = useMemo(() => {
     if (filter === "ALL") return connectedAhus;
-    return connectedAhus.filter((ahu) => getAhuHealth(ahu).status === filter);
-  }, [connectedAhus, filter]);
+    return connectedAhus.filter((ahu) => getHealth(ahu).status === filter);
+  }, [connectedAhus, filter, getHealth]);
 
   const groupedByPlant = useMemo(
     () => groupByPlant(filteredAhus),
@@ -50,23 +51,23 @@ export default function DashboardHVAC() {
     let alarm = 0;
 
     connectedAhus.forEach((ahu) => {
-      const status = getAhuHealth(ahu).status;
+      const status = getHealth(ahu).status;
       if (status === "OK") ok++;
       else if (status === "WARNING") warning++;
       else if (status === "ALARM") alarm++;
     });
 
     return { ok, warning, alarm, total: connectedAhus.length };
-  }, [connectedAhus]);
+  }, [connectedAhus, getHealth]);
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Background Effects */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--muted))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--muted))_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000,transparent)] opacity-20" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--muted))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--muted))_1px,transparent_1px)] bg-size-[4rem_4rem] mask-[radial-gradient(ellipse_80%_50%_at_50%_0%,#000,transparent)] opacity-20" />
 
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[128px] animate-pulse-slow" />
 
-      <div className="relative z-10 p-6 md:p-12 space-y-8 max-w-[2000px] mx-auto">
+      <div className="relative z-10 p-6 md:p-12 space-y-8 max-w-500 mx-auto">
         {/* Header */}
         <section
           className={`
@@ -86,7 +87,7 @@ export default function DashboardHVAC() {
             </div>
 
             <h1 className="text-4xl md:text-5xl font-black tracking-tight">
-              <span className="bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-foreground to-primary bg-clip-text text-transparent">
                 HVAC
               </span>{" "}
               <span className="text-primary">Dashboard</span>
@@ -171,9 +172,9 @@ export default function DashboardHVAC() {
         ) : (
           Object.entries(groupedByPlant).map(([plantId, ahus], index) => {
             const hasAlarm = ahus.some(
-              (ahu) => getAhuHealth(ahu).status === "ALARM",
+              (ahu) => getHealth(ahu).status === "ALARM",
             );
-            const plantStats = getPlantStats(ahus);
+            const plantStats = getPlantStats(ahus, getHealth);
 
             return (
               <section
@@ -350,13 +351,16 @@ function groupByPlant(telemetry: HvacTelemetry[]) {
   }, {});
 }
 
-function getPlantStats(ahus: HvacTelemetry[]) {
+function getPlantStats(
+  ahus: HvacTelemetry[],
+  getHealth: (ahu: HvacTelemetry) => ReturnType<typeof import("@/domain/ahu/getAhuHealth").getAhuHealth>,
+) {
   let ok = 0;
   let warning = 0;
   let alarm = 0;
 
   ahus.forEach((ahu) => {
-    const status = getAhuHealth(ahu).status;
+    const status = getHealth(ahu).status;
     if (status === "OK") ok++;
     else if (status === "WARNING") warning++;
     else if (status === "ALARM") alarm++;

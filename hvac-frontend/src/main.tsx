@@ -21,48 +21,48 @@ import { SettingsProvider } from "@/context/SettingsContext";
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
-      <WebSocketProvider>
-        <SettingsProvider>
-        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-          <Toaster position="top-right" richColors expand />
+      <SettingsProvider>
+        <WebSocketProvider>
+          <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+            <Toaster position="top-right" richColors expand />
 
-          <AppLayout>
-            <Routes>
-              {/* ========================= */}
-              {/* 🔹 CORE - Plataforma     */}
-              {/* ========================= */}
-              <Route path="/" element={<HomeGlobal />} />
+            <AppLayout>
+              <Routes>
+                {/* ========================= */}
+                {/* 🔹 CORE - Plataforma     */}
+                {/* ========================= */}
+                <Route path="/" element={<HomeGlobal />} />
 
-              {/* ========================= */}
-              {/* 🔹 HVAC MODULE            */}
-              {/* ========================= */}
-              <Route path={routes.hvac.home} element={<HomePageHVAC />} />
+                {/* ========================= */}
+                {/* 🔹 HVAC MODULE            */}
+                {/* ========================= */}
+                <Route path={routes.hvac.home} element={<HomePageHVAC />} />
 
-              <Route path={routes.hvac.dashboard} element={<DashboardHVAC />} />
+                <Route path={routes.hvac.dashboard} element={<DashboardHVAC />} />
 
-              <Route path={routes.hvac.alarms} element={<AlarmsPage />} />
+                <Route path={routes.hvac.alarms} element={<AlarmsPage />} />
 
-              <Route path={routes.hvac.settings} element={<SettingsPage />} />
+                <Route path={routes.hvac.settings} element={<SettingsPage />} />
 
-              <Route
-                path={routes.hvac.ejecutivo}
-                element={<DashboardEjecutivoPage />}
-              />
+                <Route
+                  path={routes.hvac.ejecutivo}
+                  element={<DashboardEjecutivoPage />}
+                />
 
-              <Route
-                path={routes.hvac.ahuDetailPattern}
-                element={<AhuDetailPage />}
-              />
+                <Route
+                  path={routes.hvac.ahuDetailPattern}
+                  element={<AhuDetailPage />}
+                />
 
-              <Route
-                path={routes.hvac.ahuDetail3DPattern}
-                element={<AhuDetailView />}
-              />
-            </Routes>
-          </AppLayout>
-        </ThemeProvider>
-        </SettingsProvider>
-      </WebSocketProvider>
+                <Route
+                  path={routes.hvac.ahuDetail3DPattern}
+                  element={<AhuDetailView />}
+                />
+              </Routes>
+            </AppLayout>
+          </ThemeProvider>
+        </WebSocketProvider>
+      </SettingsProvider>
     </BrowserRouter>
   </React.StrictMode>,
 );

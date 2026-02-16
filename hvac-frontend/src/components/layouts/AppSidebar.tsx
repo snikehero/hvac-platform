@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useEffect, useState, useMemo } from "react";
-import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
+import { useAhuHealth } from "@/hooks/useAhuHealth";
 import { routes } from "@/router/routes";
 import { useNavigate } from "react-router-dom";
 
@@ -54,6 +54,7 @@ const categories = [
 export default function AppSidebar() {
   const { telemetry, ahuConnectionStatus } = useTelemetry();
   const navigate = useNavigate();
+  const getHealth = useAhuHealth();
   const activeAlarms = useMemo(() => {
     return telemetry.reduce((acc, ahu) => {
       const key = `${ahu.plantId}-${ahu.stationId}`;
@@ -62,10 +63,10 @@ export default function AppSidebar() {
       // Don't count alarms from disconnected AHUs
       if (!isConnected) return acc;
 
-      const health = getAhuHealth(ahu);
+      const health = getHealth(ahu);
       return acc + (health.status === "ALARM" ? 1 : 0);
     }, 0);
-  }, [telemetry, ahuConnectionStatus]);
+  }, [telemetry, ahuConnectionStatus, getHealth]);
 
   const [prevCount, setPrevCount] = useState(activeAlarms);
 

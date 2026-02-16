@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 import { useAhuHistory } from "@/hooks/useAhuHistory";
-import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
+import { useAhuHealth } from "@/hooks/useAhuHealth";
 import type { HvacTelemetry } from "@/types/telemetry";
 
 interface Props {
@@ -22,7 +22,8 @@ interface Props {
 
 export function AhuCard({ ahu, onClick }: Props) {
   const history = useAhuHistory(ahu);
-  const health = getAhuHealth(ahu);
+  const getHealth = useAhuHealth();
+  const health = getHealth(ahu);
 
   const temperature = Number(ahu.points.temperature?.value);
   const humidity = Number(ahu.points.humidity?.value);
@@ -87,7 +88,7 @@ export function AhuCard({ ahu, onClick }: Props) {
       `}
     >
       {/* Gradient Overlay on Hover */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-linear-to-br from-primary/5 to-transparent pointer-events-none" />
 
       {/* Header */}
       <CardHeader className="relative z-10 pb-4">

@@ -13,6 +13,7 @@ import { useEventManagement } from "@/hooks/useEventManagement";
 import { useHistoryManagement } from "@/hooks/useHistoryManagement";
 import { useTelemetryState } from "@/hooks/useTelemetryState";
 import { NotificationService } from "@/services/NotificationService";
+import { useSettings } from "@/context/SettingsContext";
 
 /* ---------------- CONTEXT ---------------- */
 
@@ -52,6 +53,9 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   // Connection management
   const { socket, connected } = useWebSocketConnection();
 
+  // Settings
+  const { settings } = useSettings();
+
   // Telemetry state
   const { telemetry, setTelemetry, updateTelemetry } = useTelemetryState();
 
@@ -72,6 +76,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       [eventManager],
     ),
     connected, // Pass WebSocket connection status
+    settings.thresholds.disconnectTimeoutSeconds * 1000, // Pass configured timeout in milliseconds
   );
 
   // Event handler for reconnection

@@ -5,7 +5,7 @@ import { useAhuHistory } from "@/hooks/useAhuHistory";
 import { AhuHistoryTemperatureChart } from "@/components/Graphs/AhuHistoryTemperatureCard";
 import { AhuHistoryHumidityChart } from "@/components/Graphs/AhuHistoryHumidityChart";
 
-import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
+import { useAhuHealth } from "@/hooks/useAhuHealth";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -35,6 +35,8 @@ export default function AlarmsPage() {
   );
   const [searchAhu, setSearchAhu] = useState("");
 
+  const getHealth = useAhuHealth();
+
   const selectedAhuHistory = useAhuHistory(selectedAhu ?? undefined);
 
   /* -------------------------------- */
@@ -52,7 +54,7 @@ export default function AlarmsPage() {
       // Skip disconnected AHUs
       if (!isAhuConnected(ahu)) return;
 
-      const health = getAhuHealth(ahu);
+      const health = getHealth(ahu);
 
       if (health.status === "ALARM") alarms++;
       else if (health.status === "WARNING") warnings++;
@@ -66,7 +68,7 @@ export default function AlarmsPage() {
   /* -------------------------------- */
   const filteredActiveAhu = useMemo(() => {
     return telemetry.filter((ahu) => {
-      const health = getAhuHealth(ahu);
+      const health = getHealth(ahu);
 
       // 🚫 Ignorar desconectados completamente
       if (health.status === "DISCONNECTED") return false;
@@ -293,7 +295,7 @@ export default function AlarmsPage() {
       {/* Grid de AHUs Afectados - Mejorado */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredActiveAhu.map((ahu) => {
-          const health = getAhuHealth(ahu);
+          const health = getHealth(ahu);
           const temperature = Number(ahu.points.temperature?.value);
           const humidity = Number(ahu.points.humidity?.value);
           const timeSince = getTimeSince(ahu.timestamp);
@@ -476,13 +478,13 @@ export default function AlarmsPage() {
               {selectedAhu && (
                 <Badge
                   variant={
-                    getAhuHealth(selectedAhu).status === "ALARM"
+                    getHealth(selectedAhu).status === "ALARM"
                       ? "destructive"
                       : "secondary"
                   }
                   className="text-base px-3 py-1"
                 >
-                  {getAhuHealth(selectedAhu).status}
+                  {getHealth(selectedAhu).status}
                 </Badge>
               )}
             </DialogTitle>
@@ -513,7 +515,7 @@ export default function AlarmsPage() {
                         Puntos en error
                       </span>
                       <div className="font-bold text-destructive">
-                        {getAhuHealth(selectedAhu).badPoints}
+                        {getHealth(selectedAhu).badPoints}
                       </div>
                     </div>
                     <div className="space-y-1">
@@ -530,11 +532,11 @@ export default function AlarmsPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <AhuHistoryTemperatureChart
                   data={selectedAhuHistory.temperature}
-                  status={getAhuHealth(selectedAhu).status}
+                  status={getHealth(selectedAhu).status}
                 />
                 <AhuHistoryHumidityChart
                   data={selectedAhuHistory.humidity}
-                  status={getAhuHealth(selectedAhu).status}
+                  status={getHealth(selectedAhu).status}
                 />
               </div>
             </div>

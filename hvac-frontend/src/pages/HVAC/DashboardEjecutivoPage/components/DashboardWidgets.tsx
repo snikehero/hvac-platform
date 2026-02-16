@@ -138,12 +138,12 @@ function KpiCard({
     >
       {/* Gradient Top Border */}
       <div
-        className={`absolute top-0 inset-x-0 h-1 bg-gradient-to-r ${config.gradient}`}
+        className={`absolute top-0 inset-x-0 h-1 bg-linear-to-r ${config.gradient}`}
       />
 
       {/* Hover Effect */}
       {isClickable && (
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-linear-to-br from-primary/5 to-transparent pointer-events-none" />
       )}
 
       <CardContent className="relative z-10 p-6 space-y-4">

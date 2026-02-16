@@ -25,11 +25,13 @@ interface UseAhuConnectivityReturn {
 
 /**
  * Hook responsible for tracking AHU connectivity status
+ * @param disconnectTimeoutMs - Timeout in milliseconds before marking an AHU as disconnected (defaults to STALE_THRESHOLD_MS)
  */
 export function useAhuConnectivity(
   telemetry: HvacTelemetry[],
   onDisconnected: (ahu: { plantId: string; stationId: string }) => void,
   isWebSocketConnected: boolean,
+  disconnectTimeoutMs: number = STALE_THRESHOLD_MS,
 ): UseAhuConnectivityReturn {
   const [ahuConnectionStatus, setAhuConnectionStatus] = useState<
     Record<string, AhuConnectionStatus>
@@ -88,7 +90,7 @@ export function useAhuConnectivity(
       const now = Date.now();
 
       Object.entries(lastSeenRef.current).forEach(([key, lastSeen]) => {
-        const isStale = now - lastSeen > STALE_THRESHOLD_MS;
+        const isStale = now - lastSeen > disconnectTimeoutMs;
 
         if (isStale) {
           const ahu = telemetryRef.current.find(
@@ -96,17 +98,26 @@ export function useAhuConnectivity(
           );
 
           if (ahu) {
-            // Mark as disconnected FIRST
-            setAhuConnectionStatus((prev) => ({
-              ...prev,
-              [key]: {
-                ...prev[key],
-                isConnected: false,
-              },
-            }));
+            // Only notify if the status is changing from connected to disconnected
+            setAhuConnectionStatus((prev) => {
+              const wasConnected = prev[key]?.isConnected !== false;
 
-            // Then notify via callback
-            onDisconnected({ plantId: ahu.plantId, stationId: ahu.stationId });
+              // Only call onDisconnected if state is changing
+              if (wasConnected) {
+                // Use setTimeout to ensure state update happens first
+                setTimeout(() => {
+                  onDisconnected({ plantId: ahu.plantId, stationId: ahu.stationId });
+                }, 0);
+              }
+
+              return {
+                ...prev,
+                [key]: {
+                  ...prev[key],
+                  isConnected: false,
+                },
+              };
+            });
           }
         }
       });
@@ -118,7 +129,7 @@ export function useAhuConnectivity(
     );
 
     return () => clearInterval(intervalId);
-  }, [onDisconnected, isWebSocketConnected]);
+  }, [onDisconnected, isWebSocketConnected, disconnectTimeoutMs]);
 
   return {
     ahuConnectionStatus,
