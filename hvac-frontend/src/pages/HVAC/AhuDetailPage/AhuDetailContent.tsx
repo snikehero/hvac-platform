@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -26,6 +27,7 @@ import {
   WifiOff,
   TrendingUp,
   Factory,
+  RefreshCwOff,
   type LucideIcon,
 } from "lucide-react";
 
@@ -33,7 +35,7 @@ import { AhuHistoryTemperatureChart } from "@/components/Graphs/AhuHistoryTemper
 import { AhuHistoryHumidityChart } from "@/components/Graphs/AhuHistoryHumidityChart";
 import { useTranslation } from "@/i18n/useTranslation";
 
-// Importar las nuevas MetricCards con SVG
+// MetricCards
 import {
   TemperatureCard,
   HumidityCard,
@@ -45,12 +47,25 @@ import {
   GenericCard,
 } from "@/components/MetricCards";
 
+function getStatusText(t: any, status: AhuHealthStatus) {
+  switch (status) {
+    case "OK":
+      return t.status.ok;
+    case "WARNING":
+      return t.status.warning;
+    case "ALARM":
+      return t.status.alarm;
+    case "DISCONNECTED":
+      return t.status.disconnected;
+  }
+}
+
 export default function AhuDetailPage() {
   const navigate = useNavigate();
   const { telemetry } = useTelemetry();
   const { ahuId, plantId } = useParams();
   const [mounted, setMounted] = useState(false);
-  const { t } = useTranslation();
+  const { t, tf } = useTranslation();
 
   useEffect(() => {
     setMounted(true);
@@ -58,9 +73,7 @@ export default function AhuDetailPage() {
 
   const getHealth = useAhuHealth();
 
-  const ahu = telemetry.find(
-    (t) => t.stationId === ahuId && t.plantId === plantId,
-  );
+  const ahu = telemetry.find((x) => x.stationId === ahuId && x.plantId === plantId);
 
   const history = useAhuHistory(ahu);
   const events = useAhuEvents(ahu);
@@ -73,9 +86,7 @@ export default function AhuDetailPage() {
           <CardContent className="p-12 text-center space-y-4">
             <WifiOff className="w-12 h-12 mx-auto text-muted-foreground" />
             <p className="text-lg font-semibold">{t.ahuDetail.ahuNotFound}</p>
-            <p className="text-sm text-muted-foreground">
-              {t.ahuDetail.unitNotExist}
-            </p>
+            <p className="text-sm text-muted-foreground">{t.ahuDetail.unitNotExist}</p>
             <Button onClick={() => navigate(-1)}>
               <ArrowLeft className="w-4 h-4 mr-2" />
               {t.ahuDetail.goBack}
@@ -86,24 +97,38 @@ export default function AhuDetailPage() {
     );
   }
 
-  const statusConfig = getStatusConfig(health.status);
+  const statusConfig = getStatusConfig(t, health.status);
   const hasActiveAlarms = health.status === "ALARM";
+  const statusLabel = getStatusText(t, health.status);
+
+  const extraKeys = Object.keys(ahu.points).filter(
+    (key) =>
+      ![
+        "temperature",
+        "humidity",
+        "fan_status",
+        "airflow",
+        "damper_position",
+        "power_status",
+        "filter_dp",
+        "status",
+      ].includes(key),
+  );
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--muted))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--muted))_1px,transparent_1px)] bg-size-[4rem_4rem] mask-[radial-gradient(ellipse_80%_50%_at_50%_0%,#000,transparent)] opacity-20" />
-
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[128px] animate-pulse-slow" />
 
       <div className="relative z-10 p-6 md:p-8 space-y-6 max-w-450 mx-auto">
         {/* Header */}
         <section
           className={`
-          space-y-4
-          transition-all duration-1000 delay-100
-          ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}
-        `}
+            space-y-4
+            transition-all duration-1000 delay-100
+            ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}
+          `}
         >
           {/* Back Button */}
           <Button
@@ -113,7 +138,7 @@ export default function AhuDetailPage() {
             className="gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Dashboard
+            {t.ahuDetailPage.backToDashboard}
           </Button>
 
           {/* Title & Status */}
@@ -122,9 +147,9 @@ export default function AhuDetailPage() {
               <div className="flex items-center gap-3">
                 <div
                   className={`
-                  p-3 rounded-lg
-                  ${statusConfig.bgColor} ${statusConfig.borderColor} border
-                `}
+                    p-3 rounded-lg
+                    ${statusConfig.bgColor} ${statusConfig.borderColor} border
+                  `}
                 >
                   <Factory className={`w-6 h-6 ${statusConfig.iconColor}`} />
                 </div>
@@ -134,7 +159,7 @@ export default function AhuDetailPage() {
                     {ahu.stationId}
                   </h1>
                   <p className="text-muted-foreground font-mono">
-                    Plant {ahu.plantId}
+                    {tf(t.ahuDetailPage.plantLabel, { plantId: ahu.plantId })}
                   </p>
                 </div>
               </div>
@@ -146,13 +171,12 @@ export default function AhuDetailPage() {
                 className={`text-base px-4 py-2 ${hasActiveAlarms ? "animate-pulse" : ""}`}
               >
                 <statusConfig.StatusIcon className="w-4 h-4 mr-2" />
-                {health.status}
+                {statusLabel}
               </Badge>
 
               {health.badPoints > 0 && (
                 <p className="text-sm text-muted-foreground">
-                  {health.badPoints} point{health.badPoints !== 1 ? "s" : ""}{" "}
-                  out of range
+                  {tf(t.ahuDetailPage.badPointsOutOfRange, { count: health.badPoints })}
                 </p>
               )}
             </div>
@@ -161,29 +185,29 @@ export default function AhuDetailPage() {
           {/* Status Summary Card */}
           <Card
             className={`
-            border backdrop-blur-sm
-            ${statusConfig.border} ${statusConfig.bg}
-            ${hasActiveAlarms ? "shadow-lg shadow-destructive/20 animate-pulse" : ""}
-          `}
+              border backdrop-blur-sm
+              ${statusConfig.border} ${statusConfig.bg}
+              ${hasActiveAlarms ? "shadow-lg shadow-destructive/20 animate-pulse" : ""}
+            `}
           >
             <CardContent className="p-6">
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div className="flex items-center gap-4">
-                  <statusConfig.StatusIcon
-                    className={`w-8 h-8 ${statusConfig.iconColor}`}
-                  />
+                  <statusConfig.StatusIcon className={`w-8 h-8 ${statusConfig.iconColor}`} />
                   <div>
                     <p className="text-lg font-bold">{statusConfig.label}</p>
                     <p className="text-sm text-muted-foreground flex items-center gap-2">
                       <Clock className="w-3 h-3" />
-                      Last update: {health.lastUpdate.toLocaleString()}
+                      {tf(t.ahuDetailPage.lastUpdate, {
+                        value: health.lastUpdate.toLocaleString(),
+                      })}
                     </p>
                   </div>
                 </div>
 
                 {events.length > 0 && (
                   <Badge variant="outline" className="font-mono">
-                    {events.length} event{events.length !== 1 ? "s" : ""} logged
+                    {tf(t.ahuDetailPage.eventsLogged, { count: events.length })}
                   </Badge>
                 )}
               </div>
@@ -196,11 +220,12 @@ export default function AhuDetailPage() {
           <TabsList className="grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="overview">
               <Activity className="w-4 h-4 mr-2" />
-              Overview
+              {t.ahuDetailPage.tabs.overview}
             </TabsTrigger>
+
             <TabsTrigger value="events" className="relative">
               <AlertTriangle className="w-4 h-4 mr-2" />
-              Events
+              {t.ahuDetailPage.tabs.events}
               {events.length > 0 && (
                 <Badge
                   className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs"
@@ -216,7 +241,7 @@ export default function AhuDetailPage() {
           <TabsContent value="overview" className="space-y-6">
             {/* Environmental Conditions */}
             <Section
-              title="Environmental Conditions"
+              title={t.ahuDetailPage.sections.environmental}
               icon={Thermometer}
               mounted={mounted}
               delay={200}
@@ -224,9 +249,9 @@ export default function AhuDetailPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 <TemperatureCard
                   type="temperature"
-                  label="Temperature"
+                  label={t.ahuDetailPage.metrics.temperature}
                   value={ahu.points.temperature?.value || 0}
-                  unit={ahu.points.temperature?.unit || "°C"}
+                  unit={ahu.points.temperature?.unit || t.units.celsius}
                   quality={ahu.points.temperature?.quality}
                   color="primary"
                   min={0}
@@ -236,9 +261,9 @@ export default function AhuDetailPage() {
 
                 <HumidityCard
                   type="humidity"
-                  label="Humidity"
+                  label={t.ahuDetailPage.metrics.humidity}
                   value={ahu.points.humidity?.value || 0}
-                  unit={ahu.points.humidity?.unit || "%"}
+                  unit={ahu.points.humidity?.unit || t.units.percent}
                   quality={ahu.points.humidity?.quality}
                   color="accent"
                 />
@@ -247,14 +272,11 @@ export default function AhuDetailPage() {
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium flex items-center gap-2">
                       <TrendingUp className="w-4 h-4 text-primary" />
-                      Temperature History
+                      {t.ahuDetailPage.charts.temperatureHistory}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <AhuHistoryTemperatureChart
-                      data={history.temperature}
-                      status={health.status}
-                    />
+                    <AhuHistoryTemperatureChart data={history.temperature} status={health.status} />
                   </CardContent>
                 </Card>
               </div>
@@ -262,7 +284,7 @@ export default function AhuDetailPage() {
 
             {/* Air Movement */}
             <Section
-              title="Air Movement"
+              title={t.ahuDetailPage.sections.airMovement}
               icon={Wind}
               mounted={mounted}
               delay={300}
@@ -270,7 +292,7 @@ export default function AhuDetailPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 <FanCard
                   type="fan"
-                  label="Fan Status"
+                  label={t.ahuDetailPage.metrics.fanStatus}
                   value={ahu.points.fan_status?.value || "OFF"}
                   unit=""
                   quality={ahu.points.fan_status?.quality}
@@ -280,9 +302,9 @@ export default function AhuDetailPage() {
 
                 <AirflowCard
                   type="airflow"
-                  label="Airflow"
+                  label={t.ahuDetailPage.metrics.airflow}
                   value={ahu.points.airflow?.value || 0}
-                  unit={ahu.points.airflow?.unit || "m³/h"}
+                  unit={ahu.points.airflow?.unit || t.ahuDetailPage.units.airflowFallback}
                   quality={ahu.points.airflow?.quality}
                   color="chart"
                   min={0}
@@ -291,9 +313,9 @@ export default function AhuDetailPage() {
 
                 <DamperCard
                   type="damper"
-                  label="Damper Position"
+                  label={t.ahuDetailPage.metrics.damperPosition}
                   value={ahu.points.damper_position?.value || 0}
-                  unit={ahu.points.damper_position?.unit || "%"}
+                  unit={ahu.points.damper_position?.unit || t.units.percent}
                   quality={ahu.points.damper_position?.quality}
                   color="accent"
                 />
@@ -302,7 +324,7 @@ export default function AhuDetailPage() {
 
             {/* Energy & Filtration */}
             <Section
-              title="Energy & Filtration"
+              title={t.ahuDetailPage.sections.energyFiltration}
               icon={Zap}
               mounted={mounted}
               delay={400}
@@ -310,7 +332,7 @@ export default function AhuDetailPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 <PowerCard
                   type="power"
-                  label="Power Status"
+                  label={t.ahuDetailPage.metrics.powerStatus}
                   value={ahu.points.power_status?.value || "OFF"}
                   unit=""
                   quality={ahu.points.power_status?.quality}
@@ -320,9 +342,9 @@ export default function AhuDetailPage() {
 
                 <FilterCard
                   type="filter"
-                  label="Filter ΔP"
+                  label={t.ahuDetailPage.metrics.filterDp}
                   value={ahu.points.filter_dp?.value || 0}
-                  unit={ahu.points.filter_dp?.unit || "Pa"}
+                  unit={ahu.points.filter_dp?.unit || t.ahuDetailPage.units.filterDpFallback}
                   quality={ahu.points.filter_dp?.quality}
                   color="destructive"
                   min={0}
@@ -334,54 +356,27 @@ export default function AhuDetailPage() {
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium flex items-center gap-2">
                       <TrendingUp className="w-4 h-4 text-primary" />
-                      Temperature History
+                      {t.ahuDetailPage.charts.humidityHistory}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <AhuHistoryHumidityChart
-                      data={history.humidity}
-                      status={health.status}
-                    />
+                    <AhuHistoryHumidityChart data={history.humidity} status={health.status} />
                   </CardContent>
                 </Card>
               </div>
             </Section>
 
             {/* Additional Points */}
-            {Object.keys(ahu.points).filter(
-              (key) =>
-                ![
-                  "temperature",
-                  "humidity",
-                  "fan_status",
-                  "airflow",
-                  "damper_position",
-                  "power_status",
-                  "filter_dp",
-                  "status",
-                ].includes(key),
-            ).length > 0 && (
+            {extraKeys.length > 0 && (
               <Section
-                title="Additional Data"
+                title={t.ahuDetailPage.sections.additionalData}
                 icon={Activity}
                 mounted={mounted}
                 delay={500}
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                   {Object.entries(ahu.points)
-                    .filter(
-                      ([key]) =>
-                        ![
-                          "temperature",
-                          "humidity",
-                          "fan_status",
-                          "airflow",
-                          "damper_position",
-                          "power_status",
-                          "filter_dp",
-                          "status",
-                        ].includes(key),
-                    )
+                    .filter(([key]) => extraKeys.includes(key))
                     .map(([key, point]) => (
                       <GenericCard
                         key={key}
@@ -418,20 +413,14 @@ interface SectionProps {
   delay: number;
 }
 
-function Section({
-  title,
-  icon: Icon,
-  children,
-  mounted,
-  delay,
-}: SectionProps) {
+function Section({ title, icon: Icon, children, mounted, delay }: SectionProps) {
   return (
     <section
       className={`
-      space-y-4
-      transition-all duration-1000
-      ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}
-    `}
+        space-y-4
+        transition-all duration-1000
+        ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}
+      `}
       style={{ transitionDelay: `${delay}ms` }}
     >
       <div className="flex items-center gap-2">
@@ -450,15 +439,15 @@ interface EventsTimelineProps {
 }
 
 function EventsTimeline({ events }: EventsTimelineProps) {
+  const { t, tf } = useTranslation();
+
   if (events.length === 0) {
     return (
       <Card className="border-dashed">
         <CardContent className="p-12 text-center">
           <CheckCircle2 className="w-12 h-12 mx-auto text-green-500 mb-4" />
-          <p className="text-lg font-semibold">No Events Logged</p>
-          <p className="text-sm text-muted-foreground">
-            This unit has no recent events or alarms
-          </p>
+          <p className="text-lg font-semibold">{t.ahuDetailPage.events.noEventsTitle}</p>
+          <p className="text-sm text-muted-foreground">{t.ahuDetailPage.events.noEventsDesc}</p>
         </CardContent>
       </Card>
     );
@@ -469,7 +458,7 @@ function EventsTimeline({ events }: EventsTimelineProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Activity className="w-5 h-5 text-primary" />
-          Event Timeline
+          {t.ahuDetailPage.events.timelineTitle}
         </CardTitle>
       </CardHeader>
 
@@ -486,7 +475,7 @@ function EventsTimeline({ events }: EventsTimelineProps) {
                 <p className="font-medium">{event.message}</p>
 
                 <Badge variant={getEventVariant(event.type)}>
-                  {event.type}
+                  {tf(t.ahuDetailPage.events.eventTypeLabel, { type: event.type })}
                 </Badge>
               </div>
 
@@ -506,6 +495,7 @@ function EventIcon({ type }: { type: string }) {
   const config = {
     ALARM: { Icon: XCircle, color: "text-destructive" },
     WARNING: { Icon: AlertTriangle, color: "text-yellow-500" },
+    DISCONNECTED: { Icon: RefreshCwOff, color: "text-yellow-500" },
     default: { Icon: CheckCircle2, color: "text-green-500" },
   };
 
@@ -514,9 +504,7 @@ function EventIcon({ type }: { type: string }) {
   return <Icon className={`w-5 h-5 ${color} mt-0.5`} />;
 }
 
-function getEventVariant(
-  type: string,
-): "destructive" | "secondary" | "default" {
+function getEventVariant(type: string): "destructive" | "secondary" | "default" {
   if (type === "ALARM") return "destructive";
   if (type === "WARNING") return "secondary";
   return "default";
@@ -524,10 +512,10 @@ function getEventVariant(
 
 /* ================= HELPERS ================= */
 
-function getStatusConfig(status: AhuHealthStatus) {
+function getStatusConfig(t: any, status: AhuHealthStatus) {
   const configs = {
     ALARM: {
-      label: "Critical Alarm Active",
+      label: t.ahuDetailPage.statusLabels.alarm,
       StatusIcon: XCircle,
       iconColor: "text-destructive",
       bgColor: "bg-destructive/10",
@@ -537,7 +525,7 @@ function getStatusConfig(status: AhuHealthStatus) {
       badgeVariant: "destructive" as const,
     },
     WARNING: {
-      label: "Warnings Detected",
+      label: t.ahuDetailPage.statusLabels.warning,
       StatusIcon: AlertTriangle,
       iconColor: "text-yellow-500",
       bgColor: "bg-yellow-500/10",
@@ -547,7 +535,7 @@ function getStatusConfig(status: AhuHealthStatus) {
       badgeVariant: "secondary" as const,
     },
     OK: {
-      label: "Normal Operation",
+      label: t.ahuDetailPage.statusLabels.ok,
       StatusIcon: CheckCircle2,
       iconColor: "text-green-500",
       bgColor: "bg-green-500/10",
@@ -557,7 +545,7 @@ function getStatusConfig(status: AhuHealthStatus) {
       badgeVariant: "default" as const,
     },
     DISCONNECTED: {
-      label: "No Communication",
+      label: t.ahuDetailPage.statusLabels.disconnected,
       StatusIcon: WifiOff,
       iconColor: "text-muted-foreground",
       bgColor: "bg-muted/10",

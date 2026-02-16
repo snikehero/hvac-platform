@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/rules-of-hooks */
 import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAhuHistory } from "@/hooks/useAhuHistory";
 import { useSettings } from "@/context/SettingsContext";
+import { useTranslation } from "@/i18n/useTranslation";
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useRef } from "react";
 
@@ -27,75 +29,86 @@ import {
   Gauge,
 } from "lucide-react";
 
-const STATUS_CONFIG = {
-  OK: {
-    label: "Operativo",
-    color: "bg-green-500",
-    border: "border-green-500/30",
-    bg: "bg-green-500/5",
-    glow: "",
-    textColor: "text-green-500",
-    icon: CheckCircle2,
-    pulse: false,
-  },
-  WARNING: {
-    label: "Advertencia",
-    color: "bg-yellow-500",
-    border: "border-yellow-500/50",
-    bg: "bg-yellow-500/5",
-    glow: "shadow-md shadow-yellow-500/10",
-    textColor: "text-yellow-500",
-    icon: AlertTriangle,
-    pulse: false,
-  },
-  ALARM: {
-    label: "Alarma",
-    color: "bg-red-500",
-    border: "border-destructive/50",
-    bg: "bg-destructive/5",
-    glow: "shadow-lg shadow-destructive/20",
-    textColor: "text-destructive",
-    icon: AlertTriangle,
-    pulse: true,
-  },
-  DISCONNECTED: {
-    label: "Desconectado",
-    color: "bg-gray-500",
-    border: "border-muted",
-    bg: "bg-muted/5",
-    glow: "",
-    textColor: "text-muted-foreground",
-    icon: WifiOff,
-    pulse: false,
-  },
-};
+function getStatusUiConfig() {
+  return {
+    OK: {
+      color: "bg-green-500",
+      border: "border-green-500/30",
+      bg: "bg-green-500/5",
+      glow: "",
+      textColor: "text-green-500",
+      icon: CheckCircle2,
+      pulse: false,
+    },
+    WARNING: {
+      color: "bg-yellow-500",
+      border: "border-yellow-500/50",
+      bg: "bg-yellow-500/5",
+      glow: "shadow-md shadow-yellow-500/10",
+      textColor: "text-yellow-500",
+      icon: AlertTriangle,
+      pulse: false,
+    },
+    ALARM: {
+      color: "bg-red-500",
+      border: "border-destructive/50",
+      bg: "bg-destructive/5",
+      glow: "shadow-lg shadow-destructive/20",
+      textColor: "text-destructive",
+      icon: AlertTriangle,
+      pulse: true,
+    },
+    DISCONNECTED: {
+      color: "bg-gray-500",
+      border: "border-muted",
+      bg: "bg-muted/5",
+      glow: "",
+      textColor: "text-muted-foreground",
+      icon: WifiOff,
+      pulse: false,
+    },
+  } as const;
+}
+
+function getStatusLabel(t: any, status: "OK" | "WARNING" | "ALARM" | "DISCONNECTED") {
+  switch (status) {
+    case "OK":
+      return t.status.ok;
+    case "WARNING":
+      return t.status.warning;
+    case "ALARM":
+      return t.status.alarm;
+    case "DISCONNECTED":
+      return t.status.disconnected;
+  }
+}
 
 export default function AhuDetailView() {
-  const { plantId, ahuId } = useParams<{
-    plantId: string;
-    ahuId: string;
-  }>();
-
+  const { plantId, ahuId } = useParams<{ plantId: string; ahuId: string }>();
   const navigate = useNavigate();
   const { telemetry } = useTelemetry();
   const { settings } = useSettings();
+  const { t, tf } = useTranslation();
 
-  const ahu = telemetry.find(
-    (a) => a.plantId === plantId && a.stationId === ahuId,
-  );
+  const ahu = telemetry.find((a) => a.plantId === plantId && a.stationId === ahuId);
 
   if (!ahu) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
         <Card className="p-8 text-center space-y-4">
           <WifiOff className="w-12 h-12 mx-auto text-muted-foreground" />
-          <h2 className="text-xl font-bold">AHU no encontrado</h2>
+          <h2 className="text-xl font-bold">{t.ahuDetailView.ahuNotFound}</h2>
+
           <p className="text-muted-foreground">
-            El equipo {ahuId} en planta {plantId} no está disponible.
+            {tf(t.ahuDetailView.notAvailableMessage, {
+              ahuId: ahuId ?? "-",
+              plantId: plantId ?? "-",
+            })}
           </p>
+
           <Button variant="outline" onClick={() => navigate(-1)}>
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Volver
+            {t.ahuDetailView.goBack}
           </Button>
         </Card>
       </div>
@@ -109,9 +122,14 @@ export default function AhuDetailView() {
     humidityWarning: settings.thresholds.humidityWarning,
     humidityAlarm: settings.thresholds.humidityAlarm,
   });
+
   const history = useAhuHistory(ahu);
-  const config = STATUS_CONFIG[health.status];
+
+  const STATUS_UI = getStatusUiConfig();
+  const config = STATUS_UI[health.status];
   const StatusIcon = config.icon;
+
+  const statusLabel = getStatusLabel(t, health.status);
 
   /* --- Extract telemetry values --- */
   const fanStatusRaw = ahu.points.fan_status?.value;
@@ -124,12 +142,10 @@ export default function AhuDetailView() {
   const humidity = typeof humidityRaw === "number" ? humidityRaw : 0;
 
   const timeSinceUpdate = Math.round(
-    (Date.now() - new Date(ahu.timestamp).getTime()) / 1000,
+    (Date.now() - new Date(ahu.timestamp).getTime()) / 1000
   );
   const timeLabel =
-    timeSinceUpdate < 60
-      ? `${timeSinceUpdate}s`
-      : `${Math.floor(timeSinceUpdate / 60)}m`;
+    timeSinceUpdate < 60 ? `${timeSinceUpdate}s` : `${Math.floor(timeSinceUpdate / 60)}m`;
 
   /* --- Audio on alarm transition --- */
   const prevAlarmRef = useRef(false);
@@ -145,18 +161,15 @@ export default function AhuDetailView() {
       audioManager.playOneShot("ahu-alarm");
     }
     prevAlarmRef.current = isAlarm;
-  }, [health.status, settings.notifications.soundEnabled, settings.notifications.soundVolume]);
+  }, [
+    health.status,
+    settings.notifications.soundEnabled,
+    settings.notifications.soundVolume,
+  ]);
 
   /* --- Sensor list (excluding known keys) --- */
-  const knownKeys = new Set([
-    "fan_status",
-    "temperature",
-    "humidity",
-    "status",
-  ]);
-  const extraSensors = Object.entries(ahu.points).filter(
-    ([key]) => !knownKeys.has(key),
-  );
+  const knownKeys = new Set(["fan_status", "temperature", "humidity", "status"]);
+  const extraSensors = Object.entries(ahu.points).filter(([key]) => !knownKeys.has(key));
 
   return (
     <div className="p-6 lg:p-8 space-y-6 lg:space-y-8">
@@ -167,6 +180,7 @@ export default function AhuDetailView() {
           size="icon"
           onClick={() => navigate(-1)}
           className="shrink-0"
+          aria-label={t.ahuDetailView.goBack}
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
@@ -176,26 +190,31 @@ export default function AhuDetailView() {
             <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">
               {ahu.stationId}
             </h1>
+
             <Badge
-              className={`${config.color} text-white font-mono ${config.pulse ? "animate-pulse" : ""}`}
+              className={`${config.color} text-white font-mono ${
+                config.pulse ? "animate-pulse" : ""
+              }`}
             >
               <StatusIcon className="w-3 h-3 mr-1.5" />
-              {config.label}
+              {statusLabel}
             </Badge>
+
             {health.badPoints > 0 && (
               <Badge variant="destructive" className="font-mono">
-                {health.badPoints} BAD
+                {tf(t.ahuDetailView.badPointsShort, { count: health.badPoints })}
               </Badge>
             )}
           </div>
+
           <p className="text-sm text-muted-foreground font-mono mt-1">
-            Planta {ahu.plantId}
+            {tf(t.ahuDetailView.plantLabel, { plantId: ahu.plantId })}
           </p>
         </div>
 
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Clock className="w-3.5 h-3.5" />
-          <span>hace {timeLabel}</span>
+          <span>{tf(t.ahuDetailView.updatedAgo, { value: timeLabel })}</span>
         </div>
       </div>
 
@@ -203,40 +222,49 @@ export default function AhuDetailView() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <QuickStat
           icon={<Activity className={`w-5 h-5 ${config.textColor}`} />}
-          label="Estado"
-          value={config.label}
+          label={t.ahuDetailView.quickStats.status}
+          value={statusLabel}
           accent={config.textColor}
           border={config.border}
           bg={config.bg}
         />
+
         <QuickStat
           icon={<Thermometer className="w-5 h-5 text-orange-500" />}
-          label="Temperatura"
-          value={`${temperature.toFixed(1)}°C`}
+          label={t.ahuDetailView.quickStats.temperature}
+          value={tf(t.ahuDetailView.valueWithUnit, {
+            value: temperature.toFixed(1),
+            unit: t.units.celsius,
+          })}
           accent="text-orange-500"
           border="border-orange-500/20"
           bg="bg-orange-500/5"
         />
+
         <QuickStat
           icon={<Droplets className="w-5 h-5 text-cyan-500" />}
-          label="Humedad"
-          value={`${humidity.toFixed(1)}%`}
+          label={t.ahuDetailView.quickStats.humidity}
+          value={tf(t.ahuDetailView.valueWithUnit, {
+            value: humidity.toFixed(1),
+            unit: t.units.percent,
+          })}
           accent="text-cyan-500"
           border="border-cyan-500/20"
           bg="bg-cyan-500/5"
         />
+
         <QuickStat
           icon={
             <Fan
-              className={`w-5 h-5 ${fanStatus ? "text-green-500" : "text-muted-foreground"}`}
+              className={`w-5 h-5 ${
+                fanStatus ? "text-green-500" : "text-muted-foreground"
+              }`}
             />
           }
-          label="Ventilador"
-          value={fanStatus ? "Encendido" : "Apagado"}
+          label={t.ahuDetailView.quickStats.fan}
+          value={fanStatus ? t.ahuDetailView.fan.onLabel : t.ahuDetailView.fan.offLabel}
           accent={fanStatus ? "text-green-500" : "text-muted-foreground"}
-          border={
-            fanStatus ? "border-green-500/20" : "border-muted"
-          }
+          border={fanStatus ? "border-green-500/20" : "border-muted"}
           bg={fanStatus ? "bg-green-500/5" : "bg-muted/5"}
         />
       </div>
@@ -254,18 +282,22 @@ export default function AhuDetailView() {
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Gauge className="w-5 h-5 text-primary" />
-                Visualización 3D
+                {t.ahuDetailView.viewer3d.title}
               </CardTitle>
+
               <div className="flex items-center gap-2">
                 <div
-                  className={`w-2 h-2 rounded-full ${config.color} ${config.pulse ? "animate-ping" : ""}`}
+                  className={`w-2 h-2 rounded-full ${config.color} ${
+                    config.pulse ? "animate-ping" : ""
+                  }`}
                 />
                 <span className="text-xs text-muted-foreground">
-                  {fanStatus ? "Fan activo" : "Fan inactivo"}
+                  {fanStatus ? t.ahuDetailView.viewer3d.fanActive : t.ahuDetailView.viewer3d.fanInactive}
                 </span>
               </div>
             </div>
           </CardHeader>
+
           <CardContent className="h-100 lg:h-120 p-2 pt-0">
             <Scene status={health.status}>
               <FanModel
@@ -282,74 +314,78 @@ export default function AhuDetailView() {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
               <Activity className="w-5 h-5 text-primary" />
-              Información Técnica
+              {t.ahuDetailView.technical.title}
             </CardTitle>
           </CardHeader>
 
           <CardContent className="space-y-4">
-            {/* Primary readings */}
             <div className="space-y-3">
               <SensorRow
-                label="Estado operativo"
-                value={health.status}
+                label={t.ahuDetailView.technical.operationalStatus}
+                value={statusLabel}
                 icon={<StatusIcon className={`w-4 h-4 ${config.textColor}`} />}
                 valueClass={config.textColor}
               />
+
               <SensorRow
-                label="Temperatura"
-                value={`${temperature.toFixed(1)} °C`}
-                icon={
-                  <Thermometer className="w-4 h-4 text-orange-500" />
-                }
+                label={t.ahuDetailView.quickStats.temperature}
+                value={tf(t.ahuDetailView.valueWithUnit, {
+                  value: temperature.toFixed(1),
+                  unit: t.units.celsius,
+                })}
+                icon={<Thermometer className="w-4 h-4 text-orange-500" />}
               />
+
               <SensorRow
-                label="Humedad"
-                value={`${humidity.toFixed(1)} %`}
+                label={t.ahuDetailView.quickStats.humidity}
+                value={tf(t.ahuDetailView.valueWithUnit, {
+                  value: humidity.toFixed(1),
+                  unit: t.units.percent,
+                })}
                 icon={<Droplets className="w-4 h-4 text-cyan-500" />}
               />
+
               <SensorRow
-                label="Ventilador"
-                value={fanStatus ? "ON" : "OFF"}
+                label={t.ahuDetailView.quickStats.fan}
+                value={fanStatus ? t.ahuDetailView.fan.on : t.ahuDetailView.fan.off}
                 icon={<Fan className="w-4 h-4 text-primary" />}
                 valueClass={fanStatus ? "text-green-500" : "text-muted-foreground"}
               />
+
               {health.badPoints > 0 && (
                 <SensorRow
-                  label="Puntos BAD"
+                  label={t.ahuDetailView.technical.badPoints}
                   value={String(health.badPoints)}
-                  icon={
-                    <AlertTriangle className="w-4 h-4 text-destructive" />
-                  }
+                  icon={<AlertTriangle className="w-4 h-4 text-destructive" />}
                   valueClass="text-destructive"
                 />
               )}
             </div>
 
-            {/* Extra sensors */}
             {extraSensors.length > 0 && (
-              <>
-                <div className="border-t border-border/50 pt-3">
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                    Sensores adicionales
-                  </h4>
-                  <div className="space-y-2">
-                    {extraSensors.map(([key, point]) => (
-                      <div
-                        key={key}
-                        className="flex items-center justify-between py-1.5 px-2 rounded-md hover:bg-muted/50 transition-colors"
-                      >
-                        <span className="text-sm text-muted-foreground capitalize">
-                          {key.replaceAll("_", " ")}
-                        </span>
-                        <span className="text-sm font-medium font-mono">
-                          {point?.value ?? "-"}
-                          {point?.unit ? ` ${point.unit}` : ""}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+              <div className="border-t border-border/50 pt-3">
+                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                  {t.ahuDetailView.technical.extraSensors}
+                </h4>
+
+                <div className="space-y-2">
+                  {extraSensors.map(([key, point]) => (
+                    <div
+                      key={key}
+                      className="flex items-center justify-between py-1.5 px-2 rounded-md hover:bg-muted/50 transition-colors"
+                    >
+                      <span className="text-sm text-muted-foreground capitalize">
+                        {key.replaceAll("_", " ")}
+                      </span>
+
+                      <span className="text-sm font-medium font-mono">
+                        {point?.value ?? "-"}
+                        {point?.unit ? ` ${point.unit}` : ""}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              </>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -357,14 +393,8 @@ export default function AhuDetailView() {
 
       {/* ===== CHARTS ===== */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <AhuHistoryTemperatureChart
-          data={history.temperature}
-          status={health.status}
-        />
-        <AhuHistoryHumidityChart
-          data={history.humidity}
-          status={health.status}
-        />
+        <AhuHistoryTemperatureChart data={history.temperature} status={health.status} />
+        <AhuHistoryHumidityChart data={history.humidity} status={health.status} />
       </div>
     </div>
   );

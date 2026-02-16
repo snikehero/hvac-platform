@@ -258,6 +258,119 @@ export const es = {
     goBack: "Volver",
   },
 
+// ====== AHU Detail View =====
+ahuDetailView: {
+  ahuNotFound: "AHU no encontrado",
+  goBack: "Volver",
+
+  // Mensaje not found (placeholders)
+  notAvailableMessage: "El equipo {ahuId} en planta {plantId} no está disponible.",
+
+  // Header
+  plantLabel: "Planta {plantId}",
+  updatedAgo: "hace {value}",
+  badPointsShort: "{count} BAD",
+
+  // General formatting
+  valueWithUnit: "{value}{unit}",
+
+  // Quick stats
+  quickStats: {
+    status: "Estado",
+    temperature: "Temperatura",
+    humidity: "Humedad",
+    fan: "Ventilador",
+  },
+
+  // Fan labels
+  fan: {
+    onLabel: "Encendido",
+    offLabel: "Apagado",
+    on: "ON",
+    off: "OFF",
+  },
+
+  // 3D viewer
+  viewer3d: {
+    title: "Visualización 3D",
+    fanActive: "Fan activo",
+    fanInactive: "Fan inactivo",
+  },
+
+  // Technical panel
+  technical: {
+    title: "Información Técnica",
+    operationalStatus: "Estado operativo",
+    badPoints: "Puntos BAD",
+    extraSensors: "Sensores adicionales",
+  },
+},
+ahuDetailPage: {
+  backToDashboard: "Volver al Dashboard",
+  plantLabel: "Planta {plantId}",
+
+  badPointsOutOfRange: "{count} punto{suffix} fuera de rango",
+  lastUpdate: "Última actualización: {value}",
+  eventsLogged: "{count} evento{suffix} registrado{suffix2}",
+
+  tabs: {
+    overview: "Resumen",
+    events: "Eventos",
+  },
+
+  sections: {
+    environmental: "Condiciones Ambientales",
+    airMovement: "Movimiento de Aire",
+    energyFiltration: "Energía y Filtración",
+    additionalData: "Datos Adicionales",
+  },
+
+  metrics: {
+    temperature: "Temperatura",
+    humidity: "Humedad",
+    fanStatus: "Estado del Ventilador",
+    airflow: "Flujo de Aire",
+    damperPosition: "Posición del Damper",
+    powerStatus: "Estado de Energía",
+    filterDp: "ΔP del Filtro",
+  },
+
+  charts: {
+    temperatureHistory: "Histórico de Temperatura",
+    humidityHistory: "Histórico de Humedad",
+  },
+
+  events: {
+    noEventsTitle: "Sin eventos registrados",
+    noEventsDesc: "Esta unidad no tiene eventos recientes o alarmas",
+    timelineTitle: "Línea de tiempo de eventos",
+    eventTypeLabel: "{type}",
+  },
+
+  statusLabels: {
+    alarm: "Alarma crítica activa",
+    warning: "Advertencias detectadas",
+    ok: "Operación normal",
+    disconnected: "Sin comunicación",
+  },
+
+  units: {
+    airflowFallback: "m³/h",
+    filterDpFallback: "Pa",
+  },
+},
+
+eventMessages: {
+  enteredAlarm: "Unidad entró en ALARMA",
+  warningCondition: "Unidad en condición de ADVERTENCIA",
+  communicationRestored: "Unidad restableció comunicación",
+  backToNormal: "Unidad volvió a estado NORMAL",
+  communicationLost: "Unidad perdió comunicación",
+  statusChange: "Cambio de estado: {previous} → {current}",
+},
+
+
+
   // ===== Home Page HVAC =====
   homePageHvac: {
     hvacModule: "Módulo HVAC",
@@ -394,6 +507,10 @@ export const es = {
     percent: "%",
     rpm: "RPM",
   },
+
+
+
+  
 } as const;
 
 export type TranslationKeys = typeof es;

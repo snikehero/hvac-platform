@@ -258,6 +258,113 @@ export const en = {
     goBack: "Go Back",
   },
 
+  // ====== AHU Detail View =====
+  ahuDetailView: {
+    ahuNotFound: "AHU not found",
+    goBack: "Go Back",
+
+    notAvailableMessage: "Unit {ahuId} in plant {plantId} is unavailable.",
+
+    plantLabel: "Plant {plantId}",
+    updatedAgo: "{value} ago",
+    badPointsShort: "{count} BAD",
+
+    valueWithUnit: "{value}{unit}",
+
+    quickStats: {
+      status: "Status",
+      temperature: "Temperature",
+      humidity: "Humidity",
+      fan: "Fan",
+    },
+
+    fan: {
+      onLabel: "On",
+      offLabel: "Off",
+      on: "ON",
+      off: "OFF",
+    },
+
+    viewer3d: {
+      title: "3D Visualization",
+      fanActive: "Fan active",
+      fanInactive: "Fan inactive",
+    },
+
+    technical: {
+      title: "Technical Information",
+      operationalStatus: "Operational status",
+      badPoints: "BAD points",
+      extraSensors: "Additional sensors",
+    },
+  },
+
+  ahuDetailPage: {
+  backToDashboard: "Back to Dashboard",
+  plantLabel: "Plant {plantId}",
+
+  badPointsOutOfRange: "{count} point{suffix} out of range",
+  lastUpdate: "Last update: {value}",
+  eventsLogged: "{count} event{suffix} logged",
+
+  tabs: {
+    overview: "Overview",
+    events: "Events",
+  },
+
+  sections: {
+    environmental: "Environmental Conditions",
+    airMovement: "Air Movement",
+    energyFiltration: "Energy & Filtration",
+    additionalData: "Additional Data",
+  },
+
+  metrics: {
+    temperature: "Temperature",
+    humidity: "Humidity",
+    fanStatus: "Fan Status",
+    airflow: "Airflow",
+    damperPosition: "Damper Position",
+    powerStatus: "Power Status",
+    filterDp: "Filter ΔP",
+  },
+
+  charts: {
+    temperatureHistory: "Temperature History",
+    humidityHistory: "Humidity History",
+  },
+
+  events: {
+    noEventsTitle: "No Events Logged",
+    noEventsDesc: "This unit has no recent events or alarms",
+    timelineTitle: "Event Timeline",
+    eventTypeLabel: "{type}",
+  },
+
+  statusLabels: {
+    alarm: "Critical Alarm Active",
+    warning: "Warnings Detected",
+    ok: "Normal Operation",
+    disconnected: "No Communication",
+  },
+
+  units: {
+    airflowFallback: "m³/h",
+    filterDpFallback: "Pa",
+  },
+},
+
+
+eventMessages: {
+  enteredAlarm: "Unit entered ALARM",
+  warningCondition: "Unit in WARNING condition",
+  communicationRestored: "Unit communication restored",
+  backToNormal: "Unit returned to NORMAL",
+  communicationLost: "Unit lost communication",
+  statusChange: "Status change: {previous} → {current}",
+},
+
+
   // ===== Home Page HVAC =====
   homePageHvac: {
     hvacModule: "HVAC Module",

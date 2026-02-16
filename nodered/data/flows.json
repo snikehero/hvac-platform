@@ -804,19 +804,18 @@
         "type": "function",
         "z": "0b645bfed5d9f7be",
         "name": "function 5",
-        "func": "// =============================\n// 1️⃣ Validación de Topic\n// =============================\nconst topicParts = msg.topic.split(\"/\");\n\nif (topicParts.length !==2) {\n    node.error(\"Topic inválido\", msg);\n    return null;\n}\n\nconst plantId = topicParts[0].toLowerCase();\nconst ahuId = topicParts[1];\n\n// =============================\n// 2️⃣ Validación de Payload\n// =============================\nconst data = msg.payload;\n\nif (!Array.isArray(data) || data.length !== 8) {\n    node.error(\"Payload inválido\", msg);\n    return null;\n}\n\nconst [\n    temperature,\n    humidity,\n    fan_status_raw,\n    airflow,\n    filter_dp,\n    damper_position,\n    power_status_raw,\n    status_raw\n] = data;\n\n// =============================\n// 3️⃣ Normalizadores\n// =============================\n\n// Normalizador ON/OFF robusto\nconst normalizeOnOff = (value) => {\n    if (value === \"ON\" || value === 1 || value === true) return \"ON\";\n    return \"OFF\";\n};\n\n// Normalizador de Status\nconst normalizeStatus = (value) => {\n    if (!value) return \"UNKNOWN\";\n    return value.toString().toUpperCase();\n};\n\n// Evaluador de Quality para valores numéricos\nconst evaluateQuality = (value, minGood, maxGood, minUncertain, maxUncertain) => {\n    if (value === null || value === undefined || isNaN(value)) return \"BAD\";\n\n    if (value >= minGood && value <= maxGood) return \"GOOD\";\n\n    if (value >= minUncertain && value <= maxUncertain) return \"UNCERTAIN\";\n\n    return \"BAD\";\n};\n\n// =============================\n// 4️⃣ Inferencia de Status Quality\n// =============================\n\nconst normalizedStatus = normalizeStatus(status_raw);\n\nconst statusQualityMap = {\n    OK: \"GOOD\",\n    WARNING: \"UNCERTAIN\",\n    ALARM: \"BAD\"\n};\n\nconst statusQuality = statusQualityMap[normalizedStatus] || \"BAD\";\n\n// =============================\n// 5️⃣ Construcción Final\n// =============================\n\nmsg.payload = {\n    plantId,\n    stationId: ahuId,\n    timestamp: new Date().toISOString(),\n    points: {\n        temperature: {\n            value: Number(temperature),\n            unit: \"°C\",\n            quality: evaluateQuality(Number(temperature), 0, 50, -10, 60)\n        },\n        humidity: {\n            value: Number(humidity),\n            unit: \"%\",\n            quality: evaluateQuality(Number(humidity), 0, 100, -5, 105)\n        },\n        fan_status: {\n            value: normalizeOnOff(fan_status_raw),\n            unit: \"\",\n            quality: \"GOOD\"\n        },\n        airflow: {\n            value: Number(airflow),\n            unit: \"m3/h\",\n            quality: evaluateQuality(Number(airflow), 1, 10000, 0, 20000)\n        },\n        filter_dp: {\n            value: Number(filter_dp),\n            unit: \"Pa\",\n            quality: evaluateQuality(Number(filter_dp), 0, 1000, 0, 2000)\n        },\n        damper_position: {\n            value: Number(damper_position),\n            unit: \"%\",\n            quality: evaluateQuality(Number(damper_position), 0, 100, -10, 110)\n        },\n        power_status: {\n            value: normalizeOnOff(power_status_raw),\n            unit: \"\",\n            quality: \"GOOD\"\n        },\n        status: {\n            value: normalizedStatus,\n            unit: \"\",\n            quality: statusQuality\n        }\n    }\n};\n\nreturn msg;\n",
+        "func": "// =============================\n// 1️⃣ Validación topic\n// =============================\nconst topicParts = msg.topic.split(\"/\");\n\nif (topicParts.length !== 2) {\n  node.error(\"Topic inválido\", msg);\n  return null;\n}\n\nconst plantId = topicParts[0].toLowerCase();\nconst ahuId = topicParts[1];\n\n// =============================\n// 2️⃣ Procesar string\n// =============================\nif (typeof msg.payload !== \"string\") {\n  node.error(\"Payload no es string\", msg);\n  return null;\n}\n\n// Eliminar espacios extra y dividir\nconst tokens = msg.payload.trim().split(/\\s+/);\n\n// Validar cantidad esperada (nuevo orden: 8 campos)\nif (tokens.length < 8) {\n  node.error(\"Cantidad de campos insuficiente\", { ...msg, tokens });\n  return null;\n}\n\n// =============================\n// 3️⃣ Mapear por NUEVO orden\n//    Status, powerstatus, statusfan,\n//    airflow, filterdp, tamperposition,\n//    temperature, humidity\n// =============================\nconst [\n  status_raw,\n  power_status_raw,\n  fan_status_raw,\n  airflow_raw,\n  filter_dp_raw,\n  damper_position_raw,\n  temperature_raw,\n  humidity_raw\n] = tokens;\n\n// =============================\n// 4️⃣ Parseo numéricos robusto\n// =============================\nconst parseNumber = (v) => {\n  if (v == null) return NaN;\n  // soporta +3.00, -2.5, 4, y también \"3.00m3/h\" (extrae el prefijo numérico)\n  const m = String(v).match(/^[+-]?\\d+(\\.\\d+)?/);\n  return m ? Number(m[0]) : NaN;\n};\n\nconst temperature = parseNumber(temperature_raw);\nconst humidity = parseNumber(humidity_raw);\nconst airflow = parseNumber(airflow_raw);\nconst filter_dp = parseNumber(filter_dp_raw);\nconst damper_position = parseNumber(damper_position_raw);\n\n// =============================\n// 5️⃣ Normalizadores\n// =============================\nconst normalizeOnOff = (v) => {\n  const s = String(v || \"\").toUpperCase();\n  return s === \"ON\" || s === \"1\" || s === \"TRUE\" ? \"ON\" : \"OFF\";\n};\n\nconst normalizeStatus = (v) => {\n  if (!v) return \"UNKNOWN\";\n  return String(v).toUpperCase();\n};\n\n// Power puede venir como ON/OFF o OK/NO_OK (lo preservamos)\nconst normalizePowerStatus = (v) => {\n  const s = String(v || \"\").toUpperCase();\n  if (s === \"OK\" || s === \"NO_OK\") return s;\n  // fallback a ON/OFF si te llega así\n  if (s === \"ON\" || s === \"OFF\") return s;\n  return s || \"UNKNOWN\";\n};\n\nconst evaluateQuality = (value, min, max) => {\n  if (isNaN(value)) return \"BAD\";\n  if (value >= min && value <= max) return \"GOOD\";\n  return \"UNCERTAIN\";\n};\n\nconst normalizedStatus = normalizeStatus(status_raw);\n\nconst statusQualityMap = {\n  OK: \"GOOD\",\n  WARNING: \"UNCERTAIN\",\n  ALARM: \"BAD\",\n  DISCONNECTED: \"BAD\"\n};\n\nconst statusQuality = statusQualityMap[normalizedStatus] || \"BAD\";\n\n// =============================\n// 6️⃣ Construcción final\n// =============================\nmsg.payload = {\n  plantId,\n  stationId: ahuId,\n  timestamp: new Date().toISOString(),\n  points: {\n    temperature: {\n      value: isNaN(temperature) ? null : temperature,\n      unit: \"°C\",\n      quality: evaluateQuality(temperature, -10, 60)\n    },\n    humidity: {\n      value: isNaN(humidity) ? null : humidity,\n      unit: \"%\",\n      quality: evaluateQuality(humidity, 0, 100)\n    },\n    fan_status: {\n      value: normalizeOnOff(fan_status_raw),\n      unit: \"\",\n      quality: \"GOOD\"\n    },\n    airflow: {\n      value: isNaN(airflow) ? null : airflow,\n      unit: \"m3/h\",\n      quality: evaluateQuality(airflow, 0, 20000)\n    },\n    filter_dp: {\n      value: isNaN(filter_dp) ? null : filter_dp,\n      unit: \"Pa\",\n      quality: evaluateQuality(filter_dp, 0, 2000)\n    },\n    damper_position: {\n      value: isNaN(damper_position) ? null : damper_position,\n      unit: \"%\",\n      quality: evaluateQuality(damper_position, 0, 100)\n    },\n    power_status: {\n      value: normalizePowerStatus(power_status_raw),\n      unit: \"\",\n      quality: \"GOOD\"\n    },\n    status: {\n      value: normalizedStatus,\n      unit: \"\",\n      quality: statusQuality\n    }\n  }\n};\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 300,
-        "y": 180,
+        "x": 280,
+        "y": 160,
         "wires": [
             [
-                "c0fd16e6e1ea1371",
-                "b118990f307bb5b5"
+                "8fcb321b808fc069"
             ]
         ]
     },
@@ -832,8 +831,8 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 540,
-        "y": 60,
+        "x": 560,
+        "y": 80,
         "wires": []
     },
     {
@@ -908,7 +907,7 @@
         "type": "mqtt out",
         "z": "0b645bfed5d9f7be",
         "name": "",
-        "topic": "hvac/Planta5/AHU-01",
+        "topic": "hvac/Planta1/AHU-1",
         "qos": "",
         "retain": "",
         "respTopic": "",
@@ -917,8 +916,34 @@
         "correl": "",
         "expiry": "",
         "broker": "8c44c13ea6274c19",
-        "x": 540,
+        "x": 600,
         "y": 300,
         "wires": []
+    },
+    {
+        "id": "8fcb321b808fc069",
+        "type": "delay",
+        "z": "0b645bfed5d9f7be",
+        "name": "",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": true,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 390,
+        "y": 220,
+        "wires": [
+            [
+                "b118990f307bb5b5",
+                "c0fd16e6e1ea1371"
+            ]
+        ]
     }
 ]
