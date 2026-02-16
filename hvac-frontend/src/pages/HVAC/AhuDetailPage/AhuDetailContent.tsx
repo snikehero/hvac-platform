@@ -329,8 +329,8 @@ export default function AhuDetailPage() {
                 <Card className="border-border bg-card/50 backdrop-blur-sm">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      <TrendingUp className="w-4 h-4 text-accent" />
-                      Humidity History
+                      <TrendingUp className="w-4 h-4 text-primary" />
+                      Temperature History
                     </CardTitle>
                   </CardHeader>
                   <CardContent>

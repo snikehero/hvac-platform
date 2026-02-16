@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ResponsiveContainer,
   LineChart,
@@ -10,8 +9,7 @@ import {
 } from "recharts";
 import type { HistoryPoint } from "@/types/history";
 import type { AhuHealthStatus } from "@/domain/ahu/getAhuHealth";
-
-import { Badge } from "../ui/badge";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 interface Props {
   title?: string;
@@ -24,107 +22,216 @@ export function AhuHistoryTemperatureChart({
   data,
   status,
 }: Props) {
-  const lineColor = "#38bdf8"; // azul fijo (puedes cambiarlo si quieres)
   const avgTemperature =
     data.length > 0
       ? data.reduce((acc, p) => acc + p.value, 0) / data.length
       : null;
-  // último punto (para animarlo si está en ALARM)
+
   const lastIndex = data.length - 1;
+  const trend = getTrend(data);
+
+  // Color brillante adaptativo según estado (optimizado para fondos oscuros)
+  const lineColor =
+    status === "ALARM"
+      ? "#ef4444" // Rojo brillante
+      : status === "WARNING"
+        ? "#f59e0b" // Naranja/Amarillo brillante
+        : "#3b82f6"; // Azul brillante
 
   return (
-    <Card
-      className={`rounded-xl shadow-md ${
-        status === "ALARM" ? "alarm-glow" : ""
-      }`}
-    >
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base">{title}</CardTitle>
+    <div className="space-y-3">
+      {/* Stats Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {trend === "up" && (
+            <TrendingUp className="w-4 h-4 text-destructive" />
+          )}
+          {trend === "down" && <TrendingDown className="w-4 h-4 text-accent" />}
+          {trend === "stable" && (
+            <Minus className="w-4 h-4 text-muted-foreground" />
+          )}
+
+          <span className="text-sm font-medium text-muted-foreground">
+            {title}
+          </span>
+        </div>
+
         {avgTemperature !== null && (
-          <Badge variant="secondary">
-            Temperatura Promedio: {avgTemperature.toFixed(1)} °C
-          </Badge>
+          <div className="flex items-baseline gap-1">
+            <span className="text-2xl font-black tabular-nums text-primary">
+              {avgTemperature.toFixed(1)}
+            </span>
+            <span className="text-xs text-muted-foreground">°C avg</span>
+          </div>
         )}
-      </CardHeader>
+      </div>
 
-      <CardContent>
+      {/* Chart */}
+      <div
+        className={`
+        relative rounded-lg border backdrop-blur-sm overflow-hidden
+        ${status === "ALARM" ? "border-destructive/50 bg-destructive/5 shadow-lg shadow-destructive/20 animate-pulse" : ""}
+        ${status === "WARNING" ? "border-chart-3/50 bg-chart-3/5" : ""}
+        ${!status || status === "OK" || status === "DISCONNECTED" ? "border-border bg-card/50" : ""}
+      `}
+      >
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+
         {data.length === 0 ? (
-          <div className="text-sm text-gray-400">Sin datos históricos</div>
+          <div className="flex items-center justify-center h-[220px] text-sm text-muted-foreground">
+            Sin datos históricos
+          </div>
         ) : (
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart
-              data={data}
-              margin={{ top: 10, right: 20, bottom: 30, left: 40 }}
-            >
-              {/* Zonas térmicas HVAC */}
-              <ReferenceArea y1={0} y2={23} fill="#22c55e22" />
-              <ReferenceArea y1={23} y2={29} fill="#facc1522" />
-              <ReferenceArea y1={29} y2={40} fill="#dc262622" />
+          <div className="relative z-10 p-4">
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart
+                data={data}
+                margin={{ top: 10, right: 10, bottom: 30, left: 0 }}
+              >
+                {/* Zonas de temperatura */}
+                <ReferenceArea
+                  y1={0}
+                  y2={18}
+                  fill="hsl(var(--chart-1))"
+                  fillOpacity={0.1}
+                  strokeOpacity={0.3}
+                  stroke="hsl(var(--chart-1))"
+                />
+                <ReferenceArea
+                  y1={18}
+                  y2={26}
+                  fill="hsl(var(--chart-2))"
+                  fillOpacity={0.1}
+                  strokeOpacity={0.3}
+                  stroke="hsl(var(--chart-2))"
+                />
+                <ReferenceArea
+                  y1={26}
+                  y2={40}
+                  fill="hsl(var(--destructive))"
+                  fillOpacity={0.1}
+                  strokeOpacity={0.3}
+                  stroke="hsl(var(--destructive))"
+                />
 
-              <XAxis
-                dataKey="timestamp"
-                tickFormatter={formatTime}
-                tick={{ fontSize: 11, fill: "#cbd5e1" }}
-                axisLine={{ stroke: "#475569" }}
-                tickLine={false}
-              />
+                <XAxis
+                  dataKey="timestamp"
+                  tickFormatter={formatTime}
+                  tick={{
+                    fontSize: 12,
+                    fill: "var(--chart-axis-label)",
+                    fontWeight: 500,
+                  }}
+                  stroke="var(--chart-axis-line)"
+                  strokeWidth={1.5}
+                  tickLine={false}
+                />
 
-              <YAxis
-                domain={[0, 40]}
-                tick={{ fontSize: 11, fill: "#cbd5e1" }}
-                axisLine={{ stroke: "#475569" }}
-                tickLine={false}
-                label={{
-                  value: "°C",
-                  angle: -90,
-                  position: "insideLeft",
-                  fontSize: 12,
-                }}
-              />
+                <YAxis
+                  domain={[0, 40]}
+                  tick={{
+                    fontSize: 12,
+                    fill: "var(--chart-axis-label)",
+                    fontWeight: 500,
+                  }}
+                  stroke="var(--chart-axis-line)"
+                  strokeWidth={1.5}
+                  tickLine={false}
+                  width={40}
+                  label={{
+                    value: "°C",
+                    angle: -90,
+                    position: "insideLeft",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    fill: "var(--chart-axis-label)",
+                  }}
+                />
 
-              <Tooltip
-                contentStyle={{ border: "none" }}
-                formatter={(v: number) => [`${v} °C`, "Temperatura"]}
-                labelFormatter={(l) =>
-                  `Hora: ${new Date(l).toLocaleTimeString()}`
-                }
-              />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--popover))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "0.5rem",
+                    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                  }}
+                  labelStyle={{ color: "hsl(var(--popover-foreground))" }}
+                  formatter={(v: number) => [
+                    `${v.toFixed(1)} °C`,
+                    "Temperatura",
+                  ]}
+                  labelFormatter={(l) => `${new Date(l).toLocaleTimeString()}`}
+                />
 
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke={lineColor}
-                strokeWidth={3}
-                dot={(props) => {
-                  const isLastPoint =
-                    props.index === lastIndex && status === "ALARM";
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  stroke={lineColor}
+                  strokeWidth={3.5}
+                  dot={(props) => {
+                    const isLastPoint = props.index === lastIndex;
 
-                  return (
-                    <circle
-                      cx={props.cx}
-                      cy={props.cy}
-                      r={isLastPoint ? 6 : 3}
-                      fill={lineColor}
-                      className={isLastPoint ? "alarm-blink-dot" : ""}
-                    />
-                  );
-                }}
-                activeDot={{
-                  r: 6,
-                  stroke: "#fff",
-                  strokeWidth: 2,
-                  fill: lineColor,
-                }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+                    return (
+                      <g>
+                        {/* Glow effect */}
+                        <circle
+                          cx={props.cx}
+                          cy={props.cy}
+                          r={isLastPoint ? 8 : 5}
+                          fill={lineColor}
+                          fillOpacity={0.2}
+                        />
+                        {/* Main dot */}
+                        <circle
+                          cx={props.cx}
+                          cy={props.cy}
+                          r={isLastPoint ? 5 : 3}
+                          fill={lineColor}
+                          stroke="hsl(var(--background))"
+                          strokeWidth={2}
+                          className={
+                            isLastPoint && status === "ALARM"
+                              ? "animate-pulse"
+                              : ""
+                          }
+                        />
+                      </g>
+                    );
+                  }}
+                  activeDot={{
+                    r: 8,
+                    fill: lineColor,
+                    stroke: "hsl(var(--background))",
+                    strokeWidth: 3,
+                  }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
-function formatTime(ts: string) {
+// ===== Helpers =====
+
+function formatTime(ts: number): string {
   const d = new Date(ts);
-  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
+}
+
+function getTrend(data: HistoryPoint[]): "up" | "down" | "stable" {
+  if (data.length < 2) return "stable";
+
+  const last5 = data.slice(-5);
+  const avg = last5.reduce((acc, p) => acc + p.value, 0) / last5.length;
+  const lastValue = data[data.length - 1].value;
+
+  const diff = lastValue - avg;
+
+  if (diff > 1) return "up";
+  if (diff < -1) return "down";
+  return "stable";
 }
