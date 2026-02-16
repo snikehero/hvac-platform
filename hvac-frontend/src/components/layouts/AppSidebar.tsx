@@ -42,11 +42,11 @@ const categories = [
     ],
   },
   {
-    name: "Categoria2",
+    name: "Proyecto 2",
     items: [],
   },
   {
-    name: "Categoria3",
+    name: "Proyecto 3",
     items: [],
   },
 ];

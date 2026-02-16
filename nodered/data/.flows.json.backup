@@ -463,7 +463,7 @@
                 "vt": "str"
             }
         ],
-        "repeat": "",
+        "repeat": "60",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,

@@ -52,11 +52,13 @@ export default function DashboardEjecutivoPage() {
   };
 
   return (
-    <div className="p-6 space-y-8 text-white">
+    <div className="p-6 lg:p-8 space-y-8 lg:space-y-10">
       {/* ================= HEADER ================= */}
-      <div>
-        <h1 className="text-3xl font-bold">Dashboard Overview</h1>
-        <p className="text-muted-foreground">
+      <div className="space-y-2">
+        <h1 className="text-3xl lg:text-4xl font-black tracking-tight">
+          Dashboard Overview
+        </h1>
+        <p className="text-muted-foreground text-sm lg:text-base">
           Vista ejecutiva del estado global del sistema HVAC
         </p>
       </div>

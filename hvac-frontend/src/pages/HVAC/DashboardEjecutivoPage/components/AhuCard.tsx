@@ -1,10 +1,18 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import MiniLineChart from "@/components/Graphs/MiniLineChart";
+import {
+  Thermometer,
+  Droplets,
+  AlertTriangle,
+  CheckCircle2,
+  WifiOff,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+} from "lucide-react";
 
 import { useAhuHistory } from "@/hooks/useAhuHistory";
 import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
-
 import type { HvacTelemetry } from "@/types/telemetry";
 
 interface Props {
@@ -14,127 +22,257 @@ interface Props {
 
 export function AhuCard({ ahu, onClick }: Props) {
   const history = useAhuHistory(ahu);
-
-  // Estado operativo global
   const health = getAhuHealth(ahu);
 
   const temperature = Number(ahu.points.temperature?.value);
   const humidity = Number(ahu.points.humidity?.value);
 
+  // Calcular tendencias
+  const tempTrend = getTrend(history.temperature);
+  const humidityTrend = getTrend(history.humidity);
+
+  // Configuración por estado
+  const statusConfig = {
+    ALARM: {
+      border: "border-destructive/50",
+      bg: "bg-destructive/5",
+      glow: "shadow-lg shadow-destructive/20",
+      badge: "destructive" as const,
+      icon: AlertTriangle,
+      iconColor: "text-destructive",
+      pulse: true,
+    },
+    WARNING: {
+      border: "border-yellow-500/50",
+      bg: "bg-yellow-500/5",
+      glow: "shadow-md shadow-yellow-500/10",
+      badge: "secondary" as const,
+      icon: AlertTriangle,
+      iconColor: "text-yellow-500",
+      pulse: false,
+    },
+    OK: {
+      border: "border-green-500/30",
+      bg: "bg-green-500/5",
+      glow: "",
+      badge: "default" as const,
+      icon: CheckCircle2,
+      iconColor: "text-green-500",
+      pulse: false,
+    },
+    DISCONNECTED: {
+      border: "border-muted",
+      bg: "bg-muted/5",
+      glow: "",
+      badge: "outline" as const,
+      icon: WifiOff,
+      iconColor: "text-muted-foreground",
+      pulse: false,
+    },
+  };
+
+  const config = statusConfig[health.status];
+  const StatusIcon = config.icon;
+
   return (
     <Card
       onClick={onClick}
-      className="
-        cursor-pointer
-        transition
-        border
-        border-transparent
-        hover:border-gray-600
-      "
+      className={`
+        group relative overflow-hidden
+        cursor-pointer backdrop-blur-sm
+        transition-all duration-300
+        hover:scale-[1.02] hover:shadow-xl
+        ${config.border} ${config.bg} ${config.glow}
+        ${config.pulse ? "animate-pulse" : ""}
+      `}
     >
-      {/* ---------- Header ---------- */}
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <span className="font-semibold text-sm">
-          {ahu.stationId} de {ahu.plantId}
-        </span>
+      {/* Gradient Overlay on Hover */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
 
-        <HealthBadge status={health.status} />
+      {/* Header */}
+      <CardHeader className="relative z-10 pb-4">
+        <div className="flex items-start justify-between">
+          <div className="space-y-1.5">
+            <h3 className="font-bold text-lg tracking-tight">
+              {ahu.stationId}
+            </h3>
+            <p className="text-sm text-muted-foreground font-mono">
+              {ahu.plantId}
+            </p>
+          </div>
+
+          <div className="flex flex-col items-end gap-2">
+            <Badge
+              variant={config.badge}
+              className={`font-mono text-xs ${config.pulse ? "animate-pulse" : ""}`}
+            >
+              <StatusIcon className="w-3 h-3 mr-1" />
+              {health.status}
+            </Badge>
+
+            {health.badPoints > 0 && (
+              <span className="text-xs text-destructive font-medium">
+                {health.badPoints} errors
+              </span>
+            )}
+          </div>
+        </div>
       </CardHeader>
 
-      {/* ---------- Content ---------- */}
-      <CardContent className="space-y-3">
+      {/* Content */}
+      <CardContent className="relative z-10 space-y-5 pb-6">
         {/* Temperatura */}
         <MetricRow
-          label="Temperatura"
-          value={!isNaN(temperature) ? `${temperature.toFixed(1)} °C` : "--"}
-          chart={
-            history.temperature.length > 0 ? (
-              <MiniLineChart
-                data={history.temperature}
-                color="#38bdf8"
-                height={40}
-              />
-            ) : null
-          }
+          icon={<Thermometer className="w-5 h-5 text-primary" />}
+          label="Temp"
+          value={!isNaN(temperature) ? temperature.toFixed(1) : "--"}
+          unit="°C"
+          trend={tempTrend}
+          sparklineData={history.temperature.slice(-10)}
+          sparklineColor="#3b82f6"
         />
 
         {/* Humedad */}
         <MetricRow
-          label="Humedad"
-          value={!isNaN(humidity) ? `${humidity.toFixed(1)} %` : "--"}
-          chart={
-            history.humidity.length > 0 ? (
-              <MiniLineChart
-                data={history.humidity}
-                color="#22c55e"
-                height={40}
-              />
-            ) : null
-          }
+          icon={<Droplets className="w-5 h-5 text-accent" />}
+          label="Humidity"
+          value={!isNaN(humidity) ? humidity.toFixed(1) : "--"}
+          unit="%"
+          trend={humidityTrend}
+          sparklineData={history.humidity.slice(-10)}
+          sparklineColor="#06b6d4"
         />
-
-        {/* Advertencias */}
-        {health.badPoints > 0 && (
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-muted-foreground">Sensores con error</span>
-            <Badge variant="secondary">{health.badPoints}</Badge>
-          </div>
-        )}
       </CardContent>
+
+      {/* Status Indicator Dot */}
+      <div className="absolute top-3 right-3">
+        <div
+          className={`
+            w-2 h-2 rounded-full
+            ${config.iconColor.replace("text-", "bg-")}
+            ${config.pulse ? "animate-ping" : ""}
+          `}
+        />
+      </div>
     </Card>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* ----------------------- Subcomponentes ---------------------------- */
-/* ------------------------------------------------------------------ */
+// ===== Subcomponents =====
 
-function HealthBadge({
-  status,
-}: {
-  status: "OK" | "WARNING" | "ALARM" | "DISCONNECTED";
-}) {
-  const config = {
-    OK: {
-      label: "OK",
-      variant: "default",
-    },
-    WARNING: {
-      label: "WARNING",
-      variant: "secondary",
-    },
-    ALARM: {
-      label: "ALARM",
-      variant: "destructive",
-    },
-    DISCONNECTED: {
-      label: "OFFLINE",
-      variant: "outline",
-    },
-  } as const;
-
-  const { label, variant } = config[status];
-
-  return <Badge variant={variant}>{label}</Badge>;
+interface MetricRowProps {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  unit: string;
+  trend?: "up" | "down" | "stable";
+  sparklineData?: Array<{ timestamp: string; value: number }>;
+  sparklineColor?: string;
 }
 
 function MetricRow({
+  icon,
   label,
   value,
-  chart,
-}: {
-  label: string;
-  value: string;
-  chart?: React.ReactNode;
-}) {
+  unit,
+  trend,
+  sparklineData,
+  sparklineColor = "#3b82f6",
+}: MetricRowProps) {
+  const TrendIcon =
+    trend === "up" ? TrendingUp : trend === "down" ? TrendingDown : Minus;
+  const trendColor =
+    trend === "up"
+      ? "text-destructive"
+      : trend === "down"
+        ? "text-accent"
+        : "text-muted-foreground";
+
   return (
-    <div className="space-y-1">
-      <div className="flex justify-between text-sm">
-        <span className="text-muted-foreground">{label}</span>
-        <span className="font-medium">{value}</span>
+    <div className="space-y-2">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          {icon}
+          <span className="text-sm font-medium text-muted-foreground">
+            {label}
+          </span>
+          {trend && <TrendIcon className={`w-4 h-4 ${trendColor}`} />}
+        </div>
+
+        <div className="flex items-baseline gap-1">
+          <span className="text-2xl font-black tabular-nums">{value}</span>
+          <span className="text-sm text-muted-foreground">{unit}</span>
+        </div>
       </div>
 
-      {chart}
+      {/* Sparkline */}
+      {sparklineData && sparklineData.length > 0 && (
+        <MiniSparkline data={sparklineData} color={sparklineColor} />
+      )}
     </div>
   );
+}
+
+// Simple inline sparkline (sin Recharts para mejor performance)
+function MiniSparkline({
+  data,
+  color,
+}: {
+  data: Array<{ value: number }>;
+  color: string;
+}) {
+  if (data.length < 2) return null;
+
+  const values = data.map((d) => d.value);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+
+  // Add padding to prevent clipping
+  const paddingX = 5;
+  const paddingY = 10;
+  const width = 100 - paddingX * 2;
+  const height = 100 - paddingY * 2;
+
+  const points = values
+    .map((value, i) => {
+      const x = paddingX + (i / (values.length - 1)) * width;
+      const y = paddingY + (1 - (value - min) / range) * height;
+      return `${x},${y}`;
+    })
+    .join(" ");
+
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      className="w-full h-16"
+      preserveAspectRatio="none"
+    >
+      <polyline
+        points={points}
+        fill="none"
+        stroke={color}
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.8"
+      />
+    </svg>
+  );
+}
+
+// Helper para calcular tendencia
+function getTrend(data: Array<{ value: number }>): "up" | "down" | "stable" {
+  if (data.length < 2) return "stable";
+
+  const recent = data.slice(-5);
+  const avg = recent.reduce((acc, p) => acc + p.value, 0) / recent.length;
+  const last = data[data.length - 1].value;
+
+  const diff = last - avg;
+
+  if (diff > 1) return "up";
+  if (diff < -1) return "down";
+  return "stable";
 }

@@ -11,11 +11,15 @@ export function getAhuHealth(ahu: HvacTelemetry): {
   const now = Date.now();
   const lastUpdate = new Date(ahu.timestamp);
 
+  /* ---------------- Conteo de puntos con calidad BAD ---------------- */
+  const points = Object.values(ahu.points) as HvacPoint[];
+  const badPoints = points.filter((p) => p?.quality === "BAD").length;
+
   /* ---------------- 1️⃣ DISCONNECTED ---------------- */
   if (now - lastUpdate.getTime() > STALE_THRESHOLD_MS) {
     return {
       status: "DISCONNECTED",
-      badPoints: 0,
+      badPoints: 0, // No contamos puntos cuando está desconectado
       lastUpdate,
     };
   }
@@ -26,16 +30,12 @@ export function getAhuHealth(ahu: HvacTelemetry): {
   if (rawStatus === "ALARM") {
     return {
       status: "ALARM",
-      badPoints: 0,
+      badPoints, // ✅ Ahora contabiliza correctamente
       lastUpdate,
     };
   }
 
   /* ---------------- 3️⃣ BAD quality → WARNING ---------------- */
-  const points = Object.values(ahu.points) as HvacPoint[];
-
-  const badPoints = points.filter((p) => p?.quality === "BAD").length;
-
   if (badPoints > 0) {
     return {
       status: "WARNING",
@@ -48,7 +48,7 @@ export function getAhuHealth(ahu: HvacTelemetry): {
   if (rawStatus === "WARNING") {
     return {
       status: "WARNING",
-      badPoints: 0,
+      badPoints, // ✅ Ahora contabiliza correctamente
       lastUpdate,
     };
   }
@@ -56,7 +56,7 @@ export function getAhuHealth(ahu: HvacTelemetry): {
   /* ---------------- 5️⃣ OK ---------------- */
   return {
     status: "OK",
-    badPoints: 0,
+    badPoints: 0, // ✅ Correcto: si está OK, no hay bad points
     lastUpdate,
   };
 }
