@@ -2,6 +2,7 @@
 import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAhuHistory } from "@/hooks/useAhuHistory";
+import { useSettings } from "@/context/SettingsContext";
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useRef } from "react";
 
@@ -77,6 +78,7 @@ export default function AhuDetailView() {
 
   const navigate = useNavigate();
   const { telemetry } = useTelemetry();
+  const { settings } = useSettings();
 
   const ahu = telemetry.find(
     (a) => a.plantId === plantId && a.stationId === ahuId,
@@ -100,7 +102,13 @@ export default function AhuDetailView() {
     );
   }
 
-  const health = getAhuHealth(ahu);
+  const health = getAhuHealth(ahu, {
+    disconnectTimeoutMs: settings.thresholds.disconnectTimeoutSeconds * 1000,
+    temperatureWarning: settings.thresholds.temperatureWarning,
+    temperatureAlarm: settings.thresholds.temperatureAlarm,
+    humidityWarning: settings.thresholds.humidityWarning,
+    humidityAlarm: settings.thresholds.humidityAlarm,
+  });
   const history = useAhuHistory(ahu);
   const config = STATUS_CONFIG[health.status];
   const StatusIcon = config.icon;
@@ -132,11 +140,12 @@ export default function AhuDetailView() {
 
   useEffect(() => {
     const isAlarm = health.status === "ALARM";
-    if (!prevAlarmRef.current && isAlarm) {
+    if (!prevAlarmRef.current && isAlarm && settings.notifications.soundEnabled) {
+      audioManager.setGlobalVolume(settings.notifications.soundVolume);
       audioManager.playOneShot("ahu-alarm");
     }
     prevAlarmRef.current = isAlarm;
-  }, [health.status]);
+  }, [health.status, settings.notifications.soundEnabled, settings.notifications.soundVolume]);
 
   /* --- Sensor list (excluding known keys) --- */
   const knownKeys = new Set([

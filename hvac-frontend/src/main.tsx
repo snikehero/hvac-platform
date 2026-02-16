@@ -15,11 +15,14 @@ import { Toaster } from "sonner";
 import AhuDetailView from "./pages/HVAC/DashboardEjecutivoPage/3DDetailPage/AhuDetailView";
 import { routes } from "@/router/routes";
 import AhuDetailPage from "./pages/HVAC/AhuDetailPage/AhuDetailContent";
+import SettingsPage from "./pages/HVAC/Settings/SettingsPage";
+import { SettingsProvider } from "@/context/SettingsContext";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
       <WebSocketProvider>
+        <SettingsProvider>
         <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
           <Toaster position="top-right" richColors expand />
 
@@ -39,6 +42,8 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
 
               <Route path={routes.hvac.alarms} element={<AlarmsPage />} />
 
+              <Route path={routes.hvac.settings} element={<SettingsPage />} />
+
               <Route
                 path={routes.hvac.ejecutivo}
                 element={<DashboardEjecutivoPage />}
@@ -56,6 +61,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
             </Routes>
           </AppLayout>
         </ThemeProvider>
+        </SettingsProvider>
       </WebSocketProvider>
     </BrowserRouter>
   </React.StrictMode>,
