@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo } from "react";
 import { useTelemetry } from "@/hooks/useTelemetry";
@@ -6,6 +7,7 @@ import { AhuHistoryTemperatureChart } from "@/components/Graphs/AhuHistoryTemper
 import { AhuHistoryHumidityChart } from "@/components/Graphs/AhuHistoryHumidityChart";
 
 import { useAhuHealth } from "@/hooks/useAhuHealth";
+import { useTranslation } from "@/i18n/useTranslation";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -36,6 +38,7 @@ export default function AlarmsPage() {
   const [searchAhu, setSearchAhu] = useState("");
 
   const getHealth = useAhuHealth();
+  const { t, tf } = useTranslation();
 
   const selectedAhuHistory = useAhuHistory(selectedAhu ?? undefined);
 
@@ -93,10 +96,10 @@ export default function AlarmsPage() {
       {/* Header */}
       <div className="space-y-2">
         <h1 className="text-3xl font-black tracking-tight">
-          Sistema de Alarmas
+          {t.alarmsPage.title}
         </h1>
         <p className="text-muted-foreground">
-          Monitoreo en tiempo real de unidades HVAC con alarmas y advertencias
+          {t.alarmsPage.subtitle}
         </p>
       </div>
 
@@ -112,10 +115,10 @@ export default function AlarmsPage() {
           `}
         >
           {/* Gradient Top Border */}
-          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-red-500 to-red-600" />
+          <div className="absolute top-0 inset-x-0 h-1 bg-linear-to-r from-red-500 to-red-600" />
 
           {/* Hover Effect */}
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-destructive/10 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-linear-to-br from-destructive/10 to-transparent pointer-events-none" />
 
           <CardContent className="relative z-10 p-6 space-y-4">
             {/* Header */}
@@ -127,10 +130,10 @@ export default function AlarmsPage() {
 
                 <div>
                   <div className="text-xs uppercase tracking-wide text-muted-foreground font-medium">
-                    Alarmas Críticas
+                    {t.alarmsPage.criticalAlarms}
                   </div>
                   <div className="text-xs text-muted-foreground mt-0.5">
-                    Requieren atención inmediata
+                    {t.alarmsPage.requiresImmediate}
                   </div>
                 </div>
               </div>
@@ -146,7 +149,7 @@ export default function AlarmsPage() {
             {/* Progress Bar */}
             <div className="space-y-1">
               <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground">Criticidad</span>
+                <span className="text-muted-foreground">{t.alarmsPage.criticality}</span>
                 <span className="font-bold">
                   {telemetry.length > 0
                     ? ((activeAlarms / telemetry.length) * 100).toFixed(0)
@@ -184,10 +187,10 @@ export default function AlarmsPage() {
           `}
         >
           {/* Gradient Top Border */}
-          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-yellow-500 to-orange-500" />
+          <div className="absolute top-0 inset-x-0 h-1 bg-linear-to-r from-yellow-500 to-orange-500" />
 
           {/* Hover Effect */}
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-yellow-500/10 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-linear-to-br from-yellow-500/10 to-transparent pointer-events-none" />
 
           <CardContent className="relative z-10 p-6 space-y-4">
             {/* Header */}
@@ -199,10 +202,10 @@ export default function AlarmsPage() {
 
                 <div>
                   <div className="text-xs uppercase tracking-wide text-muted-foreground font-medium">
-                    Advertencias
+                    {t.alarmsPage.warnings}
                   </div>
                   <div className="text-xs text-muted-foreground mt-0.5">
-                    Monitoreo preventivo
+                    {t.alarmsPage.preventiveMonitoring}
                   </div>
                 </div>
               </div>
@@ -218,7 +221,7 @@ export default function AlarmsPage() {
             {/* Progress Bar */}
             <div className="space-y-1">
               <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground">Impacto</span>
+                <span className="text-muted-foreground">{t.alarmsPage.impact}</span>
                 <span className="font-bold">
                   {telemetry.length > 0
                     ? ((activeWarnings / telemetry.length) * 100).toFixed(0)
@@ -256,21 +259,21 @@ export default function AlarmsPage() {
             >
               <TabsList>
                 <TabsTrigger value="ALL" className="gap-2">
-                  Todos
+                  {t.alarmsPage.all}
                   <Badge variant="outline" className="ml-1">
                     {activeAlarms + activeWarnings}
                   </Badge>
                 </TabsTrigger>
                 <TabsTrigger value="ALARM" className="gap-2">
                   <Bell className="w-3 h-3" />
-                  Alarmas
+                  {t.alarmsPage.alarms}
                   <Badge variant="destructive" className="ml-1">
                     {activeAlarms}
                   </Badge>
                 </TabsTrigger>
                 <TabsTrigger value="WARNING" className="gap-2">
                   <AlertTriangle className="w-3 h-3" />
-                  Warnings
+                  {t.alarmsPage.warningsLabel}
                   <Badge variant="secondary" className="ml-1">
                     {activeWarnings}
                   </Badge>
@@ -282,7 +285,7 @@ export default function AlarmsPage() {
             <div className="relative w-full md:w-64">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar AHU o planta..."
+                placeholder={t.alarmsPage.searchPlaceholder}
                 value={searchAhu}
                 onChange={(e) => setSearchAhu(e.target.value)}
                 className="pl-9"
@@ -298,7 +301,7 @@ export default function AlarmsPage() {
           const health = getHealth(ahu);
           const temperature = Number(ahu.points.temperature?.value);
           const humidity = Number(ahu.points.humidity?.value);
-          const timeSince = getTimeSince(ahu.timestamp);
+          const timeSince = getTimeSince(ahu.timestamp, t, tf);
 
           const config =
             health.status === "ALARM"
@@ -336,13 +339,13 @@ export default function AlarmsPage() {
               <div
                 className={`absolute top-0 inset-x-0 h-1 ${
                   health.status === "ALARM"
-                    ? "bg-gradient-to-r from-red-500 to-red-600"
-                    : "bg-gradient-to-r from-yellow-500 to-orange-500"
+                    ? "bg-linear-to-r from-red-500 to-red-600"
+                    : "bg-linear-to-r from-yellow-500 to-orange-500"
                 }`}
               />
 
               {/* Hover Effect */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-linear-to-br from-primary/5 to-transparent pointer-events-none" />
 
               <CardHeader className="relative z-10 pb-3">
                 <div className="flex items-start justify-between">
@@ -365,7 +368,7 @@ export default function AlarmsPage() {
 
                     {health.badPoints > 0 && (
                       <span className="text-xs text-destructive font-medium">
-                        {health.badPoints} errores
+                        {health.badPoints} {health.badPoints === 1 ? t.ahuCard.error : t.ahuCard.errors}
                       </span>
                     )}
                   </div>
@@ -380,7 +383,7 @@ export default function AlarmsPage() {
                     <div className="flex items-center gap-1.5">
                       <Thermometer className="w-3 h-3 text-primary" />
                       <span className="text-xs text-muted-foreground">
-                        Temp
+                        {t.alarmsPage.temp}
                       </span>
                     </div>
                     <div className="flex items-baseline gap-1">
@@ -396,7 +399,7 @@ export default function AlarmsPage() {
                     <div className="flex items-center gap-1.5">
                       <Droplets className="w-3 h-3 text-accent" />
                       <span className="text-xs text-muted-foreground">
-                        Humedad
+                        {t.alarmsPage.humidity}
                       </span>
                     </div>
                     <div className="flex items-baseline gap-1">
@@ -412,14 +415,14 @@ export default function AlarmsPage() {
                 <div className="flex items-center gap-2 pt-2 border-t border-border/50">
                   <Clock className="w-3 h-3 text-muted-foreground" />
                   <span className="text-xs text-muted-foreground">
-                    Actualizado {timeSince}
+                    {t.alarmsPage.updated} {timeSince}
                   </span>
                 </div>
 
                 {/* Click hint */}
                 <div className="pt-2 border-t border-border/50 opacity-0 group-hover:opacity-100 transition-opacity">
                   <span className="text-xs text-muted-foreground font-medium">
-                    Click para ver detalles →
+                    {t.alarmsPage.clickDetails}
                   </span>
                 </div>
               </CardContent>
@@ -444,12 +447,12 @@ export default function AlarmsPage() {
               <CardContent className="flex flex-col items-center justify-center py-12 text-center">
                 <Bell className="w-12 h-12 text-muted-foreground/50 mb-4" />
                 <h3 className="text-lg font-semibold mb-2">
-                  No hay alarmas activas
+                  {t.alarmsPage.noActiveAlarms}
                 </h3>
                 <p className="text-sm text-muted-foreground max-w-sm">
                   {searchAhu
-                    ? "No se encontraron AHUs que coincidan con tu búsqueda"
-                    : "Todos los sistemas están operando normalmente"}
+                    ? t.alarmsPage.noAlarmsFound
+                    : t.alarmsPage.allSystemsNormal}
                 </p>
               </CardContent>
             </Card>
@@ -471,7 +474,7 @@ export default function AlarmsPage() {
                     {selectedAhu?.stationId}
                   </div>
                   <div className="text-sm font-normal text-muted-foreground">
-                    Análisis detallado de métricas
+                    {t.alarmsPage.detailedAnalysis}
                   </div>
                 </div>
               </div>
@@ -498,13 +501,13 @@ export default function AlarmsPage() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div className="space-y-1">
                       <span className="text-xs text-muted-foreground uppercase tracking-wide">
-                        Planta
+                        {t.alarmsPage.plant}
                       </span>
                       <div className="font-bold">{selectedAhu.plantId}</div>
                     </div>
                     <div className="space-y-1">
                       <span className="text-xs text-muted-foreground uppercase tracking-wide">
-                        Última actualización
+                        {t.alarmsPage.lastUpdate}
                       </span>
                       <div className="font-bold">
                         {new Date(selectedAhu.timestamp).toLocaleString()}
@@ -512,7 +515,7 @@ export default function AlarmsPage() {
                     </div>
                     <div className="space-y-1">
                       <span className="text-xs text-muted-foreground uppercase tracking-wide">
-                        Puntos en error
+                        {t.alarmsPage.errorPoints}
                       </span>
                       <div className="font-bold text-destructive">
                         {getHealth(selectedAhu).badPoints}
@@ -520,9 +523,9 @@ export default function AlarmsPage() {
                     </div>
                     <div className="space-y-1">
                       <span className="text-xs text-muted-foreground uppercase tracking-wide">
-                        Estado de conexión
+                        {t.alarmsPage.connectionStatus}
                       </span>
-                      <div className="font-bold text-green-500">Conectado</div>
+                      <div className="font-bold text-green-500">{t.alarmsPage.connected}</div>
                     </div>
                   </div>
                 </CardContent>
@@ -549,13 +552,17 @@ export default function AlarmsPage() {
 
 // ===== Helpers =====
 
-function getTimeSince(timestamp: string): string {
+function getTimeSince(
+  timestamp: string,
+  t: any,
+  tf: (text: string, values: Record<string, string | number>) => string
+): string {
   const now = Date.now();
   const then = new Date(timestamp).getTime();
   const diffSeconds = Math.floor((now - then) / 1000);
 
-  if (diffSeconds < 60) return `hace ${diffSeconds}s`;
-  if (diffSeconds < 3600) return `hace ${Math.floor(diffSeconds / 60)}m`;
-  if (diffSeconds < 86400) return `hace ${Math.floor(diffSeconds / 3600)}h`;
-  return `hace ${Math.floor(diffSeconds / 86400)}d`;
+  if (diffSeconds < 60) return tf(t.activity.secondsAgo, { seconds: diffSeconds });
+  if (diffSeconds < 3600) return tf(t.activity.minutesAgoShort, { minutes: Math.floor(diffSeconds / 60) });
+  if (diffSeconds < 86400) return tf(t.activity.hoursAgoShort, { hours: Math.floor(diffSeconds / 3600) });
+  return tf(t.activity.daysAgoShort, { days: Math.floor(diffSeconds / 86400) });
 }

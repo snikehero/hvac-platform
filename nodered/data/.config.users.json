@@ -18,6 +18,12 @@
             },
             "context": {
                 "flowRefresh": false
+            },
+            "dialog": {
+                "export": {
+                    "pretty": true,
+                    "json-view": false
+                }
             }
         },
         "debug": {

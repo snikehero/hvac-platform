@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // src/app/page.tsx
 import { useMemo, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,11 +20,13 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 import { useAhuHealth } from "@/hooks/useAhuHealth";
 import { routes } from "@/router/routes";
 import type { LucideIcon } from "lucide-react";
+import { useTranslation } from "@/i18n/useTranslation";
 
 export default function HomePageHVAC() {
   const { telemetry, ahuConnectionStatus } = useTelemetry();
   const connected = useWebSocket();
   const [mounted, setMounted] = useState(false);
+  const { t, tf } = useTranslation();
 
   useEffect(() => {
     setMounted(true);
@@ -97,25 +100,25 @@ export default function HomePageHVAC() {
       color: "text-destructive",
       bgColor: "bg-destructive/10",
       borderColor: "border-destructive/30",
-      label: "Critical",
+      label: t.homePageHvac.critical,
     },
     DEGRADED: {
       color: "text-yellow-500",
       bgColor: "bg-yellow-500/10",
       borderColor: "border-yellow-500/30",
-      label: "Degraded",
+      label: t.homePageHvac.degraded,
     },
     HEALTHY: {
       color: "text-green-500",
       bgColor: "bg-green-500/10",
       borderColor: "border-green-500/30",
-      label: "Healthy",
+      label: t.homePageHvac.healthy,
     },
     NO_DATA: {
       color: "text-muted-foreground",
       bgColor: "bg-muted/10",
       borderColor: "border-muted/30",
-      label: "No Data",
+      label: t.homePageHvac.noData,
     },
   };
 
@@ -159,7 +162,7 @@ export default function HomePageHVAC() {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Background Effects - Similar a HomePage principal */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--muted))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--muted))_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000,transparent)] opacity-20" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--muted))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--muted))_1px,transparent_1px)] bg-size-[4rem_4rem] mask-[radial-gradient(ellipse_80%_50%_at_50%_0%,#000,transparent)] opacity-20" />
 
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[128px] animate-pulse-slow" />
       <div
@@ -180,22 +183,21 @@ export default function HomePageHVAC() {
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm">
               <AirVent className="w-3.5 h-3.5 text-primary" />
               <span className="text-xs font-mono text-primary uppercase tracking-wider">
-                HVAC Module
+                {t.homePageHvac.hvacModule}
               </span>
             </div>
           </div>
 
           <div className="space-y-2">
             <h1 className="text-4xl md:text-5xl font-black tracking-tight">
-              <span className="bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent">
-                Air Handling
+              <span className="bg-linear-to-r from-foreground to-primary bg-clip-text text-transparent">
+                {t.homePageHvac.airHandling}
               </span>{" "}
-              <span className="text-primary">Control</span>
+              <span className="text-primary">{t.homePageHvac.control}</span>
             </h1>
 
             <p className="text-lg text-muted-foreground max-w-2xl">
-              Real-time monitoring and diagnostics for air handling units across
-              your facility
+              {t.homePageHvac.subtitle}
             </p>
           </div>
         </section>
@@ -227,12 +229,12 @@ export default function HomePageHVAC() {
                     <p
                       className={`font-bold ${connected ? "text-green-500" : "text-destructive"}`}
                     >
-                      {connected ? "SERVER ONLINE" : "SERVER OFFLINE"}
+                      {connected ? t.homePageHvac.serverOnline : t.homePageHvac.serverOffline}
                     </p>
                     <p className="text-xs text-muted-foreground font-mono">
                       {connected
-                        ? "Real-time telemetry active"
-                        : "Attempting to reconnect..."}
+                        ? t.homePageHvac.telemetryActive
+                        : t.homePageHvac.reconnecting}
                     </p>
                   </div>
                 </div>
@@ -241,7 +243,7 @@ export default function HomePageHVAC() {
                   variant={connected ? "default" : "destructive"}
                   className="font-mono"
                 >
-                  {connected ? "Connected" : "Disconnected"}
+                  {connected ? t.homePageHvac.connected : t.homePageHvac.disconnected}
                 </Badge>
               </div>
             </CardContent>
@@ -259,7 +261,7 @@ export default function HomePageHVAC() {
           {/* System Health */}
           <MetricCard
             icon={ShieldCheck}
-            label="System Health"
+            label={t.homePageHvac.systemHealth}
             value={currentHealth.label}
             className={`${currentHealth.bgColor} ${currentHealth.borderColor} ${currentHealth.color}`}
             pulse={systemHealth === "CRITICAL"}
@@ -268,9 +270,9 @@ export default function HomePageHVAC() {
           {/* Connected AHUs */}
           <MetricCard
             icon={Activity}
-            label="Connected AHUs"
+            label={t.homePageHvac.connectedAhus}
             value={connectedAhus}
-            suffix="units"
+            suffix={t.homePageHvac.units}
             className="bg-primary/10 border-primary/30 text-primary"
             pulse={connected}
           />
@@ -278,7 +280,7 @@ export default function HomePageHVAC() {
           {/* Avg Temperature */}
           <MetricCard
             icon={Thermometer}
-            label="Avg Temperature"
+            label={t.homePageHvac.avgTemperature}
             value={avgTemperature?.toFixed(1) ?? "--"}
             suffix={avgTemperature !== null ? "°C" : ""}
             className="bg-accent/10 border-accent/30 text-accent"
@@ -287,9 +289,9 @@ export default function HomePageHVAC() {
           {/* Active Alarms */}
           <MetricCard
             icon={AlertTriangle}
-            label="Critical Alarms"
+            label={t.homePageHvac.criticalAlarms}
             value={activeAlarms}
-            suffix="active"
+            suffix={t.homePageHvac.active}
             className="bg-destructive/10 border-destructive/30 text-destructive"
             pulse={activeAlarms > 0}
             alert={activeAlarms > 0}
@@ -307,36 +309,42 @@ export default function HomePageHVAC() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Gauge className="w-5 h-5 text-primary" />
-                System Overview
+                {t.homePageHvac.systemOverview}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Healthy */}
                 <StatusBox
-                  label="Operational"
+                  label={t.homePageHvac.operational}
                   value={connectedAhus - activeAlarms - activeWarnings}
                   total={connectedAhus}
                   color="green"
                   icon={TrendingUp}
+                  t={t}
+                  tf={tf}
                 />
 
                 {/* Warnings */}
                 <StatusBox
-                  label="Warnings"
+                  label={t.homePageHvac.warnings}
                   value={activeWarnings}
                   total={connectedAhus}
                   color="yellow"
                   icon={AlertTriangle}
+                  t={t}
+                  tf={tf}
                 />
 
                 {/* Critical */}
                 <StatusBox
-                  label="Critical"
+                  label={t.homePageHvac.criticalLabel}
                   value={activeAlarms}
                   total={connectedAhus}
                   color="red"
                   icon={AlertTriangle}
+                  t={t}
+                  tf={tf}
                 />
               </div>
             </CardContent>
@@ -352,42 +360,46 @@ export default function HomePageHVAC() {
         `}
         >
           <h2 className="text-2xl font-bold tracking-tight">
-            <span className="text-muted-foreground">Quick</span>{" "}
-            <span className="text-foreground">Actions</span>
+            <span className="text-muted-foreground">{t.homePageHvac.quick}</span>{" "}
+            <span className="text-foreground">{t.homePageHvac.actions}</span>
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <QuickActionCard
               to={routes.hvac.dashboard}
               icon={AirVent}
-              label="Dashboard"
-              description="View all AHUs"
+              label={t.homePageHvac.dashboard}
+              description={t.homePageHvac.viewAllAhus}
               color="primary"
+              t={t}
             />
 
             <QuickActionCard
               to={routes.hvac.alarms}
               icon={Bell}
-              label="Alarms"
-              description="Active alerts"
+              label={t.homePageHvac.alarms}
+              description={t.homePageHvac.activeAlerts}
               color="destructive"
               badge={activeAlarms > 0 ? activeAlarms : undefined}
+              t={t}
             />
 
             <QuickActionCard
               to={routes.hvac.dashboard}
               icon={Thermometer}
-              label="Temperature"
-              description="Thermal monitoring"
+              label={t.homePageHvac.temperature}
+              description={t.homePageHvac.thermalMonitoring}
               color="accent"
+              t={t}
             />
 
             <QuickActionCard
               to={routes.hvac.dashboard}
               icon={Activity}
-              label="Analytics"
-              description="System insights"
+              label={t.homePageHvac.analytics}
+              description={t.homePageHvac.systemInsights}
               color="chart"
+              t={t}
             />
           </div>
         </section>
@@ -475,7 +487,7 @@ function MetricCard({
 
       {/* Animated border effect */}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-current to-transparent opacity-10 animate-shimmer" />
+        <div className="absolute inset-0 bg-linear-to-r from-transparent via-current to-transparent opacity-10 animate-shimmer" />
       </div>
     </Card>
   );
@@ -487,9 +499,12 @@ interface StatusBoxProps {
   total: number;
   color: "green" | "yellow" | "red";
   icon: LucideIcon;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  t: any;
+  tf: (text: string, values: Record<string, string | number>) => string;
 }
 
-function StatusBox({ label, value, total, color, icon: Icon }: StatusBoxProps) {
+function StatusBox({ label, value, total, color, icon: Icon, t, tf }: StatusBoxProps) {
   const percentage = total > 0 ? (value / total) * 100 : 0;
 
   const colorClasses = {
@@ -541,7 +556,7 @@ function StatusBox({ label, value, total, color, icon: Icon }: StatusBoxProps) {
         </div>
 
         <p className="text-xs text-muted-foreground font-mono">
-          {value} of {total} units
+          {tf(t.homePageHvac.ofUnits, { value, total })}
         </p>
       </div>
     </div>
@@ -555,6 +570,8 @@ interface QuickActionCardProps {
   description: string;
   color: "primary" | "destructive" | "accent" | "chart";
   badge?: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  t: any;
 }
 
 function QuickActionCard({
@@ -564,6 +581,7 @@ function QuickActionCard({
   description,
   color,
   badge,
+  t,
 }: QuickActionCardProps) {
   const colorClasses = {
     primary: {
@@ -624,13 +642,13 @@ function QuickActionCard({
           <div
             className={`flex items-center gap-2 text-sm font-medium ${colors.icon}`}
           >
-            <span>Open</span>
+            <span>{t.homePageHvac.open}</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </div>
         </CardContent>
 
         {/* Hover gradient */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-current/5 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-linear-to-br from-current/5 to-transparent pointer-events-none" />
       </Card>
     </Link>
   );

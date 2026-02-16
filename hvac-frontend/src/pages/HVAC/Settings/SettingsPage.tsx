@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { audioManager } from "@/pages/HVAC/DashboardEjecutivoPage/3DDetailPage/presentation/Audio/AudioManager";
+import { useTranslation } from "@/i18n/useTranslation";
 
 export default function SettingsPage() {
   const {
@@ -49,6 +50,7 @@ export default function SettingsPage() {
     updateGeneral,
     resetToDefaults,
   } = useSettings();
+  const { t, tf } = useTranslation();
 
   // Local draft state so we can show "unsaved" and batch saves
   const [thresholds, setThresholds] = useState<HvacThresholds>(
@@ -68,7 +70,7 @@ export default function SettingsPage() {
     updateThresholds(thresholds);
     updateNotifications(notifications);
     updateGeneral(general);
-    toast.success("Configuración guardada correctamente");
+    toast.success(t.settings.toast.saved);
   }
 
   function handleReset() {
@@ -76,7 +78,7 @@ export default function SettingsPage() {
     setNotifications(DEFAULT_SETTINGS.notifications);
     setGeneral(DEFAULT_SETTINGS.general);
     resetToDefaults();
-    toast.info("Configuración restablecida a valores por defecto");
+    toast.info(t.settings.toast.reset);
   }
 
   function handleTestSound() {
@@ -99,11 +101,10 @@ export default function SettingsPage() {
           </div>
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">
-              Configuración
+              {t.settings.title}
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Administra los umbrales de alarma, notificaciones y preferencias
-              generales de la plataforma HVAC.
+              {t.settings.subtitle}
             </p>
           </div>
         </div>
@@ -114,15 +115,15 @@ export default function SettingsPage() {
         <TabsList>
           <TabsTrigger value="thresholds" className="gap-1.5">
             <Gauge className="w-4 h-4" />
-            Umbrales
+            {t.settings.tabs.thresholds}
           </TabsTrigger>
           <TabsTrigger value="notifications" className="gap-1.5">
             <Bell className="w-4 h-4" />
-            Notificaciones
+            {t.settings.tabs.notifications}
           </TabsTrigger>
           <TabsTrigger value="general" className="gap-1.5">
             <Globe className="w-4 h-4" />
-            General
+            {t.settings.tabs.general}
           </TabsTrigger>
         </TabsList>
 
@@ -135,18 +136,17 @@ export default function SettingsPage() {
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Thermometer className="w-5 h-5 text-orange-500" />
-                Umbrales de Temperatura
+                {t.settings.thresholds.temperature}
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Define los límites que disparan advertencias y alarmas por
-                temperatura.
+                {t.settings.thresholds.temperatureDesc}
               </p>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <ThresholdInput
-                  label="Advertencia (WARNING)"
-                  description="Se activa cuando la temperatura supera este valor"
+                  label={t.settings.thresholds.warning}
+                  description={tf(t.settings.thresholds.warningDesc, { metric: t.ahuCard.temperature.toLowerCase() })}
                   value={thresholds.temperatureWarning}
                   unit="°C"
                   badgeColor="bg-yellow-500"
@@ -155,8 +155,8 @@ export default function SettingsPage() {
                   }
                 />
                 <ThresholdInput
-                  label="Alarma (ALARM)"
-                  description="Se activa cuando la temperatura supera este valor"
+                  label={t.settings.thresholds.alarm}
+                  description={tf(t.settings.thresholds.alarmDesc, { metric: t.ahuCard.temperature.toLowerCase() })}
                   value={thresholds.temperatureAlarm}
                   unit="°C"
                   badgeColor="bg-red-500"
@@ -169,7 +169,7 @@ export default function SettingsPage() {
               {thresholds.temperatureWarning >= thresholds.temperatureAlarm && (
                 <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 rounded-md p-3">
                   <AlertTriangle className="w-4 h-4 shrink-0" />
-                  El umbral de advertencia debe ser menor al de alarma.
+                  {t.settings.thresholds.errorWarningAlarm}
                 </div>
               )}
             </CardContent>
@@ -180,18 +180,17 @@ export default function SettingsPage() {
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Droplets className="w-5 h-5 text-cyan-500" />
-                Umbrales de Humedad
+                {t.settings.thresholds.humidity}
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Define los límites que disparan advertencias y alarmas por
-                humedad relativa.
+                {t.settings.thresholds.humidityDesc}
               </p>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <ThresholdInput
-                  label="Advertencia (WARNING)"
-                  description="Se activa cuando la humedad supera este valor"
+                  label={t.settings.thresholds.warning}
+                  description={tf(t.settings.thresholds.warningDesc, { metric: t.ahuCard.humidity.toLowerCase() })}
                   value={thresholds.humidityWarning}
                   unit="%"
                   badgeColor="bg-yellow-500"
@@ -200,8 +199,8 @@ export default function SettingsPage() {
                   }
                 />
                 <ThresholdInput
-                  label="Alarma (ALARM)"
-                  description="Se activa cuando la humedad supera este valor"
+                  label={t.settings.thresholds.alarm}
+                  description={tf(t.settings.thresholds.alarmDesc, { metric: t.ahuCard.humidity.toLowerCase() })}
                   value={thresholds.humidityAlarm}
                   unit="%"
                   badgeColor="bg-red-500"
@@ -214,7 +213,7 @@ export default function SettingsPage() {
               {thresholds.humidityWarning >= thresholds.humidityAlarm && (
                 <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 rounded-md p-3">
                   <AlertTriangle className="w-4 h-4 shrink-0" />
-                  El umbral de advertencia debe ser menor al de alarma.
+                  {t.settings.thresholds.errorWarningAlarm}
                 </div>
               )}
             </CardContent>
@@ -225,16 +224,15 @@ export default function SettingsPage() {
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <WifiOff className="w-5 h-5 text-muted-foreground" />
-                Tiempo de Desconexión
+                {t.settings.thresholds.disconnection}
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Tiempo sin recibir datos antes de marcar un AHU como
-                desconectado.
+                {t.settings.thresholds.disconnectionDesc}
               </p>
             </CardHeader>
             <CardContent>
               <div className="max-w-sm space-y-2">
-                <Label htmlFor="disconnect-timeout">Timeout (segundos)</Label>
+                <Label htmlFor="disconnect-timeout">{t.settings.thresholds.timeout}</Label>
                 <div className="flex items-center gap-3">
                   <Input
                     id="disconnect-timeout"
@@ -252,12 +250,12 @@ export default function SettingsPage() {
                   />
                   <span className="text-sm text-muted-foreground">
                     {thresholds.disconnectTimeoutSeconds >= 60
-                      ? `${(thresholds.disconnectTimeoutSeconds / 60).toFixed(1)} min`
-                      : `${thresholds.disconnectTimeoutSeconds}s`}
+                      ? `${(thresholds.disconnectTimeoutSeconds / 60).toFixed(1)} ${t.time.min}`
+                      : `${thresholds.disconnectTimeoutSeconds}${t.time.sec}`}
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Valor actual:{" "}
+                  {t.settings.thresholds.currentValue}{" "}
                   <span className="font-mono">
                     {settings.thresholds.disconnectTimeoutSeconds}s
                   </span>
@@ -275,20 +273,19 @@ export default function SettingsPage() {
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Bell className="w-5 h-5 text-primary" />
-                Sonido de Alarma
+                {t.settings.notifications.alarmSound}
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Configura las alertas sonoras cuando un AHU entra en estado de
-                alarma.
+                {t.settings.notifications.alarmSoundDesc}
               </p>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Toggle */}
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Sonido habilitado</Label>
+                  <Label>{t.settings.notifications.soundEnabled}</Label>
                   <p className="text-sm text-muted-foreground">
-                    Reproduce un sonido al detectar una nueva alarma.
+                    {t.settings.notifications.soundEnabledDesc}
                   </p>
                 </div>
                 <Switch
@@ -304,7 +301,7 @@ export default function SettingsPage() {
               {/* Volume */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label>Volumen</Label>
+                  <Label>{t.settings.notifications.volume}</Label>
                   <div className="flex items-center gap-2">
                     {notifications.soundVolume === 0 ? (
                       <VolumeX className="w-4 h-4 text-muted-foreground" />
@@ -336,9 +333,9 @@ export default function SettingsPage() {
               {/* Test */}
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Probar sonido</Label>
+                  <Label>{t.settings.notifications.testSound}</Label>
                   <p className="text-sm text-muted-foreground">
-                    Reproduce el sonido de alarma con el volumen configurado.
+                    {t.settings.notifications.testSoundDesc}
                   </p>
                 </div>
                 <Button
@@ -348,7 +345,7 @@ export default function SettingsPage() {
                   disabled={!notifications.soundEnabled}
                 >
                   <Play className="w-4 h-4 mr-1.5" />
-                  Reproducir
+                  {t.settings.notifications.play}
                 </Button>
               </div>
             </CardContent>
@@ -363,19 +360,19 @@ export default function SettingsPage() {
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Globe className="w-5 h-5 text-primary" />
-                Preferencias Generales
+                {t.settings.general.preferences}
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Ajustes de idioma y comportamiento general de la plataforma.
+                {t.settings.general.preferencesDesc}
               </p>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Language */}
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Idioma</Label>
+                  <Label>{t.settings.general.language}</Label>
                   <p className="text-sm text-muted-foreground">
-                    Idioma preferido para la interfaz.
+                    {t.settings.general.languageDesc}
                   </p>
                 </div>
                 <Select
@@ -403,9 +400,9 @@ export default function SettingsPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label>Intervalo de refresco</Label>
+                    <Label>{t.settings.general.refreshInterval}</Label>
                     <p className="text-sm text-muted-foreground">
-                      Frecuencia de actualización de datos en el dashboard.
+                      {t.settings.general.refreshIntervalDesc}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -428,8 +425,8 @@ export default function SettingsPage() {
                   }
                 />
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>1s (tiempo real)</span>
-                  <span>30s (bajo consumo)</span>
+                  <span>1s ({t.settings.general.realTime})</span>
+                  <span>30s ({t.settings.general.lowConsumption})</span>
                 </div>
               </div>
             </CardContent>
@@ -441,18 +438,18 @@ export default function SettingsPage() {
       <div className="flex items-center justify-between pt-2">
         <Button variant="outline" onClick={handleReset} className="gap-1.5">
           <RotateCcw className="w-4 h-4" />
-          Restablecer valores por defecto
+          {t.settings.resetDefaults}
         </Button>
 
         <div className="flex items-center gap-3">
           {hasChanges && (
             <Badge variant="secondary" className="font-mono text-xs">
-              Cambios sin guardar
+              {t.settings.unsavedChanges}
             </Badge>
           )}
           <Button onClick={handleSave} disabled={!hasChanges} className="gap-1.5">
             <Save className="w-4 h-4" />
-            Guardar cambios
+            {t.settings.saveChanges}
           </Button>
         </div>
       </div>

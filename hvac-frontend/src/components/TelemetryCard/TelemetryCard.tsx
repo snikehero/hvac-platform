@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useAhuHistory } from "@/hooks/useAhuHistory";
 import { useMemo } from "react";
+import { useTranslation } from "@/i18n/useTranslation";
 
 interface TelemetryCardProps {
   ahu: HvacTelemetry;
@@ -28,6 +29,7 @@ export default function TelemetryCard({ ahu }: TelemetryCardProps) {
   const getHealth = useAhuHealth();
   const health = getHealth(ahu);
   const ahuHistory = useAhuHistory(ahu);
+  const { t,} = useTranslation();
 
   // Temperatura promedio últimos 60s
   const avgTemperature = useMemo(() => {
@@ -119,7 +121,7 @@ export default function TelemetryCard({ ahu }: TelemetryCardProps) {
               <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary" />
             </h3>
             <p className="text-xs text-muted-foreground font-mono">
-              Plant {plantId}
+              {t.ahuCard.plant} {plantId}
             </p>
           </div>
 
@@ -139,7 +141,7 @@ export default function TelemetryCard({ ahu }: TelemetryCardProps) {
           {/* Temperature */}
           <MetricRow
             icon={<Thermometer className="w-4 h-4 text-primary" />}
-            label="Temperature"
+            label={t.ahuCard.temperature}
             value={`${points.temperature?.value ?? "--"}`}
             unit={points.temperature?.unit ?? "°C"}
           />
@@ -147,7 +149,7 @@ export default function TelemetryCard({ ahu }: TelemetryCardProps) {
           {/* Humidity */}
           <MetricRow
             icon={<Droplets className="w-4 h-4 text-accent" />}
-            label="Humidity"
+            label={t.ahuCard.humidity}
             value={`${points.humidity?.value ?? "--"}`}
             unit={points.humidity?.unit ?? "%"}
           />
@@ -162,7 +164,7 @@ export default function TelemetryCard({ ahu }: TelemetryCardProps) {
                     : "text-muted-foreground"
                 }`}
               />
-              <span className="font-medium">Fan</span>
+              <span className="font-medium">{t.ahuCard.fan}</span>
             </div>
             <Badge
               className={
@@ -180,7 +182,7 @@ export default function TelemetryCard({ ahu }: TelemetryCardProps) {
         {avgTemperature !== null && (
           <div className="pt-3 border-t border-border/50">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Avg (60s)</span>
+              <span className="text-muted-foreground">{t.ahuCard.avg60s}</span>
               <span className="font-semibold tabular-nums text-primary">
                 {avgTemperature.toFixed(1)} {points.temperature?.unit ?? "°C"}
               </span>
@@ -192,7 +194,7 @@ export default function TelemetryCard({ ahu }: TelemetryCardProps) {
         {extraPoints.length > 0 && (
           <div className="pt-3 border-t border-border/50 space-y-2">
             <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Additional Data
+              {t.ahuCard.additionalData}
             </div>
             {extraPoints.slice(0, 4).map(([key, point]) => (
               <div
@@ -209,7 +211,7 @@ export default function TelemetryCard({ ahu }: TelemetryCardProps) {
             ))}
             {extraPoints.length > 3 && (
               <p className="text-xs text-muted-foreground">
-                +{extraPoints.length - 3} more...
+                +{extraPoints.length - 3} {t.ahuCard.moreData}...
               </p>
             )}
           </div>

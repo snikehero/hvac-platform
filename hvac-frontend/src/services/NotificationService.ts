@@ -1,5 +1,6 @@
 import { toast } from "sonner";
 import type { HvacEventType } from "@/types/event";
+import { translations, type Language } from "@/i18n/translations";
 
 /**
  * Service responsible for displaying toast notifications for status changes
@@ -10,35 +11,49 @@ export class NotificationService {
     plantId: string,
     status: HvacEventType,
     previousStatus?: HvacEventType,
+    language: Language = "es",
   ): void {
+    const t = translations[language];
+
     if (status === "ALARM") {
-      toast.error(`🚨 AHU ${stationId} en ALARMA`, {
-        description: `Planta ${plantId}`,
+      toast.error(`🚨 ${t.notifications.ahuAlarm.replace("{stationId}", stationId)}`, {
+        description: t.notifications.plant.replace("{plantId}", plantId),
         duration: 3000,
       });
     } else if (status === "WARNING") {
-      toast.warning(`⚠ AHU ${stationId} en WARNING`, {
-        description: `Planta ${plantId}`,
+      toast.warning(`⚠ ${t.notifications.ahuWarning.replace("{stationId}", stationId)}`, {
+        description: t.notifications.plant.replace("{plantId}", plantId),
         duration: 3000,
       });
     } else if (status === "OK" && previousStatus === "ALARM") {
-      toast.success(`✅ AHU ${stationId} volvió a NORMAL`, {
-        description: `Planta ${plantId}`,
+      toast.success(`✅ ${t.notifications.ahuNormal.replace("{stationId}", stationId)}`, {
+        description: t.notifications.plant.replace("{plantId}", plantId),
         duration: 3000,
       });
     }
   }
 
-  static notifyDisconnection(stationId: string, plantId: string): void {
-    toast.error(`🔴 AHU ${stationId} desconectado`, {
-      description: `Planta ${plantId} - Sin datos por más de 2 minutos`,
+  static notifyDisconnection(
+    stationId: string,
+    plantId: string,
+    timeoutMinutes: number = 2,
+    language: Language = "es",
+  ): void {
+    const t = translations[language];
+    toast.error(`🔴 ${t.notifications.ahuDisconnected.replace("{stationId}", stationId)}`, {
+      description: `${t.notifications.plant.replace("{plantId}", plantId)} - ${t.notifications.noDataTimeout.replace("{minutes}", String(timeoutMinutes))}`,
       duration: 3000,
     });
   }
 
-  static notifyReconnection(stationId: string, plantId: string): void {
-    toast.success(`🟢 AHU ${stationId} reconectado`, {
-      description: `Planta ${plantId}`,
+  static notifyReconnection(
+    stationId: string,
+    plantId: string,
+    language: Language = "es",
+  ): void {
+    const t = translations[language];
+    toast.success(`🟢 ${t.notifications.ahuReconnected.replace("{stationId}", stationId)}`, {
+      description: t.notifications.plant.replace("{plantId}", plantId),
       duration: 4000,
     });
   }

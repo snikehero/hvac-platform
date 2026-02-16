@@ -78,10 +78,10 @@ export function AhuHistoryHumidityChart({
       `}
       >
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-br from-accent/5 to-transparent pointer-events-none" />
 
         {data.length === 0 ? (
-          <div className="flex items-center justify-center h-[220px] text-sm text-muted-foreground">
+          <div className="flex items-center justify-center h-55 text-sm text-muted-foreground">
             Sin datos históricos
           </div>
         ) : (

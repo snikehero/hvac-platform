@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/i18n/useTranslation";
 
 type FilterStatus = "ALL" | "OK" | "WARNING" | "ALARM";
 
@@ -21,6 +22,7 @@ export default function DashboardHVAC() {
   const getHealth = useAhuHealth();
   const [mounted, setMounted] = useState(false);
   const [filter, setFilter] = useState<FilterStatus>("ALL");
+  const { t, tf } = useTranslation();
 
   useEffect(() => {
     setMounted(true);
@@ -81,20 +83,20 @@ export default function DashboardHVAC() {
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm">
                 <Activity className="w-3.5 h-3.5 text-primary" />
                 <span className="text-xs font-mono text-primary uppercase tracking-wider">
-                  Live Monitoring
+                  {t.dashboardHvac.liveMonitoring}
                 </span>
               </div>
             </div>
 
             <h1 className="text-4xl md:text-5xl font-black tracking-tight">
               <span className="bg-linear-to-r from-foreground to-primary bg-clip-text text-transparent">
-                HVAC
+                {t.dashboardHvac.hvac}
               </span>{" "}
-              <span className="text-primary">Dashboard</span>
+              <span className="text-primary">{t.dashboardHvac.dashboard}</span>
             </h1>
 
             <p className="text-lg text-muted-foreground">
-              Real-time status of air handling units across all facilities
+              {t.dashboardHvac.subtitle}
             </p>
           </div>
 
@@ -103,7 +105,7 @@ export default function DashboardHVAC() {
             <CardContent className="p-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <StatBadge
-                  label="Total Units"
+                  label={t.dashboardHvac.totalUnits}
                   value={stats.total}
                   icon={Factory}
                   color="primary"
@@ -111,7 +113,7 @@ export default function DashboardHVAC() {
                   onClick={() => setFilter("ALL")}
                 />
                 <StatBadge
-                  label="Operational"
+                  label={t.dashboardHvac.operational}
                   value={stats.ok}
                   icon={CheckCircle2}
                   color="success"
@@ -119,7 +121,7 @@ export default function DashboardHVAC() {
                   onClick={() => setFilter("OK")}
                 />
                 <StatBadge
-                  label="Warnings"
+                  label={t.dashboardHvac.warnings}
                   value={stats.warning}
                   icon={AlertTriangle}
                   color="warning"
@@ -127,7 +129,7 @@ export default function DashboardHVAC() {
                   onClick={() => setFilter("WARNING")}
                 />
                 <StatBadge
-                  label="Critical"
+                  label={t.dashboardHvac.critical}
                   value={stats.alarm}
                   icon={AlertTriangle}
                   color="destructive"
@@ -143,7 +145,7 @@ export default function DashboardHVAC() {
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">
-                Filtering by:{" "}
+                {t.dashboardHvac.filteringBy}{" "}
                 <span className="font-semibold text-foreground">{filter}</span>
               </span>
               <Button
@@ -152,7 +154,7 @@ export default function DashboardHVAC() {
                 onClick={() => setFilter("ALL")}
                 className="h-6 px-2 text-xs"
               >
-                Clear
+                {t.dashboardHvac.clear}
               </Button>
             </div>
           )}
@@ -164,8 +166,8 @@ export default function DashboardHVAC() {
             <CardContent className="p-12 text-center">
               <p className="text-muted-foreground">
                 {filter === "ALL"
-                  ? "No connected AHUs found"
-                  : `No AHUs with status "${filter}"`}
+                  ? t.dashboardHvac.noConnectedAhus
+                  : tf(t.dashboardHvac.noAhusWithStatus, { status: filter })}
               </p>
             </CardContent>
           </Card>
@@ -215,10 +217,12 @@ export default function DashboardHVAC() {
                         </div>
 
                         <div>
-                          <h2 className="text-xl font-bold">Plant {plantId}</h2>
+                          <h2 className="text-xl font-bold">{t.dashboardHvac.plant} {plantId}</h2>
                           <p className="text-sm text-muted-foreground font-mono">
-                            {ahus.length} unit{ahus.length !== 1 ? "s" : ""}{" "}
-                            active
+                            {ahus.length}{" "}
+                            {ahus.length !== 1
+                              ? t.dashboardHvac.unitsActive
+                              : t.dashboardHvac.unitActive}
                           </p>
                         </div>
                       </div>
@@ -226,17 +230,17 @@ export default function DashboardHVAC() {
                       <div className="flex items-center gap-2">
                         {plantStats.ok > 0 && (
                           <Badge className="bg-green-500/10 text-green-500 border-green-500/20 font-mono">
-                            {plantStats.ok} OK
+                            {plantStats.ok} {t.dashboardHvac.ok}
                           </Badge>
                         )}
                         {plantStats.warning > 0 && (
                           <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 font-mono">
-                            {plantStats.warning} WARN
+                            {plantStats.warning} {t.dashboardHvac.warn}
                           </Badge>
                         )}
                         {plantStats.alarm > 0 && (
                           <Badge className="bg-destructive/10 text-destructive border-destructive/20 font-mono animate-pulse">
-                            {plantStats.alarm} ALARM
+                            {plantStats.alarm} {t.dashboardHvac.alarm}
                           </Badge>
                         )}
                       </div>

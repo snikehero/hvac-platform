@@ -31,6 +31,7 @@ import {
 
 import { AhuHistoryTemperatureChart } from "@/components/Graphs/AhuHistoryTemperatureCard";
 import { AhuHistoryHumidityChart } from "@/components/Graphs/AhuHistoryHumidityChart";
+import { useTranslation } from "@/i18n/useTranslation";
 
 // Importar las nuevas MetricCards con SVG
 import {
@@ -49,6 +50,7 @@ export default function AhuDetailPage() {
   const { telemetry } = useTelemetry();
   const { ahuId, plantId } = useParams();
   const [mounted, setMounted] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     setMounted(true);
@@ -70,13 +72,13 @@ export default function AhuDetailPage() {
         <Card className="border-destructive/50">
           <CardContent className="p-12 text-center space-y-4">
             <WifiOff className="w-12 h-12 mx-auto text-muted-foreground" />
-            <p className="text-lg font-semibold">AHU not found</p>
+            <p className="text-lg font-semibold">{t.ahuDetail.ahuNotFound}</p>
             <p className="text-sm text-muted-foreground">
-              The requested unit does not exist or is disconnected
+              {t.ahuDetail.unitNotExist}
             </p>
             <Button onClick={() => navigate(-1)}>
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Go Back
+              {t.ahuDetail.goBack}
             </Button>
           </CardContent>
         </Card>
@@ -90,11 +92,11 @@ export default function AhuDetailPage() {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Background Effects */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--muted))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--muted))_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000,transparent)] opacity-20" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--muted))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--muted))_1px,transparent_1px)] bg-size-[4rem_4rem] mask-[radial-gradient(ellipse_80%_50%_at_50%_0%,#000,transparent)] opacity-20" />
 
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[128px] animate-pulse-slow" />
 
-      <div className="relative z-10 p-6 md:p-8 space-y-6 max-w-[1800px] mx-auto">
+      <div className="relative z-10 p-6 md:p-8 space-y-6 max-w-450 mx-auto">
         {/* Header */}
         <section
           className={`

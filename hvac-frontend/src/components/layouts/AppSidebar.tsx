@@ -13,48 +13,51 @@ import { useEffect, useState, useMemo } from "react";
 import { useAhuHealth } from "@/hooks/useAhuHealth";
 import { routes } from "@/router/routes";
 import { useNavigate } from "react-router-dom";
-
-const categories = [
-  {
-    name: "HVAC",
-    items: [
-      { to: routes.hvac.home, label: "Home HVAC", icon: Home },
-      {
-        to: routes.hvac.ejecutivo,
-        label: "Dashboard General",
-        icon: LayoutDashboard,
-      },
-      {
-        to: routes.hvac.dashboard,
-        label: "HVAC Activos",
-        icon: AirVent,
-      },
-      {
-        to: routes.hvac.alarms,
-        label: "Alarmas",
-        icon: Bell,
-      },
-      {
-        to: routes.hvac.settings,
-        label: "Configuración",
-        icon: Settings,
-      },
-    ],
-  },
-  {
-    name: "Proyecto 2",
-    items: [],
-  },
-  {
-    name: "Proyecto 3",
-    items: [],
-  },
-];
+import { useTranslation } from "@/i18n/useTranslation";
 
 export default function AppSidebar() {
   const { telemetry, ahuConnectionStatus } = useTelemetry();
   const navigate = useNavigate();
   const getHealth = useAhuHealth();
+  const { t } = useTranslation();
+
+  const categories = [
+    {
+      name: "HVAC",
+      items: [
+        { to: routes.hvac.home, label: t.nav.homeHvac, icon: Home },
+        {
+          to: routes.hvac.ejecutivo,
+          label: t.nav.generalDashboard,
+          icon: LayoutDashboard,
+        },
+        {
+          to: routes.hvac.dashboard,
+          label: t.nav.activeHvac,
+          icon: AirVent,
+        },
+        {
+          to: routes.hvac.alarms,
+          label: t.nav.alarms,
+          icon: Bell,
+        },
+        {
+          to: routes.hvac.settings,
+          label: t.nav.settings,
+          icon: Settings,
+        },
+      ],
+    },
+    {
+      name: "Proyecto 2",
+      items: [],
+    },
+    {
+      name: "Proyecto 3",
+      items: [],
+    },
+  ];
+
   const activeAlarms = useMemo(() => {
     return telemetry.reduce((acc, ahu) => {
       const key = `${ahu.plantId}-${ahu.stationId}`;
@@ -124,7 +127,7 @@ export default function AppSidebar() {
                 <div className="flex flex-col gap-1 pt-1">
                   {category.items.length === 0 ? (
                     <div className="px-3 py-2 text-xs text-muted-foreground italic">
-                      Próximamente
+                      {t.nav.comingSoon}
                     </div>
                   ) : (
                     category.items.map(({ to, label, icon: Icon }) => (
@@ -155,7 +158,7 @@ export default function AppSidebar() {
                             <span className="flex-1">{label}</span>
 
                             {/* 🔴 Badge dinámico solo para Alarmas */}
-                            {label === "Alarmas" && activeAlarms > 0 && (
+                            {to === routes.hvac.alarms && activeAlarms > 0 && (
                               <span className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-xs font-semibold text-white">
                                 {activeAlarms}
                               </span>

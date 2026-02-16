@@ -14,6 +14,7 @@ import {
 import { useAhuHistory } from "@/hooks/useAhuHistory";
 import { useAhuHealth } from "@/hooks/useAhuHealth";
 import type { HvacTelemetry } from "@/types/telemetry";
+import { useTranslation } from "@/i18n/useTranslation";
 
 interface Props {
   ahu: HvacTelemetry;
@@ -24,6 +25,7 @@ export function AhuCard({ ahu, onClick }: Props) {
   const history = useAhuHistory(ahu);
   const getHealth = useAhuHealth();
   const health = getHealth(ahu);
+  const { t } = useTranslation();
 
   const temperature = Number(ahu.points.temperature?.value);
   const humidity = Number(ahu.points.humidity?.value);
@@ -113,7 +115,7 @@ export function AhuCard({ ahu, onClick }: Props) {
 
             {health.badPoints > 0 && (
               <span className="text-xs text-destructive font-medium">
-                {health.badPoints} errors
+                {health.badPoints} {health.badPoints === 1 ? t.ahuCard.error : t.ahuCard.errors}
               </span>
             )}
           </div>
@@ -125,7 +127,7 @@ export function AhuCard({ ahu, onClick }: Props) {
         {/* Temperatura */}
         <MetricRow
           icon={<Thermometer className="w-5 h-5 text-primary" />}
-          label="Temp"
+          label={t.ahuCard.temperature}
           value={!isNaN(temperature) ? temperature.toFixed(1) : "--"}
           unit="°C"
           trend={tempTrend}
@@ -136,7 +138,7 @@ export function AhuCard({ ahu, onClick }: Props) {
         {/* Humedad */}
         <MetricRow
           icon={<Droplets className="w-5 h-5 text-accent" />}
-          label="Humidity"
+          label={t.ahuCard.humidity}
           value={!isNaN(humidity) ? humidity.toFixed(1) : "--"}
           unit="%"
           trend={humidityTrend}

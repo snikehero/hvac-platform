@@ -71,9 +71,15 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     useCallback(
       (ahu: { plantId: string; stationId: string }) => {
         eventManager.handleDisconnection(ahu);
-        NotificationService.notifyDisconnection(ahu.stationId, ahu.plantId);
+        const timeoutMinutes = Math.round(settings.thresholds.disconnectTimeoutSeconds / 60);
+        NotificationService.notifyDisconnection(
+          ahu.stationId,
+          ahu.plantId,
+          timeoutMinutes,
+          settings.general.language,
+        );
       },
-      [eventManager],
+      [eventManager, settings.thresholds.disconnectTimeoutSeconds, settings.general.language],
     ),
     connected, // Pass WebSocket connection status
     settings.thresholds.disconnectTimeoutSeconds * 1000, // Pass configured timeout in milliseconds
@@ -82,9 +88,13 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   // Event handler for reconnection
   const handleAhuReconnected = useCallback(
     (ahu: { plantId: string; stationId: string }) => {
-      NotificationService.notifyReconnection(ahu.stationId, ahu.plantId);
+      NotificationService.notifyReconnection(
+        ahu.stationId,
+        ahu.plantId,
+        settings.general.language,
+      );
     },
-    [],
+    [settings.general.language],
   );
 
   // Handle hvac_update events
@@ -113,6 +123,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
           ahu.plantId,
           currentStatus,
           previousStatus,
+          settings.general.language,
         );
       }
 
@@ -129,6 +140,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       historyManager.updateHistory,
       updateTelemetry,
       handleAhuReconnected,
+      settings.general.language,
     ],
   );
 

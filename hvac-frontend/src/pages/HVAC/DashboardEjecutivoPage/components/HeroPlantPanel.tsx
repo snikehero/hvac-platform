@@ -12,6 +12,7 @@ import {
 import { useAhuHealth } from "@/hooks/useAhuHealth";
 import { useClock } from "@/domain/hooks/useClock";
 import type { HvacTelemetry } from "@/types/telemetry";
+import { useTranslation } from "@/i18n/useTranslation";
 
 type PlantStatus = "OK" | "WARNING" | "ALARM" | "DISCONNECTED";
 
@@ -31,6 +32,7 @@ interface Props {
 export function HeroPlantPanel({ telemetry, onSelectPlant }: Props) {
   const getHealth = useAhuHealth();
   const now = useClock(1000); // Force re-render every second to recalculate health states
+  const { t } = useTranslation();
 
   const grouped = useMemo(() => {
     return telemetry.reduce<Record<string, HvacTelemetry[]>>((acc, ahu) => {
@@ -118,9 +120,9 @@ export function HeroPlantPanel({ telemetry, onSelectPlant }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold">Plants Overview</h3>
+        <h3 className="text-lg font-bold">{t.plantPanel.plantOverview}</h3>
         <Badge variant="outline" className="font-mono">
-          {plantSummaries.length} Plants
+          {plantSummaries.length} {t.plantPanel.plant}s
         </Badge>
       </div>
 
@@ -161,10 +163,10 @@ export function HeroPlantPanel({ telemetry, onSelectPlant }: Props) {
 
                     <div>
                       <h4 className="font-bold text-lg">
-                        Plant {plant.plantId}
+                        {t.plantPanel.plant} {plant.plantId}
                       </h4>
                       <p className="text-xs text-muted-foreground">
-                        {plant.total} AHU{plant.total !== 1 ? "s" : ""}
+                        {plant.total} {t.plantPanel.units}
                       </p>
                     </div>
                   </div>
@@ -179,7 +181,7 @@ export function HeroPlantPanel({ telemetry, onSelectPlant }: Props) {
                 <div className="grid grid-cols-3 gap-3">
                   {plant.alarms > 0 && (
                     <StatPill
-                      label="Alarms"
+                      label={t.heroSystem.alarms}
                       value={plant.alarms}
                       color="destructive"
                     />
@@ -187,7 +189,7 @@ export function HeroPlantPanel({ telemetry, onSelectPlant }: Props) {
 
                   {plant.warnings > 0 && (
                     <StatPill
-                      label="Warnings"
+                      label={t.heroSystem.warnings}
                       value={plant.warnings}
                       color="warning"
                     />
@@ -195,7 +197,7 @@ export function HeroPlantPanel({ telemetry, onSelectPlant }: Props) {
 
                   {plant.disconnected > 0 && (
                     <StatPill
-                      label="Offline"
+                      label={t.status.disconnected}
                       value={plant.disconnected}
                       color="muted"
                     />
@@ -205,7 +207,7 @@ export function HeroPlantPanel({ telemetry, onSelectPlant }: Props) {
                 {/* Operational Percentage */}
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs">
-                    <span className="text-muted-foreground">Operational</span>
+                    <span className="text-muted-foreground">{t.plantPanel.operational}</span>
                     <span className="font-bold">
                       {plant.operationalPercentage}%
                     </span>
@@ -221,7 +223,7 @@ export function HeroPlantPanel({ telemetry, onSelectPlant }: Props) {
 
                 {/* Action Hint */}
                 <div className="flex items-center justify-end gap-2 text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="font-medium">View Details</span>
+                  <span className="font-medium">{t.plantPanel.viewDetails}</span>
                   <ArrowRight className="w-3 h-3" />
                 </div>
               </div>

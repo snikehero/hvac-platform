@@ -10,7 +10,7 @@
     {
         "id": "06936ed9048da629",
         "type": "tab",
-        "label": "Temperature",
+        "label": "Prueba",
         "disabled": false,
         "info": "Envio",
         "env": []
@@ -18,7 +18,15 @@
     {
         "id": "59ee26d7d447743a",
         "type": "tab",
-        "label": "Flow 1",
+        "label": "PLCInicial",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "0b645bfed5d9f7be",
+        "type": "tab",
+        "label": "Lectura PLC",
         "disabled": false,
         "info": "",
         "env": []
@@ -62,7 +70,7 @@
         ],
         "x": 74,
         "y": 159,
-        "w": 412,
+        "w": 392,
         "h": 162
     },
     {
@@ -197,7 +205,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 380,
+        "x": 360,
         "y": 200,
         "wires": [
             [
@@ -463,7 +471,7 @@
                 "vt": "str"
             }
         ],
-        "repeat": "60",
+        "repeat": "",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
@@ -736,6 +744,7 @@
         "id": "914af7edbd95ecb4",
         "type": "mqtt in",
         "z": "59ee26d7d447743a",
+        "d": true,
         "name": "",
         "topic": "#",
         "qos": "0",
@@ -745,8 +754,8 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 370,
-        "y": 180,
+        "x": 310,
+        "y": 240,
         "wires": [
             [
                 "3e58b321fff0e940"
@@ -765,8 +774,151 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 660,
+        "x": 600,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "8ae15824d579563b",
+        "type": "mqtt in",
+        "z": "0b645bfed5d9f7be",
+        "name": "",
+        "topic": "+/+",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "8c44c13ea6274c19",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 90,
         "y": 220,
+        "wires": [
+            [
+                "7f4a8c76774c651a"
+            ]
+        ]
+    },
+    {
+        "id": "7f4a8c76774c651a",
+        "type": "function",
+        "z": "0b645bfed5d9f7be",
+        "name": "function 5",
+        "func": "// =============================\n// 1️⃣ Validación de Topic\n// =============================\nconst topicParts = msg.topic.split(\"/\");\n\nif (topicParts.length !==2) {\n    node.error(\"Topic inválido\", msg);\n    return null;\n}\n\nconst plantId = topicParts[0].toLowerCase();\nconst ahuId = topicParts[1];\n\n// =============================\n// 2️⃣ Validación de Payload\n// =============================\nconst data = msg.payload;\n\nif (!Array.isArray(data) || data.length !== 8) {\n    node.error(\"Payload inválido\", msg);\n    return null;\n}\n\nconst [\n    temperature,\n    humidity,\n    fan_status_raw,\n    airflow,\n    filter_dp,\n    damper_position,\n    power_status_raw,\n    status_raw\n] = data;\n\n// =============================\n// 3️⃣ Normalizadores\n// =============================\n\n// Normalizador ON/OFF robusto\nconst normalizeOnOff = (value) => {\n    if (value === \"ON\" || value === 1 || value === true) return \"ON\";\n    return \"OFF\";\n};\n\n// Normalizador de Status\nconst normalizeStatus = (value) => {\n    if (!value) return \"UNKNOWN\";\n    return value.toString().toUpperCase();\n};\n\n// Evaluador de Quality para valores numéricos\nconst evaluateQuality = (value, minGood, maxGood, minUncertain, maxUncertain) => {\n    if (value === null || value === undefined || isNaN(value)) return \"BAD\";\n\n    if (value >= minGood && value <= maxGood) return \"GOOD\";\n\n    if (value >= minUncertain && value <= maxUncertain) return \"UNCERTAIN\";\n\n    return \"BAD\";\n};\n\n// =============================\n// 4️⃣ Inferencia de Status Quality\n// =============================\n\nconst normalizedStatus = normalizeStatus(status_raw);\n\nconst statusQualityMap = {\n    OK: \"GOOD\",\n    WARNING: \"UNCERTAIN\",\n    ALARM: \"BAD\"\n};\n\nconst statusQuality = statusQualityMap[normalizedStatus] || \"BAD\";\n\n// =============================\n// 5️⃣ Construcción Final\n// =============================\n\nmsg.payload = {\n    plantId,\n    stationId: ahuId,\n    timestamp: new Date().toISOString(),\n    points: {\n        temperature: {\n            value: Number(temperature),\n            unit: \"°C\",\n            quality: evaluateQuality(Number(temperature), 0, 50, -10, 60)\n        },\n        humidity: {\n            value: Number(humidity),\n            unit: \"%\",\n            quality: evaluateQuality(Number(humidity), 0, 100, -5, 105)\n        },\n        fan_status: {\n            value: normalizeOnOff(fan_status_raw),\n            unit: \"\",\n            quality: \"GOOD\"\n        },\n        airflow: {\n            value: Number(airflow),\n            unit: \"m3/h\",\n            quality: evaluateQuality(Number(airflow), 1, 10000, 0, 20000)\n        },\n        filter_dp: {\n            value: Number(filter_dp),\n            unit: \"Pa\",\n            quality: evaluateQuality(Number(filter_dp), 0, 1000, 0, 2000)\n        },\n        damper_position: {\n            value: Number(damper_position),\n            unit: \"%\",\n            quality: evaluateQuality(Number(damper_position), 0, 100, -10, 110)\n        },\n        power_status: {\n            value: normalizeOnOff(power_status_raw),\n            unit: \"\",\n            quality: \"GOOD\"\n        },\n        status: {\n            value: normalizedStatus,\n            unit: \"\",\n            quality: statusQuality\n        }\n    }\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 300,
+        "y": 220,
+        "wires": [
+            [
+                "c0fd16e6e1ea1371",
+                "b118990f307bb5b5"
+            ]
+        ]
+    },
+    {
+        "id": "c0fd16e6e1ea1371",
+        "type": "debug",
+        "z": "0b645bfed5d9f7be",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 480,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "7baaf8cb7778d213",
+        "type": "mqtt out",
+        "z": "0b645bfed5d9f7be",
+        "name": "",
+        "topic": "Planta1/AHU-01",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8c44c13ea6274c19",
+        "x": 600,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "b9d924079f3bc062",
+        "type": "inject",
+        "z": "0b645bfed5d9f7be",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 580,
+        "wires": [
+            [
+                "bb2dfea15296e4b6"
+            ]
+        ]
+    },
+    {
+        "id": "bb2dfea15296e4b6",
+        "type": "function",
+        "z": "0b645bfed5d9f7be",
+        "name": "function 6",
+        "func": "msg.payload = [\n    24.5,\n    49.9,\n    \"ON\",\n    1264,\n    135,\n    63,\n    \"ON\",\n    \"OK\"\n]\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 580,
+        "wires": [
+            [
+                "7baaf8cb7778d213"
+            ]
+        ]
+    },
+    {
+        "id": "b118990f307bb5b5",
+        "type": "mqtt out",
+        "z": "0b645bfed5d9f7be",
+        "name": "",
+        "topic": "hvac/Planta5/AHU-01",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8c44c13ea6274c19",
+        "x": 520,
+        "y": 300,
         "wires": []
     }
 ]

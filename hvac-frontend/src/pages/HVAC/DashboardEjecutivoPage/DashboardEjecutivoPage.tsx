@@ -21,10 +21,12 @@ import { HeroSystemStatus } from "./components/HeroSystemStatus";
 import { HeroPlantPanel } from "./components/HeroPlantPanel";
 import { SystemActivityPanel } from "./components/SystemActivityPanel";
 import { routes } from "@/router/routes";
+import { useTranslation } from "@/i18n/useTranslation";
 
 export default function DashboardEjecutivoPage() {
   const { telemetry } = useTelemetry();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   /* -------------------- filtros -------------------- */
   const [plantFilter, setPlantFilter] = useState<string | null>(null);
@@ -56,10 +58,10 @@ export default function DashboardEjecutivoPage() {
       {/* ================= HEADER ================= */}
       <div className="space-y-2">
         <h1 className="text-3xl lg:text-4xl font-black tracking-tight">
-          Dashboard Overview
+          {t.dashboardPage.title}
         </h1>
         <p className="text-muted-foreground text-sm lg:text-base">
-          Vista ejecutiva del estado global del sistema HVAC
+          {t.dashboardPage.subtitle}
         </p>
       </div>
 
@@ -91,7 +93,7 @@ export default function DashboardEjecutivoPage() {
         <div className="flex flex-wrap gap-6 items-end">
           {/* ----------- Plant Filter ----------- */}
           <div className="flex flex-col gap-2 min-w-55">
-            <Label>Planta</Label>
+            <Label>{t.dashboardPage.filterByPlant}</Label>
             <Select
               value={plantFilter ?? "ALL"}
               onValueChange={(value) =>
@@ -99,11 +101,11 @@ export default function DashboardEjecutivoPage() {
               }
             >
               <SelectTrigger className="bg-neutral-900 border-neutral-700">
-                <SelectValue placeholder="Todas las plantas" />
+                <SelectValue placeholder={t.dashboardPage.allPlants} />
               </SelectTrigger>
 
               <SelectContent>
-                <SelectItem value="ALL">Todas las plantas</SelectItem>
+                <SelectItem value="ALL">{t.dashboardPage.allPlants}</SelectItem>
                 {plants.map((plant) => (
                   <SelectItem key={plant} value={plant}>
                     {plant}
@@ -115,7 +117,7 @@ export default function DashboardEjecutivoPage() {
 
           {/* ----------- Status Filter ----------- */}
           <div className="flex flex-col gap-2 min-w-55">
-            <Label>Estado</Label>
+            <Label>{t.dashboardPage.filterByStatus}</Label>
             <Select
               value={statusFilter ?? "ALL"}
               onValueChange={(value) =>
@@ -127,15 +129,15 @@ export default function DashboardEjecutivoPage() {
               }
             >
               <SelectTrigger className="bg-neutral-900 border-neutral-700">
-                <SelectValue placeholder="Todos los estados" />
+                <SelectValue placeholder={t.dashboardPage.allStatuses} />
               </SelectTrigger>
 
               <SelectContent>
-                <SelectItem value="ALL">Todos los estados</SelectItem>
-                <SelectItem value="OK">OK</SelectItem>
-                <SelectItem value="WARNING">WARNING</SelectItem>
-                <SelectItem value="ALARM">ALARM</SelectItem>
-                <SelectItem value="DISCONNECTED">DISCONNECTED</SelectItem>
+                <SelectItem value="ALL">{t.dashboardPage.allStatuses}</SelectItem>
+                <SelectItem value="OK">{t.status.ok}</SelectItem>
+                <SelectItem value="WARNING">{t.status.warning}</SelectItem>
+                <SelectItem value="ALARM">{t.status.alarm}</SelectItem>
+                <SelectItem value="DISCONNECTED">{t.status.disconnected}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -155,7 +157,7 @@ export default function DashboardEjecutivoPage() {
 
         {filteredAhus.length === 0 && (
           <div className="col-span-full text-sm text-muted-foreground">
-            No hay AHUs que coincidan con los filtros
+            {t.dashboardPage.noAhusMatch}
           </div>
         )}
       </div>

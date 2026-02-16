@@ -15,6 +15,7 @@ import {
 import { routes } from "@/router/routes";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAhuHealth } from "@/hooks/useAhuHealth";
+import { useTranslation } from "@/i18n/useTranslation";
 
 import {
   Card,
@@ -30,6 +31,7 @@ export default function HomeGlobal() {
   const navigate = useNavigate();
   const { telemetry, ahuConnectionStatus, connected } = useTelemetry();
   const [mounted, setMounted] = useState(false);
+  const { t, tf } = useTranslation();
 
   useEffect(() => {
     setMounted(true);
@@ -78,21 +80,21 @@ export default function HomeGlobal() {
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
       {/* Animated Grid Background - usa bg del tema */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--muted))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--muted))_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000,transparent)] opacity-30" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--muted))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--muted))_1px,transparent_1px)] bg-size-[4rem_4rem] mask-[radial-gradient(ellipse_80%_50%_at_50%_0%,#000,transparent)] opacity-30" />
 
       {/* Ambient Glow Effects - usa primary */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[128px] animate-pulse" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-[128px] animate-pulse-slow" />
 
       {/* Scanline Effect - usa primary con muy baja opacidad */}
-      <div className="absolute inset-0 bg-[linear-gradient(0deg,transparent_0%,hsl(var(--primary)/0.03)_50%,transparent_100%)] bg-[length:100%_4px] pointer-events-none animate-scan" />
+      <div className="absolute inset-0 bg-[linear-gradient(0deg,transparent_0%,hsl(var(--primary)/0.03)_50%,transparent_100%)] bg-size-[100%_4px] pointer-events-none animate-scan" />
 
       <div className="relative z-10 px-6 py-12 md:px-12 lg:px-20">
         {/* Connection Status Bar */}
         <div
           className={`
           fixed top-0 left-0 right-0 h-1 z-50 transition-all duration-500
-          ${connected ? "bg-gradient-to-r from-green-500 to-primary" : "bg-gradient-to-r from-destructive to-orange-500"}
+          ${connected ? "bg-linear-to-r from-green-500 to-primary" : "bg-linear-to-r from-destructive to-orange-500"}
         `}
         >
           <div
@@ -113,42 +115,42 @@ export default function HomeGlobal() {
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm">
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
               <span className="text-xs font-mono text-primary uppercase tracking-wider">
-                Industrial IoT Platform
+                {t.homeGlobal.platformBadge}
               </span>
             </div>
 
             <div className="space-y-4">
               <h1 className="text-6xl md:text-8xl font-black tracking-tighter">
-                <span className="bg-gradient-to-r from-foreground via-primary to-accent bg-clip-text text-transparent">
-                  Fire
+                <span className="bg-linear-to-r from-foreground via-primary to-accent bg-clip-text text-transparent">
+                  {t.homeGlobal.heroTitle}
                 </span>
                 <span className="text-primary">IIOT</span>
               </h1>
 
               <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl leading-relaxed font-light">
-                Next-generation industrial monitoring platform delivering{" "}
+                {t.homeGlobal.heroSubtitle}{" "}
                 <span className="text-primary font-medium">
-                  real-time telemetry
+                  {t.homeGlobal.realtimeTelemetry}
                 </span>
                 ,{" "}
                 <span className="text-accent font-medium">
-                  predictive insights
+                  {t.homeGlobal.predictiveInsights}
                 </span>
-                , and{" "}
+                , {t.common.and}{" "}
                 <span className="text-chart-4 font-medium">
-                  modular scalability
+                  {t.homeGlobal.modularScalability}
                 </span>{" "}
-                across your entire operation.
+                {t.homeGlobal.acrossOperation}
               </p>
             </div>
 
             <div className="flex flex-wrap gap-4">
               <Button
                 onClick={() => navigate(routes.hvac.home)}
-                className="group bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground border-0 shadow-lg shadow-primary/25 px-8 py-6 text-lg font-semibold transition-all hover:shadow-xl hover:shadow-primary/40 hover:scale-105"
+                className="group bg-linear-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground border-0 shadow-lg shadow-primary/25 px-8 py-6 text-lg font-semibold transition-all hover:shadow-xl hover:shadow-primary/40 hover:scale-105"
               >
                 <AirVent className="w-5 h-5 mr-2" />
-                Enter HVAC Module
+                {t.homeGlobal.enterHvacModule}
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
 
@@ -158,7 +160,7 @@ export default function HomeGlobal() {
                 className="border-border hover:border-primary/50 bg-card/50 hover:bg-card backdrop-blur-sm px-8 py-6 text-lg transition-all group"
               >
                 <Eye className="w-5 h-5 mr-2" />
-                View Live Systems
+                {t.homeGlobal.viewLiveSystems}
                 <ArrowRight className="w-4 h-4 ml-2 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
               </Button>
             </div>
@@ -174,49 +176,49 @@ export default function HomeGlobal() {
           >
             <MetricCard
               icon={Server}
-              label="Connected"
+              label={t.homeGlobal.connected}
               value={metrics.totalDevices}
-              suffix="devices"
+              suffix={t.homeGlobal.devices}
               variant="primary"
               pulse={connected}
             />
 
             <MetricCard
               icon={Activity}
-              label="Active Plants"
+              label={t.homeGlobal.activePlants}
               value={metrics.plants}
-              suffix="sites"
+              suffix={t.homeGlobal.sites}
               variant="accent"
             />
 
             <MetricCard
               icon={Zap}
-              label="Healthy"
+              label={t.homeGlobal.healthy}
               value={metrics.healthy}
-              suffix="units"
+              suffix={t.homeGlobal.units}
               variant="success"
             />
 
             <MetricCard
               icon={AlertTriangle}
-              label="Warnings"
+              label={t.homeGlobal.warnings}
               value={metrics.warnings}
-              suffix="active"
+              suffix={t.homeGlobal.active}
               variant="warning"
               alert={metrics.warnings > 0}
             />
 
             <MetricCard
               icon={AlertTriangle}
-              label="Critical"
+              label={t.homeGlobal.critical}
               value={metrics.activeAlarms}
-              suffix="alarms"
+              suffix={t.homeGlobal.alarms}
               variant="destructive"
               alert={metrics.activeAlarms > 0}
             />
 
             <MetricCard
-              label="Avg Temp"
+              label={t.homeGlobal.avgTemp}
               value={metrics.avgTemp}
               suffix="°C"
               variant="chart"
@@ -231,7 +233,7 @@ export default function HomeGlobal() {
             ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}
           `}
           >
-            <SystemStatus connected={connected} metrics={metrics} />
+            <SystemStatus connected={connected} metrics={metrics} t={t} tf={tf} />
           </div>
 
           {/* Modules Grid */}
@@ -244,8 +246,8 @@ export default function HomeGlobal() {
           >
             <div className="flex items-center justify-between">
               <h2 className="text-3xl font-bold tracking-tight">
-                <span className="text-muted-foreground">Available</span>{" "}
-                <span className="text-foreground">Modules</span>
+                <span className="text-muted-foreground">{t.homeGlobal.available}</span>{" "}
+                <span className="text-foreground">{t.homeGlobal.modules}</span>
               </h2>
               <Badge className="bg-primary/10 text-primary border-primary/20 font-mono">
                 v1.0.0
@@ -255,28 +257,31 @@ export default function HomeGlobal() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <ModuleCard
                 icon={AirVent}
-                title="HVAC Control"
-                description="Real-time air handling unit monitoring, diagnostics, and predictive maintenance."
-                status="ACTIVE"
+                title={t.homeGlobal.hvacControl}
+                description={t.homeGlobal.hvacControlDesc}
+                status={t.homeGlobal.statusActive}
                 metrics={{
                   devices: metrics.totalDevices,
                   uptime: "99.8%",
                 }}
                 onClick={() => navigate(routes.hvac.home)}
+                t={t}
               />
 
               <ModuleCard
-                title="Energy Management"
-                description="Power consumption tracking, optimization algorithms, and cost analysis."
-                status="COMING SOON"
+                title={t.homeGlobal.energyManagement}
+                description={t.homeGlobal.energyManagementDesc}
+                status={t.homeGlobal.statusComingSoon}
                 eta="Q2 2026"
+                t={t}
               />
 
               <ModuleCard
-                title="Process Control"
-                description="Industrial automation, PLC integration, and real-time process optimization."
-                status="COMING SOON"
+                title={t.homeGlobal.processControl}
+                description={t.homeGlobal.processControlDesc}
+                status={t.homeGlobal.statusComingSoon}
                 eta="Q3 2026"
+                t={t}
               />
             </div>
           </div>
@@ -289,7 +294,7 @@ export default function HomeGlobal() {
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
               <span className="font-mono">FireIIOT Platform</span>
               <span>•</span>
-              <span>Industrial Monitoring & Telemetry</span>
+              <span>{t.homeGlobal.footerMonitoring}</span>
             </div>
             <div className="font-mono">© 2026 FireIIOT</div>
           </div>
@@ -373,7 +378,7 @@ function MetricCard({
   return (
     <Card
       className={`
-      relative overflow-hidden border bg-gradient-to-br backdrop-blur-sm
+      relative overflow-hidden border bg-linear-to-br backdrop-blur-sm
       transition-all duration-300 hover:scale-105 group
       ${variantClasses[variant]}
       ${alert ? `${glowClasses[variant]} shadow-lg animate-pulse` : ""}
@@ -410,7 +415,7 @@ function MetricCard({
 
       {/* Animated border */}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-current to-transparent opacity-20 animate-shimmer" />
+        <div className="absolute inset-0 bg-linear-to-r from-transparent via-current to-transparent opacity-20 animate-shimmer" />
       </div>
     </Card>
   );
@@ -419,9 +424,13 @@ function MetricCard({
 function SystemStatus({
   connected,
   metrics,
+  t,
+  tf,
 }: {
   connected: boolean;
   metrics: any;
+  t: any;
+  tf: (text: string, values: Record<string, string | number>) => string;
 }) {
   return (
     <Card className="border-border bg-card/50 backdrop-blur-sm overflow-hidden">
@@ -437,37 +446,42 @@ function SystemStatus({
               `}
               />
               <h3 className="text-xl font-bold">
-                System Status:{" "}
+                {t.homeGlobal.systemStatus}{" "}
                 <span
                   className={connected ? "text-green-400" : "text-destructive"}
                 >
-                  {connected ? "ONLINE" : "OFFLINE"}
+                  {connected ? t.homeGlobal.online : t.homeGlobal.offline}
                 </span>
               </h3>
             </div>
 
             <p className="text-sm text-muted-foreground font-mono">
               {connected
-                ? `Monitoring ${metrics.totalDevices} devices across ${metrics.plants} plant${metrics.plants !== 1 ? "s" : ""}`
-                : "Attempting to reconnect to telemetry server..."}
+                ? tf(
+                    metrics.plants !== 1
+                      ? t.homeGlobal.monitoringDevicesPlural
+                      : t.homeGlobal.monitoringDevices,
+                    { devices: metrics.totalDevices, plants: metrics.plants }
+                  )
+                : t.homeGlobal.reconnecting}
             </p>
           </div>
 
           <div className="flex gap-4">
             <StatusIndicator
-              label="Operational"
+              label={t.homeGlobal.operational}
               value={metrics.healthy}
               total={metrics.totalDevices}
               color="success"
             />
             <StatusIndicator
-              label="Warnings"
+              label={t.homeGlobal.warningsLabel}
               value={metrics.warnings}
               total={metrics.totalDevices}
               color="warning"
             />
             <StatusIndicator
-              label="Critical"
+              label={t.homeGlobal.criticalLabel}
               value={metrics.activeAlarms}
               total={metrics.totalDevices}
               color="destructive"
@@ -521,16 +535,18 @@ function ModuleCard({
   metrics,
   eta,
   onClick,
+  t,
 }: {
   icon?: any;
   title: string;
   description: string;
-  status: "ACTIVE" | "COMING SOON";
+  status: string;
   metrics?: { devices: number; uptime: string };
   eta?: string;
-  onClick?: () => void;
+    onClick?: () => void;
+    t: any;
 }) {
-  const isActive = status === "ACTIVE";
+  const isActive = status === t.homeGlobal.statusActive;
 
   return (
     <Card
@@ -539,14 +555,14 @@ function ModuleCard({
         group relative overflow-hidden border transition-all duration-300
         ${
           isActive
-            ? "border-primary/30 bg-gradient-to-br from-primary/10 to-accent/10 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/20 cursor-pointer hover:scale-[1.02]"
+            ? "border-primary/30 bg-linear-to-br from-primary/10 to-accent/10 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/20 cursor-pointer hover:scale-[1.02]"
             : "border-border bg-card/50 opacity-60"
         }
       `}
     >
       {/* Hover Gradient Effect */}
       {isActive && (
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-primary/5 to-accent/5" />
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-linear-to-br from-primary/5 to-accent/5" />
       )}
 
       <CardHeader className="relative z-10 p-6 space-y-4">
@@ -600,7 +616,7 @@ function ModuleCard({
                 {metrics.devices}
               </div>
               <div className="text-xs text-muted-foreground font-mono">
-                Devices
+                {t.homeGlobal.devicesLabel}
               </div>
             </div>
             <div>
@@ -608,7 +624,7 @@ function ModuleCard({
                 {metrics.uptime}
               </div>
               <div className="text-xs text-muted-foreground font-mono">
-                Uptime
+                {t.homeGlobal.uptime}
               </div>
             </div>
           </div>
@@ -616,7 +632,7 @@ function ModuleCard({
 
         {isActive && (
           <div className="flex items-center gap-2 text-sm text-primary font-medium pt-2">
-            <span>Enter Module</span>
+            <span>{t.homeGlobal.enterModule}</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </div>
         )}

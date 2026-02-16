@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertTriangle, WifiOff, TrendingUp, Activity, type LucideIcon } from "lucide-react";
+import { useTranslation } from "@/i18n/useTranslation";
 
 interface DashboardStats {
   systemStatus: string;
@@ -19,6 +20,7 @@ interface Props {
 
 export function DashboardWidgets({ stats, onFilterStatus }: Props) {
   const noData = stats.totalAhus === 0;
+  const { t } = useTranslation();
 
   return (
     <div className="space-y-4">
@@ -27,7 +29,7 @@ export function DashboardWidgets({ stats, onFilterStatus }: Props) {
         {!noData && (
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Activity className="w-3 h-3" />
-            <span className="font-mono">{stats.totalAhus} Total Units</span>
+            <span className="font-mono">{stats.totalAhus} {t.heroSystem.totalUnits}</span>
           </div>
         )}
       </div>
@@ -38,7 +40,7 @@ export function DashboardWidgets({ stats, onFilterStatus }: Props) {
           icon={AlertTriangle}
           label="Units Affected"
           value={noData ? "--" : stats.affected}
-          subtitle={`${stats.alarms} Alarms + ${stats.warnings} Warnings`}
+          subtitle={`${stats.alarms} ${t.heroSystem.alarms} + ${stats.warnings} ${t.heroSystem.warnings}`}
           color="destructive"
           percentage={noData ? 0 : (stats.affected / stats.totalAhus) * 100}
           isClickable={stats.affected > 0}
@@ -62,9 +64,9 @@ export function DashboardWidgets({ stats, onFilterStatus }: Props) {
         {/* Capacidad Operativa */}
         <KpiCard
           icon={TrendingUp}
-          label="Operational Capacity"
+          label={t.widgets.operationalCapacity}
           value={noData ? "--" : `${stats.operationalPercentage}%`}
-          subtitle={`${stats.operational} of ${stats.totalAhus} units`}
+          subtitle={`${stats.operational} ${t.common.all} ${stats.totalAhus} ${t.plantPanel.units}`}
           color="success"
           percentage={stats.operationalPercentage}
           isClickable={false}

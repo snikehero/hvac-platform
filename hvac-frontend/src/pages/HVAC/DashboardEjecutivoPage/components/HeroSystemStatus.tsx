@@ -14,11 +14,13 @@ import {
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAhuHealth } from "@/hooks/useAhuHealth";
 import { useClock } from "@/domain/hooks/useClock";
+import { useTranslation } from "@/i18n/useTranslation";
 
 export function HeroSystemStatus() {
   const { telemetry } = useTelemetry();
   const getHealth = useAhuHealth();
   const now = useClock(1000); // Force re-render every second to recalculate health states
+  const { t } = useTranslation();
 
   const stats = useMemo(() => {
     let alarms = 0;
@@ -82,32 +84,32 @@ export function HeroSystemStatus() {
   const statusConfig = {
     OPTIMAL: {
       icon: ShieldCheck,
-      title: "System Optimal",
-      subtitle: "All units operating normally",
+      title: t.heroSystem.systemOptimal,
+      subtitle: t.heroSystem.allUnitsOperating,
       gradient: "from-green-600 via-green-500 to-green-400",
       iconColor: "text-green-100",
       pulse: false,
     },
     DEGRADED: {
       icon: ShieldAlert,
-      title: "System Degraded",
-      subtitle: "Some units require attention",
+      title: t.heroSystem.systemDegraded,
+      subtitle: t.heroSystem.someUnitsAttention,
       gradient: "from-yellow-600 via-yellow-500 to-orange-400",
       iconColor: "text-yellow-100",
       pulse: false,
     },
     CRITICAL: {
       icon: ShieldX,
-      title: "System Critical",
-      subtitle: "Immediate action required",
+      title: t.heroSystem.systemCritical,
+      subtitle: t.heroSystem.immediateAction,
       gradient: "from-red-600 via-red-500 to-orange-500",
       iconColor: "text-red-100",
       pulse: true,
     },
     NO_DATA: {
       icon: Server,
-      title: "No Data",
-      subtitle: "Waiting for telemetry",
+      title: t.heroSystem.noData,
+      subtitle: t.heroSystem.waitingTelemetry,
       gradient: "from-gray-600 via-gray-500 to-gray-400",
       iconColor: "text-gray-100",
       pulse: false,
@@ -172,24 +174,24 @@ export function HeroSystemStatus() {
             <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 text-white">
               <StatBox
                 icon={Activity}
-                label="Total Units"
+                label={t.heroSystem.totalUnits}
                 value={stats.total}
               />
               <StatBox
                 icon={AlertTriangle}
-                label="Alarms"
+                label={t.heroSystem.alarms}
                 value={stats.alarms}
                 highlight={stats.alarms > 0}
               />
               <StatBox
                 icon={ShieldAlert}
-                label="Warnings"
+                label={t.heroSystem.warnings}
                 value={stats.warnings}
                 highlight={stats.warnings > 0}
               />
               <StatBox
                 icon={TrendingUp}
-                label="Operational"
+                label={t.heroSystem.operational}
                 value={`${stats.operationalPercentage}%`}
               />
             </div>
@@ -200,9 +202,9 @@ export function HeroSystemStatus() {
         {stats.total > 0 && (
           <div className="mt-6 space-y-2">
             <div className="flex justify-between text-xs text-white/80 font-medium">
-              <span>System Health Distribution</span>
+              <span>{t.heroSystem.systemHealthDistribution}</span>
               <span>
-                {stats.operational} / {stats.total} OK
+                {stats.operational} / {stats.total} {t.status.ok}
               </span>
             </div>
 

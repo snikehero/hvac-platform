@@ -18,10 +18,15 @@
             },
             "context": {
                 "flowRefresh": false
+            },
+            "dialog": {
+                "export": {
+                    "pretty": true
+                }
             }
         },
         "debug": {
-            "filter": "filterAll"
+            "filter": "filterCurrent"
         }
     }
 }
