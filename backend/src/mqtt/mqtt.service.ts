@@ -8,11 +8,21 @@ import { HvacService } from '../hvac/hvac.service';
 export class MqttService implements OnModuleInit {
   private readonly logger = new Logger(MqttService.name);
   private client: mqtt.MqttClient;
+  private responseHandler: ((topic: string, payload: unknown) => void) | null = null;
 
   constructor(
     private readonly hvacService: HvacService,
     private readonly config: ConfigService,
   ) {}
+
+  registerResponseHandler(fn: (topic: string, payload: unknown) => void) {
+    this.responseHandler = fn;
+  }
+
+  publish(topic: string, payload: object): void {
+    this.client.publish(topic, JSON.stringify(payload));
+    this.logger.log(`Published to ${topic}`);
+  }
 
   onModuleInit() {
     const brokerUrl = this.config.get<string>('MQTT_BROKER_URL', 'mqtt://mosquitto:1883');
@@ -48,7 +58,11 @@ export class MqttService implements OnModuleInit {
     this.client.on('message', (topic, message) => {
       try {
         const payload = JSON.parse(message.toString());
-        this.hvacService.handleTelemetry(payload);
+        if (topic.endsWith('/commands/response') && this.responseHandler) {
+          this.responseHandler(topic, payload);
+        } else {
+          this.hvacService.handleTelemetry(payload);
+        }
       } catch (err) {
         this.logger.error(`JSON parse error on topic "${topic}"`, (err as Error).message);
       }

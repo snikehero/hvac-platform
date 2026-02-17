@@ -28,12 +28,14 @@ import {
   TrendingUp,
   Factory,
   RefreshCwOff,
+  Send,
   type LucideIcon,
 } from "lucide-react";
 
 import { AhuHistoryTemperatureChart } from "@/components/Graphs/AhuHistoryTemperatureCard";
 import { AhuHistoryHumidityChart } from "@/components/Graphs/AhuHistoryHumidityChart";
 import { useTranslation } from "@/i18n/useTranslation";
+import { CommandsPanel } from "@/components/CommandsPanel";
 
 // MetricCards
 import {
@@ -217,7 +219,7 @@ export default function AhuDetailPage() {
 
         {/* Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsList className="grid w-full max-w-lg grid-cols-3">
             <TabsTrigger value="overview">
               <Activity className="w-4 h-4 mr-2" />
               {t.ahuDetailPage.tabs.overview}
@@ -234,6 +236,11 @@ export default function AhuDetailPage() {
                   {events.length}
                 </Badge>
               )}
+            </TabsTrigger>
+
+            <TabsTrigger value="commands">
+              <Send className="w-4 h-4 mr-2" />
+              Commands
             </TabsTrigger>
           </TabsList>
 
@@ -396,6 +403,22 @@ export default function AhuDetailPage() {
           {/* Events Tab */}
           <TabsContent value="events">
             <EventsTimeline events={events} status={health.status} />
+          </TabsContent>
+
+          {/* Commands Tab */}
+          <TabsContent value="commands">
+            <div className="max-w-sm">
+              <CommandsPanel
+                plantId={ahu.plantId}
+                stationId={ahu.stationId}
+                currentFanStatus={String(ahu.points.fan_status?.value ?? "")}
+                currentDamperPosition={
+                  typeof ahu.points.damper_position?.value === "number"
+                    ? ahu.points.damper_position.value
+                    : undefined
+                }
+              />
+            </div>
           </TabsContent>
         </Tabs>
       </div>

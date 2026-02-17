@@ -8,22 +8,6 @@
         "env": []
     },
     {
-        "id": "06936ed9048da629",
-        "type": "tab",
-        "label": "Prueba",
-        "disabled": false,
-        "info": "Envio",
-        "env": []
-    },
-    {
-        "id": "59ee26d7d447743a",
-        "type": "tab",
-        "label": "PLCInicial",
-        "disabled": false,
-        "info": "",
-        "env": []
-    },
-    {
         "id": "0b645bfed5d9f7be",
         "type": "tab",
         "label": "Lectura PLC",
@@ -32,20 +16,44 @@
         "env": []
     },
     {
-        "id": "d9490cfb64c4ef60",
+        "id": "351e5b2e390a463c",
+        "type": "tab",
+        "label": "Prueba",
+        "disabled": true,
+        "info": "Envio",
+        "env": []
+    },
+    {
+        "id": "92ede25a0d8f218c",
+        "type": "tab",
+        "label": "Commands Handler",
+        "disabled": false,
+        "info": "Receives commands from backend, saves state to global context, publishes MQTT response",
+        "env": []
+    },
+    {
+        "id": "auto_sim_tab",
+        "type": "tab",
+        "label": "Auto Simulation",
+        "disabled": false,
+        "info": "Autonomous HVAC simulation: temperature rises when fan OFF → WARNING → ALARM. User sends fan ON command → temperature decreases back to NORMAL.",
+        "env": []
+    },
+    {
+        "id": "d1dca25f62ca0878",
         "type": "group",
-        "z": "06936ed9048da629",
+        "z": "351e5b2e390a463c",
         "name": "Multiplantas",
         "style": {
             "label": true
         },
         "nodes": [
-            "fbecfbc6281e5f1d",
-            "a76198526863de61",
-            "422b50cac4fd9803",
-            "8a7706c849a6b604",
-            "27a60539aaabc214",
-            "a9358c6c17d63740"
+            "d714646ed56a78de",
+            "59cc98fd9eba9b6c",
+            "3a115958a7c12b9c",
+            "5acbcf10cff45f24",
+            "7136bac6cdf58890",
+            "e7df3af46058f34f"
         ],
         "x": 214,
         "y": 679,
@@ -53,20 +61,20 @@
         "h": 182
     },
     {
-        "id": "95f3ec1cbb701f21",
+        "id": "c895b0c3039ff3d9",
         "type": "group",
-        "z": "06936ed9048da629",
+        "z": "351e5b2e390a463c",
         "name": "1 Planta 3 AHU",
         "style": {
             "label": true
         },
         "nodes": [
-            "ae0cb9d4a3c8753c",
-            "fa89433c84ce74c9",
-            "6d8b45980660d927",
-            "b4f4a170632e6fc1",
-            "1e06672bd5ced7b0",
-            "883e4c8a6233f65f"
+            "89bd3961978a306d",
+            "257b854f59ee1ea5",
+            "51f11c8db6d4264f",
+            "090d015f533fc9f3",
+            "44e379d6b898e70e",
+            "adc6bd8289569ef1"
         ],
         "x": 74,
         "y": 159,
@@ -161,7 +169,7 @@
         "type": "debug",
         "z": "b5eac41902843c3f",
         "name": "debug 1",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -170,612 +178,6 @@
         "statusType": "auto",
         "x": 640,
         "y": 180,
-        "wires": []
-    },
-    {
-        "id": "ae0cb9d4a3c8753c",
-        "type": "inject",
-        "z": "06936ed9048da629",
-        "g": "95f3ec1cbb701f21",
-        "name": "Forzar Alarma",
-        "props": [],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": "1",
-        "topic": "",
-        "x": 190,
-        "y": 200,
-        "wires": [
-            [
-                "fa89433c84ce74c9"
-            ]
-        ]
-    },
-    {
-        "id": "fa89433c84ce74c9",
-        "type": "function",
-        "z": "06936ed9048da629",
-        "g": "95f3ec1cbb701f21",
-        "name": "Forzar Alarma",
-        "func": "const ahus = [\n  'AHU-01','AHU-02','AHU-03',\n];\n\nfunction rand(min, max, decimals = 1) {\n  return +(Math.random() * (max - min) + min).toFixed(decimals);\n}\n\nconst messages = [];\n\nahus.forEach(ahu => {\n  const timestamp = new Date().toISOString();\n\n  messages.push({\n    topic: `hvac/planta1/${ahu}`,\n    payload: {\n      plantId: 'planta1',\n      stationId: ahu,\n      timestamp,\n      points: {\n        temperature: {\n          value: rand(31, 35),\n          unit: '°C',\n          quality: 'BAD'\n        },\n        humidity: {\n          value: rand(72, 80),\n          unit: '%',\n          quality: 'BAD'\n        },\n        fan_status: {\n          value: 'OFF',\n          unit: '',\n          quality: 'BAD'\n        },\n        airflow: {\n          value: rand(400, 650, 0),\n          unit: 'm3/h',\n          quality: 'BAD'\n        },\n        filter_dp: {\n          value: rand(260, 340, 0),\n          unit: 'Pa',\n          quality: 'BAD'\n        },\n        damper_position: {\n          value: rand(92, 100, 0),\n          unit: '%',\n          quality: 'BAD'\n        },\n        power_status: {\n          value: 'OFF',\n          unit: '',\n          quality: 'BAD'\n        },\n        status: {\n          value: 'ALARM',\n          unit: '',\n          quality: 'BAD'\n        }\n      }\n    }\n  });\n});\n\nreturn [messages];\n",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 360,
-        "y": 200,
-        "wires": [
-            [
-                "70745ef2e644b323"
-            ]
-        ]
-    },
-    {
-        "id": "70745ef2e644b323",
-        "type": "mqtt out",
-        "z": "06936ed9048da629",
-        "name": "MQTT → Mosquitto",
-        "topic": "",
-        "qos": "",
-        "retain": "",
-        "respTopic": "",
-        "contentType": "",
-        "userProps": "",
-        "correl": "",
-        "expiry": "",
-        "broker": "8c44c13ea6274c19",
-        "x": 1350,
-        "y": 680,
-        "wires": []
-    },
-    {
-        "id": "fbecfbc6281e5f1d",
-        "type": "inject",
-        "z": "06936ed9048da629",
-        "g": "d9490cfb64c4ef60",
-        "name": "TDCON3",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 320,
-        "y": 820,
-        "wires": [
-            [
-                "a76198526863de61"
-            ]
-        ]
-    },
-    {
-        "id": "a76198526863de61",
-        "type": "function",
-        "z": "06936ed9048da629",
-        "g": "d9490cfb64c4ef60",
-        "name": "3 TDCON3",
-        "func": "const plantId = \"TDCON3\";\nconst plantTopic = \"hvac/PlantaTDCON\";\n\nconst ahus = [\"AHU-01\", \"AHU-02\", \"AHU-03\"];\n\nconst messages = ahus.map((ahuId) => {\n  return {\n    topic: `${plantTopic}/${ahuId}`,\n    payload: {\n      plantId: plantId,\n      stationId: ahuId,\n      timestamp: new Date().toISOString(),\n      points: {\n        temperature: {\n          value: +(22 + Math.random() * 6).toFixed(1),\n          unit: \"°C\",\n          quality: \"GOOD\"\n        },\n        humidity: {\n          value: +(45 + Math.random() * 20).toFixed(1),\n          unit: \"%\",\n          quality: \"GOOD\"\n        },\n        fan_status: {\n          value: Math.random() > 0.1 ? \"ON\" : \"OFF\",\n          quality: \"GOOD\"\n        },\n        status: {\n          value: \"OK\",\n          quality: \"GOOD\"\n        },\n        airflow: {\n          value: 1100 + Math.floor(Math.random() * 300),\n          unit: \"m3/h\",\n          quality: \"GOOD\"\n        },\n        filter_dp: {\n          value: 150 + Math.floor(Math.random() * 60),\n          unit: \"Pa\",\n          quality: \"GOOD\"\n        },\n        damper_position: {\n          value: 50 + Math.floor(Math.random() * 30),\n          unit: \"%\",\n          quality: \"GOOD\"\n        },\n        power_status: {\n          value: \"ON\",\n          quality: \"GOOD\"\n        }\n      }\n    }\n  };\n});\n\n// Node-RED: devolver múltiples mensajes\nreturn [messages];\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 570,
-        "y": 820,
-        "wires": [
-            [
-                "70745ef2e644b323"
-            ]
-        ]
-    },
-    {
-        "id": "422b50cac4fd9803",
-        "type": "inject",
-        "z": "06936ed9048da629",
-        "g": "d9490cfb64c4ef60",
-        "name": "TDCON2",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 320,
-        "y": 760,
-        "wires": [
-            [
-                "8a7706c849a6b604"
-            ]
-        ]
-    },
-    {
-        "id": "8a7706c849a6b604",
-        "type": "function",
-        "z": "06936ed9048da629",
-        "g": "d9490cfb64c4ef60",
-        "name": "3 TDCON2",
-        "func": "const plantId = \"TDCON2\";\nconst plantTopic = \"hvac/PlantaTDCON\";\n\nconst ahus = [\"AHU-01\", \"AHU-02\", \"AHU-03\"];\n\nconst messages = ahus.map((ahuId) => {\n  return {\n    topic: `${plantTopic}/${ahuId}`,\n    payload: {\n      plantId: plantId,\n      stationId: ahuId,\n      timestamp: new Date().toISOString(),\n      points: {\n        temperature: {\n          value: +(22 + Math.random() * 6).toFixed(1),\n          unit: \"°C\",\n          quality: \"GOOD\"\n        },\n        humidity: {\n          value: +(45 + Math.random() * 20).toFixed(1),\n          unit: \"%\",\n          quality: \"GOOD\"\n        },\n        fan_status: {\n          value: Math.random() > 0.1 ? \"ON\" : \"OFF\",\n          quality: \"GOOD\"\n        },\n        status: {\n          value: \"OK\",\n          quality: \"GOOD\"\n        },\n        airflow: {\n          value: 1100 + Math.floor(Math.random() * 300),\n          unit: \"m3/h\",\n          quality: \"GOOD\"\n        },\n        filter_dp: {\n          value: 150 + Math.floor(Math.random() * 60),\n          unit: \"Pa\",\n          quality: \"GOOD\"\n        },\n        damper_position: {\n          value: 50 + Math.floor(Math.random() * 30),\n          unit: \"%\",\n          quality: \"GOOD\"\n        },\n        power_status: {\n          value: \"ON\",\n          quality: \"GOOD\"\n        }\n      }\n    }\n  };\n});\n\n// Node-RED: devolver múltiples mensajes\nreturn [messages];\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 570,
-        "y": 760,
-        "wires": [
-            [
-                "70745ef2e644b323"
-            ]
-        ]
-    },
-    {
-        "id": "27a60539aaabc214",
-        "type": "inject",
-        "z": "06936ed9048da629",
-        "g": "d9490cfb64c4ef60",
-        "name": "TDCON1",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 320,
-        "y": 720,
-        "wires": [
-            [
-                "a9358c6c17d63740"
-            ]
-        ]
-    },
-    {
-        "id": "a9358c6c17d63740",
-        "type": "function",
-        "z": "06936ed9048da629",
-        "g": "d9490cfb64c4ef60",
-        "name": "3 TDCON1",
-        "func": "const plantId = \"TDCON1\";\nconst plantTopic = \"hvac/PlantaTDCON\";\n\nconst ahus = [\"AHU-01\", \"AHU-02\", \"AHU-03\"];\n\nconst messages = ahus.map((ahuId) => {\n  return {\n    topic: `${plantTopic}/${ahuId}`,\n    payload: {\n      plantId: plantId,\n      stationId: ahuId,\n      timestamp: new Date().toISOString(),\n      points: {\n        temperature: {\n          value: +(22 + Math.random() * 6).toFixed(1),\n          unit: \"°C\",\n          quality: \"GOOD\"\n        },\n        humidity: {\n          value: +(45 + Math.random() * 20).toFixed(1),\n          unit: \"%\",\n          quality: \"GOOD\"\n        },\n        fan_status: {\n          value: Math.random() > 0.1 ? \"ON\" : \"OFF\",\n          quality: \"GOOD\"\n        },\n        status: {\n          value: \"OK\",\n          quality: \"GOOD\"\n        },\n        airflow: {\n          value: 1100 + Math.floor(Math.random() * 300),\n          unit: \"m3/h\",\n          quality: \"GOOD\"\n        },\n        filter_dp: {\n          value: 150 + Math.floor(Math.random() * 60),\n          unit: \"Pa\",\n          quality: \"GOOD\"\n        },\n        damper_position: {\n          value: 50 + Math.floor(Math.random() * 30),\n          unit: \"%\",\n          quality: \"GOOD\"\n        },\n        power_status: {\n          value: \"ON\",\n          quality: \"GOOD\"\n        }\n      }\n    }\n  };\n});\n\n// Node-RED: devolver múltiples mensajes\nreturn [messages];\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 570,
-        "y": 720,
-        "wires": [
-            [
-                "70745ef2e644b323"
-            ]
-        ]
-    },
-    {
-        "id": "6d8b45980660d927",
-        "type": "function",
-        "z": "06936ed9048da629",
-        "g": "95f3ec1cbb701f21",
-        "name": "function 1",
-        "func": "const ahus = [\n  'AHU-01','AHU-02','AHU-03',\n];\n\nfunction rand(min, max, decimals = 1) {\n  return +(Math.random() * (max - min) + min).toFixed(decimals);\n}\n\nconst messages = [];\n\nahus.forEach(ahu => {\n  const timestamp = new Date().toISOString();\n\n  messages.push({\n    topic: `hvac/planta1/${ahu}`,\n    payload: {\n      plantId: 'planta1',\n      stationId: ahu,\n      timestamp,\n      points: {\n        temperature: {\n          value: rand(26, 28),\n          unit: '°C',\n          quality: 'UNCERTAIN'\n        },\n        humidity: {\n          value: rand(60, 66),\n          unit: '%',\n          quality: 'UNCERTAIN'\n        },\n        fan_status: {\n          value: 'ON',\n          unit: '',\n          quality: 'GOOD'\n        },\n        airflow: {\n          value: rand(900, 1150, 0),\n          unit: 'm3/h',\n          quality: 'UNCERTAIN'\n        },\n        filter_dp: {\n          value: rand(160, 220, 0),\n          unit: 'Pa',\n          quality: 'UNCERTAIN'\n        },\n        damper_position: {\n          value: rand(75, 85, 0),\n          unit: '%',\n          quality: 'UNCERTAIN'\n        },\n        power_status: {\n          value: 'ON',\n          unit: '',\n          quality: 'GOOD'\n        },\n        status: {\n          value: 'WARNING',\n          unit: '',\n          quality: 'UNCERTAIN'\n        }\n      }\n    }\n  });\n});\n\nreturn [messages];\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 360,
-        "y": 240,
-        "wires": [
-            [
-                "70745ef2e644b323"
-            ]
-        ]
-    },
-    {
-        "id": "b4f4a170632e6fc1",
-        "type": "function",
-        "z": "06936ed9048da629",
-        "g": "95f3ec1cbb701f21",
-        "name": "function 2",
-        "func": "const ahus = [\n    'AHU-01', 'AHU-02', 'AHU-03', \n];\n\nfunction rand(min, max, decimals = 1) {\n    return +(Math.random() * (max - min) + min).toFixed(decimals);\n}\n\nconst messages = [];\n\nahus.forEach(ahu => {\n    const timestamp = new Date().toISOString();\n\n    messages.push({\n        topic: `hvac/planta1/${ahu}`,\n        payload: {\n            plantId: 'planta1',\n            stationId: ahu,\n            timestamp,\n            points: {\n                temperature: {\n                    value: rand(22, 25),\n                    unit: '°C',\n                    quality: 'GOOD'\n                },\n                humidity: {\n                    value: rand(45, 55),\n                    unit: '%',\n                    quality: 'GOOD'\n                },\n                fan_status: {\n                    value: 'ON',\n                    unit: '',\n                    quality: 'GOOD'\n                },\n                airflow: {\n                    value: rand(1200, 1500, 0),\n                    unit: 'm3/h',\n                    quality: 'GOOD'\n                },\n                filter_dp: {\n                    value: rand(80, 140, 0),\n                    unit: 'Pa',\n                    quality: 'GOOD'\n                },\n                damper_position: {\n                    value: rand(45, 65, 0),\n                    unit: '%',\n                    quality: 'GOOD'\n                },\n                power_status: {\n                    value: 'ON',\n                    unit: '',\n                    quality: 'GOOD'\n                },\n                status: {\n                    value: 'OK',\n                    unit: '',\n                    quality: 'GOOD'\n                }\n            }\n        }\n    });\n});\n\nreturn [messages];\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 360,
-        "y": 280,
-        "wires": [
-            [
-                "70745ef2e644b323"
-            ]
-        ]
-    },
-    {
-        "id": "1e06672bd5ced7b0",
-        "type": "inject",
-        "z": "06936ed9048da629",
-        "g": "95f3ec1cbb701f21",
-        "name": "ForzarWarning",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 200,
-        "y": 240,
-        "wires": [
-            [
-                "6d8b45980660d927"
-            ]
-        ]
-    },
-    {
-        "id": "883e4c8a6233f65f",
-        "type": "inject",
-        "z": "06936ed9048da629",
-        "g": "95f3ec1cbb701f21",
-        "name": "Ok",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 170,
-        "y": 280,
-        "wires": [
-            [
-                "b4f4a170632e6fc1"
-            ]
-        ]
-    },
-    {
-        "id": "9782d8043f338e77",
-        "type": "function",
-        "z": "06936ed9048da629",
-        "name": "Forzar Alarma",
-        "func": "const ahus = [\n  'AHU-01', 'AHU-02', 'AHU-03', 'AHU-04', 'AHU-05',\n  'AHU-06', 'AHU-07', 'AHU-08', 'AHU-09', 'AHU-10', 'AHU-11'\n];\n\nconst messages = [];\n\nahus.forEach(ahu => {\n  const timestamp = new Date().toISOString();\n\n  messages.push({\n    topic: `hvac/planta1/${ahu}`,\n    payload: {\n      plantId: 'planta1',\n      stationId: ahu,\n      timestamp,\n      points: {\n        temperature: {\n          value: 32.5,\n          unit: '°C',\n          quality: 'BAD'\n        },\n        humidity: {\n          value: 74.0,\n          unit: '%',\n          quality: 'BAD'\n        },\n        fan_status: {\n          value: 'OFF',\n          unit: '',\n          quality: 'BAD'\n        },\n        airflow: {\n          value: 520,\n          unit: 'm3/h',\n          quality: 'BAD'\n        },\n        filter_dp: {\n          value: 310,\n          unit: 'Pa',\n          quality: 'BAD'\n        },\n        damper_position: {\n          value: 95,\n          unit: '%',\n          quality: 'BAD'\n        },\n        power_status: {\n          value: 'OFF',\n          unit: '',\n          quality: 'BAD'\n        },\n        status: {\n          value: 'ALARM',\n          unit: '',\n          quality: 'BAD'\n        }\n      }\n    }\n  });\n});\n\nreturn [messages];\n",
-        "outputs": 1,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 740,
-        "y": 80,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "4ba48e3948fd6f97",
-        "type": "function",
-        "z": "06936ed9048da629",
-        "name": "function 3",
-        "func": "const ahus = ['AHU-01', 'AHU-02', 'AHU-03'];\n\nfunction clamp(v, min, max) {\n    return Math.min(Math.max(v, min), max);\n}\n\n// Estado persistente\nlet state = context.get('ahuState');\n\nif (!state) {\n    state = {};\n    ahus.forEach(ahu => {\n        state[ahu] = {\n            step: 0,\n            temperature: 23,\n            humidity: 48,\n            airflow: 1400,\n            filter_dp: 90,\n            damper: 55,\n            fan: 'ON',\n            power: 'ON'\n        };\n    });\n}\n\nconst messages = [];\n\nahus.forEach(ahu => {\n    const s = state[ahu];\n    s.step++;\n\n    // ---- degradación progresiva ----\n    s.temperature += 0.3;\n    s.humidity += 0.6;\n    s.airflow -= 35;\n    s.filter_dp += 8;\n    s.damper += 1.5;\n\n    // límites físicos\n    s.temperature = clamp(s.temperature, 20, 36);\n    s.humidity = clamp(s.humidity, 40, 85);\n    s.airflow = clamp(s.airflow, 300, 1600);\n    s.filter_dp = clamp(s.filter_dp, 50, 400);\n    s.damper = clamp(s.damper, 30, 100);\n\n    // ---- estado HVAC ----\n    let status = 'OK';\n    let quality = 'GOOD';\n\n    if (\n        s.temperature > 26 ||\n        s.humidity > 60 ||\n        s.filter_dp > 150\n    ) {\n        status = 'WARNING';\n        quality = 'UNCERTAIN';\n    }\n\n    if (\n        s.temperature > 30 ||\n        s.humidity > 70 ||\n        s.filter_dp > 260 ||\n        s.airflow < 700\n    ) {\n        status = 'ALARM';\n        quality = 'BAD';\n        s.fan = 'OFF';\n        s.power = 'OFF';\n    }\n\n    const timestamp = new Date().toISOString();\n\n    messages.push({\n        topic: `hvac/planta1/${ahu}`,\n        payload: {\n            plantId: 'planta1',\n            stationId: ahu,\n            timestamp,\n            points: {\n                temperature: {\n                    value: +s.temperature.toFixed(1),\n                    unit: '°C',\n                    quality\n                },\n                humidity: {\n                    value: +s.humidity.toFixed(1),\n                    unit: '%',\n                    quality\n                },\n                fan_status: {\n                    value: s.fan,\n                    unit: '',\n                    quality\n                },\n                airflow: {\n                    value: Math.round(s.airflow),\n                    unit: 'm3/h',\n                    quality\n                },\n                filter_dp: {\n                    value: Math.round(s.filter_dp),\n                    unit: 'Pa',\n                    quality\n                },\n                damper_position: {\n                    value: Math.round(s.damper),\n                    unit: '%',\n                    quality\n                },\n                power_status: {\n                    value: s.power,\n                    unit: '',\n                    quality\n                },\n                status: {\n                    value: status,\n                    unit: '',\n                    quality\n                }\n            }\n        }\n    });\n});\n\n// Guardar estado\ncontext.set('ahuState', state);\n\nreturn [messages];\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 440,
-        "y": 440,
-        "wires": [
-            [
-                "70745ef2e644b323"
-            ]
-        ]
-    },
-    {
-        "id": "26c3a4a04e4ab53e",
-        "type": "inject",
-        "z": "06936ed9048da629",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 180,
-        "y": 460,
-        "wires": [
-            [
-                "4ba48e3948fd6f97"
-            ]
-        ]
-    },
-    {
-        "id": "e5901737c76e356d",
-        "type": "function",
-        "z": "06936ed9048da629",
-        "name": "reset",
-        "func": "context.set('ahuState', null);\nreturn null;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 430,
-        "y": 520,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "3b12ec9197f53eaa",
-        "type": "inject",
-        "z": "06936ed9048da629",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 180,
-        "y": 520,
-        "wires": [
-            [
-                "e5901737c76e356d"
-            ]
-        ]
-    },
-    {
-        "id": "2732227cf8296ad0",
-        "type": "inject",
-        "z": "06936ed9048da629",
-        "name": "Force Healthy",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 290,
-        "y": 1020,
-        "wires": [
-            [
-                "1424ef30ef89e343",
-                "46f7c8f315621118",
-                "6de2752bc9dbc102"
-            ]
-        ]
-    },
-    {
-        "id": "1424ef30ef89e343",
-        "type": "function",
-        "z": "06936ed9048da629",
-        "name": "3 TDCON1",
-        "func": "const plantId = \"TDCON1\";\nconst plantTopic = \"hvac/PlantaTDCON\";\n\nconst ahus = [\"AHU-01\", \"AHU-02\", \"AHU-03\"];\n\nconst messages = ahus.map((ahuId) => {\n  return {\n    topic: `${plantTopic}/${ahuId}`,\n    payload: {\n      plantId: plantId,\n      stationId: ahuId,\n      timestamp: new Date().toISOString(),\n      points: {\n        temperature: {\n          value: +(22 + Math.random() * 6).toFixed(1),\n          unit: \"°C\",\n          quality: \"GOOD\"\n        },\n        humidity: {\n          value: +(45 + Math.random() * 20).toFixed(1),\n          unit: \"%\",\n          quality: \"GOOD\"\n        },\n        fan_status: {\n          value: Math.random() > 0.1 ? \"ON\" : \"OFF\",\n          quality: \"GOOD\"\n        },\n        status: {\n          value: \"OK\",\n          quality: \"GOOD\"\n        },\n        airflow: {\n          value: 1100 + Math.floor(Math.random() * 300),\n          unit: \"m3/h\",\n          quality: \"GOOD\"\n        },\n        filter_dp: {\n          value: 150 + Math.floor(Math.random() * 60),\n          unit: \"Pa\",\n          quality: \"GOOD\"\n        },\n        damper_position: {\n          value: 50 + Math.floor(Math.random() * 30),\n          unit: \"%\",\n          quality: \"GOOD\"\n        },\n        power_status: {\n          value: \"ON\",\n          quality: \"GOOD\"\n        }\n      }\n    }\n  };\n});\n\n// Node-RED: devolver múltiples mensajes\nreturn [messages];\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 550,
-        "y": 1000,
-        "wires": [
-            [
-                "70745ef2e644b323"
-            ]
-        ]
-    },
-    {
-        "id": "46f7c8f315621118",
-        "type": "function",
-        "z": "06936ed9048da629",
-        "name": "3 TDCON2",
-        "func": "const plantId = \"TDCON2\";\nconst plantTopic = \"hvac/PlantaTDCON\";\n\nconst ahus = [\"AHU-01\", \"AHU-02\", \"AHU-03\"];\n\nconst messages = ahus.map((ahuId) => {\n  return {\n    topic: `${plantTopic}/${ahuId}`,\n    payload: {\n      plantId: plantId,\n      stationId: ahuId,\n      timestamp: new Date().toISOString(),\n      points: {\n        temperature: {\n          value: +(22 + Math.random() * 6).toFixed(1),\n          unit: \"°C\",\n          quality: \"GOOD\"\n        },\n        humidity: {\n          value: +(45 + Math.random() * 20).toFixed(1),\n          unit: \"%\",\n          quality: \"GOOD\"\n        },\n        fan_status: {\n          value: Math.random() > 0.1 ? \"ON\" : \"OFF\",\n          quality: \"GOOD\"\n        },\n        status: {\n          value: \"OK\",\n          quality: \"GOOD\"\n        },\n        airflow: {\n          value: 1100 + Math.floor(Math.random() * 300),\n          unit: \"m3/h\",\n          quality: \"GOOD\"\n        },\n        filter_dp: {\n          value: 150 + Math.floor(Math.random() * 60),\n          unit: \"Pa\",\n          quality: \"GOOD\"\n        },\n        damper_position: {\n          value: 50 + Math.floor(Math.random() * 30),\n          unit: \"%\",\n          quality: \"GOOD\"\n        },\n        power_status: {\n          value: \"ON\",\n          quality: \"GOOD\"\n        }\n      }\n    }\n  };\n});\n\n// Node-RED: devolver múltiples mensajes\nreturn [messages];\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 550,
-        "y": 1040,
-        "wires": [
-            [
-                "70745ef2e644b323"
-            ]
-        ]
-    },
-    {
-        "id": "6de2752bc9dbc102",
-        "type": "function",
-        "z": "06936ed9048da629",
-        "name": "3 TDCON3",
-        "func": "const plantId = \"TDCON3\";\nconst plantTopic = \"hvac/PlantaTDCON\";\n\nconst ahus = [\"AHU-01\", \"AHU-02\", \"AHU-03\"];\n\nconst messages = ahus.map((ahuId) => {\n  return {\n    topic: `${plantTopic}/${ahuId}`,\n    payload: {\n      plantId: plantId,\n      stationId: ahuId,\n      timestamp: new Date().toISOString(),\n      points: {\n        temperature: {\n          value: +(22 + Math.random() * 6).toFixed(1),\n          unit: \"°C\",\n          quality: \"GOOD\"\n        },\n        humidity: {\n          value: +(45 + Math.random() * 20).toFixed(1),\n          unit: \"%\",\n          quality: \"GOOD\"\n        },\n        fan_status: {\n          value: Math.random() > 0.1 ? \"ON\" : \"OFF\",\n          quality: \"GOOD\"\n        },\n        status: {\n          value: \"OK\",\n          quality: \"GOOD\"\n        },\n        airflow: {\n          value: 1100 + Math.floor(Math.random() * 300),\n          unit: \"m3/h\",\n          quality: \"GOOD\"\n        },\n        filter_dp: {\n          value: 150 + Math.floor(Math.random() * 60),\n          unit: \"Pa\",\n          quality: \"GOOD\"\n        },\n        damper_position: {\n          value: 50 + Math.floor(Math.random() * 30),\n          unit: \"%\",\n          quality: \"GOOD\"\n        },\n        power_status: {\n          value: \"ON\",\n          quality: \"GOOD\"\n        }\n      }\n    }\n  };\n});\n\n// Node-RED: devolver múltiples mensajes\nreturn [messages];\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 550,
-        "y": 1100,
-        "wires": [
-            [
-                "70745ef2e644b323"
-            ]
-        ]
-    },
-    {
-        "id": "5c01d06e3202d46d",
-        "type": "inject",
-        "z": "06936ed9048da629",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 1100,
-        "y": 300,
-        "wires": [
-            [
-                "f6517327530df467"
-            ]
-        ]
-    },
-    {
-        "id": "f6517327530df467",
-        "type": "function",
-        "z": "06936ed9048da629",
-        "name": "function 4",
-        "func": "msg.topic = \"hvac/planta1/AHU-03\"\nmsg.payload = {\n    plantId: \"hola\"\n}\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1340,
-        "y": 300,
-        "wires": [
-            [
-                "70745ef2e644b323"
-            ]
-        ]
-    },
-    {
-        "id": "914af7edbd95ecb4",
-        "type": "mqtt in",
-        "z": "59ee26d7d447743a",
-        "d": true,
-        "name": "",
-        "topic": "#",
-        "qos": "0",
-        "datatype": "auto-detect",
-        "broker": "8c44c13ea6274c19",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 310,
-        "y": 240,
-        "wires": [
-            [
-                "3e58b321fff0e940"
-            ]
-        ]
-    },
-    {
-        "id": "3e58b321fff0e940",
-        "type": "debug",
-        "z": "59ee26d7d447743a",
-        "name": "debug 2",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 600,
-        "y": 240,
         "wires": []
     },
     {
@@ -962,5 +364,770 @@
         "x": 300,
         "y": 320,
         "wires": []
+    },
+    {
+        "id": "89bd3961978a306d",
+        "type": "inject",
+        "z": "351e5b2e390a463c",
+        "g": "c895b0c3039ff3d9",
+        "name": "Forzar Alarma",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 190,
+        "y": 200,
+        "wires": [
+            [
+                "257b854f59ee1ea5"
+            ]
+        ]
+    },
+    {
+        "id": "257b854f59ee1ea5",
+        "type": "function",
+        "z": "351e5b2e390a463c",
+        "g": "c895b0c3039ff3d9",
+        "name": "Forzar Alarma",
+        "func": "const ahus    = ['AHU-01', 'AHU-02', 'AHU-03'];\nconst plantId = 'planta1';\n\nfunction rand(min, max, decimals = 1) {\n    return +(Math.random() * (max - min) + min).toFixed(decimals);\n}\n\nfunction applyOverrides(plantId, stationId, points) {\n    const overrides   = global.get('ahuOverrides') || {};\n    const ahuOverride = overrides[plantId + '-' + stationId];\n    if (!ahuOverride) return points;\n    if (ahuOverride.fan_status !== undefined) {\n        points.fan_status.value   = ahuOverride.fan_status;\n        points.fan_status.quality = ahuOverride.fan_status === 'ON' ? 'GOOD' : 'BAD';\n    }\n    if (ahuOverride.damper_position !== undefined) {\n        points.damper_position.value = Number(ahuOverride.damper_position);\n    }\n    return points;\n}\n\nconst messages = [];\n\nahus.forEach(ahu => {\n    const timestamp = new Date().toISOString();\n\n    let points = {\n        temperature    : { value: rand(31, 35),      unit: '°C',   quality: 'BAD' },\n        humidity       : { value: rand(72, 80),      unit: '%',    quality: 'BAD' },\n        fan_status     : { value: 'OFF',             unit: '',     quality: 'BAD' },\n        airflow        : { value: rand(400, 650, 0), unit: 'm3/h', quality: 'BAD' },\n        filter_dp      : { value: rand(260, 340, 0), unit: 'Pa',   quality: 'BAD' },\n        damper_position: { value: rand(92, 100, 0),  unit: '%',    quality: 'BAD' },\n        power_status   : { value: 'OFF',             unit: '',     quality: 'BAD' },\n        status         : { value: 'ALARM',           unit: '',     quality: 'BAD' }\n    };\n\n    points = applyOverrides(plantId, ahu, points);\n\n    messages.push({\n        topic  : `hvac/${plantId}/${ahu}`,\n        payload: { plantId, stationId: ahu, timestamp, points }\n    });\n});\n\nreturn [messages];",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 200,
+        "wires": [
+            [
+                "1174be9e9055bc0c"
+            ]
+        ]
+    },
+    {
+        "id": "44e379d6b898e70e",
+        "type": "inject",
+        "z": "351e5b2e390a463c",
+        "g": "c895b0c3039ff3d9",
+        "name": "ForzarWarning",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 200,
+        "y": 240,
+        "wires": [
+            [
+                "51f11c8db6d4264f"
+            ]
+        ]
+    },
+    {
+        "id": "51f11c8db6d4264f",
+        "type": "function",
+        "z": "351e5b2e390a463c",
+        "g": "c895b0c3039ff3d9",
+        "name": "ForzarWarning",
+        "func": "const ahus    = ['AHU-01', 'AHU-02', 'AHU-03'];\nconst plantId = 'planta1';\n\nfunction rand(min, max, decimals = 1) {\n    return +(Math.random() * (max - min) + min).toFixed(decimals);\n}\n\nfunction applyOverrides(plantId, stationId, points) {\n    const overrides   = global.get('ahuOverrides') || {};\n    const ahuOverride = overrides[plantId + '-' + stationId];\n    if (!ahuOverride) return points;\n    if (ahuOverride.fan_status !== undefined) {\n        points.fan_status.value   = ahuOverride.fan_status;\n        points.fan_status.quality = ahuOverride.fan_status === 'ON' ? 'GOOD' : 'UNCERTAIN';\n    }\n    if (ahuOverride.damper_position !== undefined) {\n        points.damper_position.value = Number(ahuOverride.damper_position);\n    }\n    return points;\n}\n\nconst messages = [];\n\nahus.forEach(ahu => {\n    const timestamp = new Date().toISOString();\n\n    let points = {\n        temperature    : { value: rand(26, 28),       unit: '°C',   quality: 'UNCERTAIN' },\n        humidity       : { value: rand(60, 66),       unit: '%',    quality: 'UNCERTAIN' },\n        fan_status     : { value: 'ON',               unit: '',     quality: 'GOOD'      },\n        airflow        : { value: rand(900, 1150, 0), unit: 'm3/h', quality: 'UNCERTAIN' },\n        filter_dp      : { value: rand(160, 220, 0),  unit: 'Pa',   quality: 'UNCERTAIN' },\n        damper_position: { value: rand(75, 85, 0),    unit: '%',    quality: 'UNCERTAIN' },\n        power_status   : { value: 'ON',               unit: '',     quality: 'GOOD'      },\n        status         : { value: 'WARNING',          unit: '',     quality: 'UNCERTAIN' }\n    };\n\n    points = applyOverrides(plantId, ahu, points);\n\n    messages.push({\n        topic  : `hvac/${plantId}/${ahu}`,\n        payload: { plantId, stationId: ahu, timestamp, points }\n    });\n});\n\nreturn [messages];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 240,
+        "wires": [
+            [
+                "1174be9e9055bc0c"
+            ]
+        ]
+    },
+    {
+        "id": "adc6bd8289569ef1",
+        "type": "inject",
+        "z": "351e5b2e390a463c",
+        "g": "c895b0c3039ff3d9",
+        "name": "Ok",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 170,
+        "y": 280,
+        "wires": [
+            [
+                "090d015f533fc9f3"
+            ]
+        ]
+    },
+    {
+        "id": "090d015f533fc9f3",
+        "type": "function",
+        "z": "351e5b2e390a463c",
+        "g": "c895b0c3039ff3d9",
+        "name": "Ok",
+        "func": "const ahus    = ['AHU-01', 'AHU-02', 'AHU-03'];\nconst plantId = 'planta1';\n\nfunction rand(min, max, decimals = 1) {\n    return +(Math.random() * (max - min) + min).toFixed(decimals);\n}\n\nfunction applyOverrides(plantId, stationId, points) {\n    const overrides   = global.get('ahuOverrides') || {};\n    const ahuOverride = overrides[plantId + '-' + stationId];\n    if (!ahuOverride) return points;\n    if (ahuOverride.fan_status !== undefined) {\n        points.fan_status.value   = ahuOverride.fan_status;\n        points.fan_status.quality = ahuOverride.fan_status === 'ON' ? 'GOOD' : 'BAD';\n    }\n    if (ahuOverride.damper_position !== undefined) {\n        points.damper_position.value = Number(ahuOverride.damper_position);\n    }\n    return points;\n}\n\nconst messages = [];\n\nahus.forEach(ahu => {\n    const timestamp = new Date().toISOString();\n\n    let points = {\n        temperature    : { value: rand(22, 25),        unit: '°C',   quality: 'GOOD' },\n        humidity       : { value: rand(45, 55),        unit: '%',    quality: 'GOOD' },\n        fan_status     : { value: 'ON',                unit: '',     quality: 'GOOD' },\n        airflow        : { value: rand(1200, 1500, 0), unit: 'm3/h', quality: 'GOOD' },\n        filter_dp      : { value: rand(80, 140, 0),    unit: 'Pa',   quality: 'GOOD' },\n        damper_position: { value: rand(45, 65, 0),     unit: '%',    quality: 'GOOD' },\n        power_status   : { value: 'ON',                unit: '',     quality: 'GOOD' },\n        status         : { value: 'OK',                unit: '',     quality: 'GOOD' }\n    };\n\n    points = applyOverrides(plantId, ahu, points);\n\n    messages.push({\n        topic  : `hvac/${plantId}/${ahu}`,\n        payload: { plantId, stationId: ahu, timestamp, points }\n    });\n});\n\nreturn [messages];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 280,
+        "wires": [
+            [
+                "1174be9e9055bc0c"
+            ]
+        ]
+    },
+    {
+        "id": "1174be9e9055bc0c",
+        "type": "mqtt out",
+        "z": "351e5b2e390a463c",
+        "name": "MQTT → Mosquitto",
+        "topic": "",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8c44c13ea6274c19",
+        "x": 1350,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "d714646ed56a78de",
+        "type": "inject",
+        "z": "351e5b2e390a463c",
+        "g": "d1dca25f62ca0878",
+        "name": "TDCON3",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 320,
+        "y": 820,
+        "wires": [
+            [
+                "59cc98fd9eba9b6c"
+            ]
+        ]
+    },
+    {
+        "id": "59cc98fd9eba9b6c",
+        "type": "function",
+        "z": "351e5b2e390a463c",
+        "g": "d1dca25f62ca0878",
+        "name": "3 TDCON3",
+        "func": "const plantId = \"TDCON3\";\nconst plantTopic = \"hvac/PlantaTDCON\";\nconst ahus = [\"AHU-01\", \"AHU-02\", \"AHU-03\"];\nconst messages = ahus.map((ahuId) => {\n  return {\n    topic: `${plantTopic}/${ahuId}`,\n    payload: {\n      plantId: plantId, stationId: ahuId, timestamp: new Date().toISOString(),\n      points: {\n        temperature: { value: +(22 + Math.random() * 6).toFixed(1), unit: \"°C\", quality: \"GOOD\" },\n        humidity: { value: +(45 + Math.random() * 20).toFixed(1), unit: \"%\", quality: \"GOOD\" },\n        fan_status: { value: Math.random() > 0.1 ? \"ON\" : \"OFF\", quality: \"GOOD\" },\n        status: { value: \"OK\", quality: \"GOOD\" },\n        airflow: { value: 1100 + Math.floor(Math.random() * 300), unit: \"m3/h\", quality: \"GOOD\" },\n        filter_dp: { value: 150 + Math.floor(Math.random() * 60), unit: \"Pa\", quality: \"GOOD\" },\n        damper_position: { value: 50 + Math.floor(Math.random() * 30), unit: \"%\", quality: \"GOOD\" },\n        power_status: { value: \"ON\", quality: \"GOOD\" }\n      }\n    }\n  };\n});\nreturn [messages];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 570,
+        "y": 820,
+        "wires": [
+            [
+                "1174be9e9055bc0c"
+            ]
+        ]
+    },
+    {
+        "id": "3a115958a7c12b9c",
+        "type": "inject",
+        "z": "351e5b2e390a463c",
+        "g": "d1dca25f62ca0878",
+        "name": "TDCON2",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 320,
+        "y": 760,
+        "wires": [
+            [
+                "5acbcf10cff45f24"
+            ]
+        ]
+    },
+    {
+        "id": "5acbcf10cff45f24",
+        "type": "function",
+        "z": "351e5b2e390a463c",
+        "g": "d1dca25f62ca0878",
+        "name": "3 TDCON2",
+        "func": "const plantId = \"TDCON2\";\nconst plantTopic = \"hvac/PlantaTDCON\";\nconst ahus = [\"AHU-01\", \"AHU-02\", \"AHU-03\"];\nconst messages = ahus.map((ahuId) => {\n  return {\n    topic: `${plantTopic}/${ahuId}`,\n    payload: {\n      plantId: plantId, stationId: ahuId, timestamp: new Date().toISOString(),\n      points: {\n        temperature: { value: +(22 + Math.random() * 6).toFixed(1), unit: \"°C\", quality: \"GOOD\" },\n        humidity: { value: +(45 + Math.random() * 20).toFixed(1), unit: \"%\", quality: \"GOOD\" },\n        fan_status: { value: Math.random() > 0.1 ? \"ON\" : \"OFF\", quality: \"GOOD\" },\n        status: { value: \"OK\", quality: \"GOOD\" },\n        airflow: { value: 1100 + Math.floor(Math.random() * 300), unit: \"m3/h\", quality: \"GOOD\" },\n        filter_dp: { value: 150 + Math.floor(Math.random() * 60), unit: \"Pa\", quality: \"GOOD\" },\n        damper_position: { value: 50 + Math.floor(Math.random() * 30), unit: \"%\", quality: \"GOOD\" },\n        power_status: { value: \"ON\", quality: \"GOOD\" }\n      }\n    }\n  };\n});\nreturn [messages];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 570,
+        "y": 760,
+        "wires": [
+            [
+                "1174be9e9055bc0c"
+            ]
+        ]
+    },
+    {
+        "id": "7136bac6cdf58890",
+        "type": "inject",
+        "z": "351e5b2e390a463c",
+        "g": "d1dca25f62ca0878",
+        "name": "TDCON1",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 320,
+        "y": 720,
+        "wires": [
+            [
+                "e7df3af46058f34f"
+            ]
+        ]
+    },
+    {
+        "id": "e7df3af46058f34f",
+        "type": "function",
+        "z": "351e5b2e390a463c",
+        "g": "d1dca25f62ca0878",
+        "name": "3 TDCON1",
+        "func": "const plantId = \"TDCON1\";\nconst plantTopic = \"hvac/PlantaTDCON\";\nconst ahus = [\"AHU-01\", \"AHU-02\", \"AHU-03\"];\nconst messages = ahus.map((ahuId) => {\n  return {\n    topic: `${plantTopic}/${ahuId}`,\n    payload: {\n      plantId: plantId, stationId: ahuId, timestamp: new Date().toISOString(),\n      points: {\n        temperature: { value: +(22 + Math.random() * 6).toFixed(1), unit: \"°C\", quality: \"GOOD\" },\n        humidity: { value: +(45 + Math.random() * 20).toFixed(1), unit: \"%\", quality: \"GOOD\" },\n        fan_status: { value: Math.random() > 0.1 ? \"ON\" : \"OFF\", quality: \"GOOD\" },\n        status: { value: \"OK\", quality: \"GOOD\" },\n        airflow: { value: 1100 + Math.floor(Math.random() * 300), unit: \"m3/h\", quality: \"GOOD\" },\n        filter_dp: { value: 150 + Math.floor(Math.random() * 60), unit: \"Pa\", quality: \"GOOD\" },\n        damper_position: { value: 50 + Math.floor(Math.random() * 30), unit: \"%\", quality: \"GOOD\" },\n        power_status: { value: \"ON\", quality: \"GOOD\" }\n      }\n    }\n  };\n});\nreturn [messages];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 570,
+        "y": 720,
+        "wires": [
+            [
+                "1174be9e9055bc0c"
+            ]
+        ]
+    },
+    {
+        "id": "e2282af75407e0c9",
+        "type": "inject",
+        "z": "351e5b2e390a463c",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 180,
+        "y": 460,
+        "wires": [
+            [
+                "d521c745022bf3e5"
+            ]
+        ]
+    },
+    {
+        "id": "d521c745022bf3e5",
+        "type": "function",
+        "z": "351e5b2e390a463c",
+        "name": "Degradación progresiva",
+        "func": "const ahus = ['AHU-01', 'AHU-02', 'AHU-03'];\n\nfunction clamp(v, min, max) { return Math.min(Math.max(v, min), max); }\n\nlet state = context.get('ahuState');\nif (!state) {\n    state = {};\n    ahus.forEach(ahu => {\n        state[ahu] = { step: 0, temperature: 23, humidity: 48, airflow: 1400, filter_dp: 90, damper: 55, fan: 'ON', power: 'ON' };\n    });\n}\n\nconst messages = [];\n\nahus.forEach(ahu => {\n    const s = state[ahu];\n    s.step++;\n    s.temperature += 0.3;\n    s.humidity    += 0.6;\n    s.airflow     -= 35;\n    s.filter_dp   += 8;\n    s.damper      += 1.5;\n    s.temperature = clamp(s.temperature, 20, 36);\n    s.humidity    = clamp(s.humidity, 40, 85);\n    s.airflow     = clamp(s.airflow, 300, 1600);\n    s.filter_dp   = clamp(s.filter_dp, 50, 400);\n    s.damper      = clamp(s.damper, 30, 100);\n\n    let status = 'OK'; let quality = 'GOOD';\n    if (s.temperature > 26 || s.humidity > 60 || s.filter_dp > 150) { status = 'WARNING'; quality = 'UNCERTAIN'; }\n    if (s.temperature > 30 || s.humidity > 70 || s.filter_dp > 260 || s.airflow < 700) { status = 'ALARM'; quality = 'BAD'; s.fan = 'OFF'; s.power = 'OFF'; }\n\n    const timestamp = new Date().toISOString();\n    messages.push({\n        topic: `hvac/planta1/${ahu}`,\n        payload: {\n            plantId: 'planta1', stationId: ahu, timestamp,\n            points: {\n                temperature:     { value: +s.temperature.toFixed(1), unit: '°C',   quality },\n                humidity:        { value: +s.humidity.toFixed(1),    unit: '%',    quality },\n                fan_status:      { value: s.fan,                     unit: '',     quality },\n                airflow:         { value: Math.round(s.airflow),     unit: 'm3/h', quality },\n                filter_dp:       { value: Math.round(s.filter_dp),   unit: 'Pa',   quality },\n                damper_position: { value: Math.round(s.damper),      unit: '%',    quality },\n                power_status:    { value: s.power,                   unit: '',     quality },\n                status:          { value: status,                    unit: '',     quality }\n            }\n        }\n    });\n});\n\ncontext.set('ahuState', state);\nreturn [messages];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 460,
+        "wires": [
+            [
+                "1174be9e9055bc0c"
+            ]
+        ]
+    },
+    {
+        "id": "9d2a54b9a26bd57e",
+        "type": "inject",
+        "z": "351e5b2e390a463c",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 180,
+        "y": 520,
+        "wires": [
+            [
+                "1cc939f9abc373b5"
+            ]
+        ]
+    },
+    {
+        "id": "1cc939f9abc373b5",
+        "type": "function",
+        "z": "351e5b2e390a463c",
+        "name": "reset degradación",
+        "func": "context.set('ahuState', null);\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8ab5a1bb5a1f245d",
+        "type": "inject",
+        "z": "351e5b2e390a463c",
+        "name": "Force Healthy",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 290,
+        "y": 1020,
+        "wires": [
+            [
+                "3cb7b21b3adcf566",
+                "d4b7b25e3ba24986",
+                "47e479e6e4fbc493"
+            ]
+        ]
+    },
+    {
+        "id": "3cb7b21b3adcf566",
+        "type": "function",
+        "z": "351e5b2e390a463c",
+        "name": "3 TDCON1",
+        "func": "const plantId = \"TDCON1\";\nconst plantTopic = \"hvac/PlantaTDCON\";\nconst ahus = [\"AHU-01\", \"AHU-02\", \"AHU-03\"];\nconst messages = ahus.map((ahuId) => ({\n    topic: `${plantTopic}/${ahuId}`,\n    payload: {\n        plantId, stationId: ahuId, timestamp: new Date().toISOString(),\n        points: {\n            temperature: { value: +(22 + Math.random() * 6).toFixed(1), unit: \"°C\", quality: \"GOOD\" },\n            humidity: { value: +(45 + Math.random() * 20).toFixed(1), unit: \"%\", quality: \"GOOD\" },\n            fan_status: { value: \"ON\", quality: \"GOOD\" },\n            status: { value: \"OK\", quality: \"GOOD\" },\n            airflow: { value: 1100 + Math.floor(Math.random() * 300), unit: \"m3/h\", quality: \"GOOD\" },\n            filter_dp: { value: 150 + Math.floor(Math.random() * 60), unit: \"Pa\", quality: \"GOOD\" },\n            damper_position: { value: 50 + Math.floor(Math.random() * 30), unit: \"%\", quality: \"GOOD\" },\n            power_status: { value: \"ON\", quality: \"GOOD\" }\n        }\n    }\n}));\nreturn [messages];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 550,
+        "y": 1000,
+        "wires": [
+            [
+                "1174be9e9055bc0c"
+            ]
+        ]
+    },
+    {
+        "id": "d4b7b25e3ba24986",
+        "type": "function",
+        "z": "351e5b2e390a463c",
+        "name": "3 TDCON2",
+        "func": "const plantId = \"TDCON2\";\nconst plantTopic = \"hvac/PlantaTDCON\";\nconst ahus = [\"AHU-01\", \"AHU-02\", \"AHU-03\"];\nconst messages = ahus.map((ahuId) => ({\n    topic: `${plantTopic}/${ahuId}`,\n    payload: {\n        plantId, stationId: ahuId, timestamp: new Date().toISOString(),\n        points: {\n            temperature: { value: +(22 + Math.random() * 6).toFixed(1), unit: \"°C\", quality: \"GOOD\" },\n            humidity: { value: +(45 + Math.random() * 20).toFixed(1), unit: \"%\", quality: \"GOOD\" },\n            fan_status: { value: \"ON\", quality: \"GOOD\" },\n            status: { value: \"OK\", quality: \"GOOD\" },\n            airflow: { value: 1100 + Math.floor(Math.random() * 300), unit: \"m3/h\", quality: \"GOOD\" },\n            filter_dp: { value: 150 + Math.floor(Math.random() * 60), unit: \"Pa\", quality: \"GOOD\" },\n            damper_position: { value: 50 + Math.floor(Math.random() * 30), unit: \"%\", quality: \"GOOD\" },\n            power_status: { value: \"ON\", quality: \"GOOD\" }\n        }\n    }\n}));\nreturn [messages];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 550,
+        "y": 1040,
+        "wires": [
+            [
+                "1174be9e9055bc0c"
+            ]
+        ]
+    },
+    {
+        "id": "47e479e6e4fbc493",
+        "type": "function",
+        "z": "351e5b2e390a463c",
+        "name": "3 TDCON3",
+        "func": "const plantId = \"TDCON3\";\nconst plantTopic = \"hvac/PlantaTDCON\";\nconst ahus = [\"AHU-01\", \"AHU-02\", \"AHU-03\"];\nconst messages = ahus.map((ahuId) => ({\n    topic: `${plantTopic}/${ahuId}`,\n    payload: {\n        plantId, stationId: ahuId, timestamp: new Date().toISOString(),\n        points: {\n            temperature: { value: +(22 + Math.random() * 6).toFixed(1), unit: \"°C\", quality: \"GOOD\" },\n            humidity: { value: +(45 + Math.random() * 20).toFixed(1), unit: \"%\", quality: \"GOOD\" },\n            fan_status: { value: \"ON\", quality: \"GOOD\" },\n            status: { value: \"OK\", quality: \"GOOD\" },\n            airflow: { value: 1100 + Math.floor(Math.random() * 300), unit: \"m3/h\", quality: \"GOOD\" },\n            filter_dp: { value: 150 + Math.floor(Math.random() * 60), unit: \"Pa\", quality: \"GOOD\" },\n            damper_position: { value: 50 + Math.floor(Math.random() * 30), unit: \"%\", quality: \"GOOD\" },\n            power_status: { value: \"ON\", quality: \"GOOD\" }\n        }\n    }\n}));\nreturn [messages];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 550,
+        "y": 1100,
+        "wires": [
+            [
+                "1174be9e9055bc0c"
+            ]
+        ]
+    },
+    {
+        "id": "cmd_live_inject",
+        "type": "inject",
+        "z": "351e5b2e390a463c",
+        "name": "Live State — 5s  [DISABLED: replaced by Auto Simulation tab]",
+        "props": [],
+        "repeat": "5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 830,
+        "y": 360,
+        "wires": [
+            [
+                "cmd_live_fn"
+            ]
+        ]
+    },
+    {
+        "id": "cmd_live_fn",
+        "type": "function",
+        "z": "351e5b2e390a463c",
+        "name": "Live State planta1",
+        "func": "const ahus    = ['AHU-01', 'AHU-02', 'AHU-03'];\nconst plantId = 'planta1';\n\nfunction rand(min, max, decimals = 1) {\n    return +(Math.random() * (max - min) + min).toFixed(decimals);\n}\n\n// Reads any override stored by the Commands Handler\nfunction applyOverrides(plantId, stationId, points) {\n    const overrides   = global.get('ahuOverrides') || {};\n    const ahuOverride = overrides[plantId + '-' + stationId];\n    if (!ahuOverride) return points;\n    if (ahuOverride.fan_status !== undefined) {\n        points.fan_status.value   = ahuOverride.fan_status;\n        points.fan_status.quality = ahuOverride.fan_status === 'ON' ? 'GOOD' : 'BAD';\n    }\n    if (ahuOverride.damper_position !== undefined) {\n        points.damper_position.value = Number(ahuOverride.damper_position);\n    }\n    return points;\n}\n\nconst messages = [];\n\nahus.forEach(ahu => {\n    const timestamp = new Date().toISOString();\n\n    let points = {\n        temperature    : { value: rand(22, 25),        unit: '°C',   quality: 'GOOD' },\n        humidity       : { value: rand(45, 55),        unit: '%',    quality: 'GOOD' },\n        fan_status     : { value: 'ON',                unit: '',     quality: 'GOOD' },\n        airflow        : { value: rand(1200, 1500, 0), unit: 'm3/h', quality: 'GOOD' },\n        filter_dp      : { value: rand(80, 140, 0),    unit: 'Pa',   quality: 'GOOD' },\n        damper_position: { value: rand(45, 65, 0),     unit: '%',    quality: 'GOOD' },\n        power_status   : { value: 'ON',                unit: '',     quality: 'GOOD' },\n        status         : { value: 'OK',                unit: '',     quality: 'GOOD' }\n    };\n\n    points = applyOverrides(plantId, ahu, points);\n\n    messages.push({\n        topic  : `hvac/${plantId}/${ahu}`,\n        payload: { plantId, stationId: ahu, timestamp, points }\n    });\n});\n\nreturn [messages];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1060,
+        "y": 360,
+        "wires": [
+            [
+                "1174be9e9055bc0c"
+            ]
+        ]
+    },
+    {
+        "id": "bb329fbdfa16533b",
+        "type": "mqtt in",
+        "z": "92ede25a0d8f218c",
+        "name": "Subscribe commands/set",
+        "topic": "hvac/+/+/commands/set",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "8c44c13ea6274c19",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 190,
+        "y": 280,
+        "wires": [
+            [
+                "f377809923b7dc38"
+            ]
+        ]
+    },
+    {
+        "id": "f377809923b7dc38",
+        "type": "function",
+        "z": "92ede25a0d8f218c",
+        "name": "Process Command + Save Override",
+        "func": "var payload   = msg.payload;\nvar commandId = payload.commandId;\nvar plantId   = payload.plantId;\nvar stationId = payload.stationId;\nvar command   = payload.command;\nvar value     = payload.value;\n\n// ── Persist override in global context ───────────────────────────────────────\nvar overrides = global.get('ahuOverrides') || {};\nvar key = plantId + '-' + stationId;\nif (!overrides[key]) overrides[key] = {};\noverrides[key][command] = value;\nglobal.set('ahuOverrides', overrides);\nnode.warn('[CMD] Override stored: ' + key + ' → ' + command + ' = ' + value);\n\n// ── Publish response back to backend ─────────────────────────────────────────\nmsg.topic   = 'hvac/' + plantId + '/' + stationId + '/commands/response';\nmsg.payload = {\n    commandId : commandId,\n    status    : 'SUCCESS',\n    message   : command + ' set to ' + value,\n    timestamp : new Date().toISOString()\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 470,
+        "y": 280,
+        "wires": [
+            [
+                "96f45b3a8010a3eb",
+                "7e2f025c4bfa9b89"
+            ]
+        ]
+    },
+    {
+        "id": "96f45b3a8010a3eb",
+        "type": "mqtt out",
+        "z": "92ede25a0d8f218c",
+        "name": "Publish commands/response",
+        "topic": "",
+        "qos": "2",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8c44c13ea6274c19",
+        "x": 840,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "7e2f025c4bfa9b89",
+        "type": "debug",
+        "z": "92ede25a0d8f218c",
+        "name": "Command Debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 850,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "c8abc294532799a0",
+        "type": "inject",
+        "z": "92ede25a0d8f218c",
+        "name": "Reset All Overrides",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 190,
+        "y": 420,
+        "wires": [
+            [
+                "7e3726afd063e4fd"
+            ]
+        ]
+    },
+    {
+        "id": "7e3726afd063e4fd",
+        "type": "function",
+        "z": "92ede25a0d8f218c",
+        "name": "Clear global overrides",
+        "func": "global.set('ahuOverrides', {});\nnode.warn('[CMD] All overrides cleared — PLC state reset to base values');\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 420,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "auto_sim_inject",
+        "type": "inject",
+        "z": "auto_sim_tab",
+        "name": "Tick — 3s",
+        "props": [],
+        "repeat": "3",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 160,
+        "y": 200,
+        "wires": [
+            [
+                "auto_sim_fn"
+            ]
+        ]
+    },
+    {
+        "id": "auto_sim_fn",
+        "type": "function",
+        "z": "auto_sim_tab",
+        "name": "AHU Simulation Engine",
+        "func": "// ═══════════════════════════════════════════════════════════════════\n// AUTO SIMULATION ENGINE — planta1 / AHU-01, AHU-02, AHU-03\n//\n// Phase machine per AHU:\n//   RISING  → fan OFF, temperature rises 0.3°C/tick\n//             → WARNING at 26°C, ALARM at 28°C\n//   ALARM   → fan still OFF, temperature creeps to ceiling (34°C)\n//             → transitions to COOLING when user sends fan_status=ON\n//   COOLING → fan ON, temperature drops 0.5°C/tick, airflow builds up\n//             → transitions to NORMAL when temperature ≤ 22°C\n//   NORMAL  → fan ON, stable values with small noise\n//\n// Complementary variable behaviour:\n//   airflow        : 0 when fan OFF → ramps up to ~1300 m³/h when fan ON\n//   humidity       : rises slowly fan OFF, drops during COOLING, stable NORMAL\n//   filter_dp      : ~100 Pa idle, rises to ~130 Pa with airflow\n//   damper_position: 0 when fan OFF, 75% when fan ON (or commanded value)\n//   power_status   : always ON (unit is powered even without fan)\n// ═══════════════════════════════════════════════════════════════════\n\nconst AHUS       = ['AHU-01', 'AHU-02', 'AHU-03'];\nconst PLANT_ID   = 'planta1';\n\n// Thresholds\nconst TEMP_WARN  = 26;\nconst TEMP_ALARM = 28;\nconst TEMP_COOL  = 22;    // target after cooling\nconst TEMP_MAX   = 34;\n\n// ── Init persistent state ────────────────────────────────────────────────────\nlet state = flow.get('autoSimState');\nif (!state) {\n    state = {};\n    AHUS.forEach((ahu, i) => {\n        state[ahu] = {\n            phase          : 'RISING',\n            temperature    : 20.0 + i * 0.5,   // slight stagger per AHU\n            humidity       : 45.0 + i * 1.0,\n            airflow        : 0,\n            filter_dp      : 100,\n            damper_position: 0,\n            fan_status     : 'OFF',\n            power_status   : 'ON'\n        };\n    });\n}\n\n// ── Helpers ───────────────────────────────────────────────────────────────────\nconst clamp = (v, mn, mx) => Math.min(Math.max(v, mn), mx);\nconst noise = (base, range) => base + (Math.random() * range * 2 - range);\n\n// ── Read overrides written by Commands Handler ────────────────────────────────\nconst overrides = global.get('ahuOverrides') || {};\n\nconst messages = [];\n\nAHUS.forEach(ahu => {\n    const s      = state[ahu];\n    const key    = `${PLANT_ID}-${ahu}`;\n    const ov     = overrides[key] || {};\n    const fanCmd = ov.fan_status;   // set by the Commands Handler when user sends command\n\n    // ── Phase state machine ──────────────────────────────────────────────────\n    switch (s.phase) {\n\n        case 'RISING':\n            // Fan is OFF — heat accumulates, humidity creeps up, no airflow\n            s.fan_status      = 'OFF';\n            s.temperature     = clamp(s.temperature + 0.3, 20, TEMP_MAX);\n            s.humidity        = clamp(s.humidity    + 0.2, 45, 85);\n            s.airflow         = 0;\n            s.filter_dp       = Math.round(noise(100, 4));\n            s.damper_position = 0;\n\n            if (s.temperature >= TEMP_ALARM) {\n                s.phase = 'ALARM';\n                node.warn(`[SIM] ${ahu}: reached ${s.temperature.toFixed(1)}°C → ALARM`);\n            }\n            break;\n\n        case 'ALARM':\n            // Fan still OFF — temperature barely creeps, waiting for fan ON command\n            s.fan_status      = 'OFF';\n            s.temperature     = clamp(s.temperature + 0.05, TEMP_ALARM, TEMP_MAX);\n            s.humidity        = clamp(s.humidity    + 0.1,  45, 85);\n            s.airflow         = Math.round(Math.max(0, noise(0, 15)));\n            s.filter_dp       = Math.round(noise(95, 4));\n            s.damper_position = 0;\n\n            // Transition: user acknowledged alarm and sent fan ON\n            if (fanCmd === 'ON') {\n                s.phase           = 'COOLING';\n                s.fan_status      = 'ON';\n                s.damper_position = ov.damper_position ? Number(ov.damper_position) : 75;\n                node.warn(`[SIM] ${ahu}: fan ON command received → COOLING`);\n            }\n            break;\n\n        case 'COOLING':\n            // Fan ON — temperature drops, airflow builds, humidity falls\n            s.fan_status      = 'ON';\n            s.temperature     = clamp(s.temperature - 0.5, TEMP_COOL - 1, TEMP_MAX);\n            s.humidity        = clamp(s.humidity    - 0.3, 44, 85);\n            s.airflow         = clamp(s.airflow + 120, 0, 1400);\n            s.filter_dp       = clamp(Math.round(noise(125, 8)), 100, 160);\n            s.damper_position = ov.damper_position ? Number(ov.damper_position) : 75;\n\n            if (s.temperature <= TEMP_COOL) {\n                s.phase = 'NORMAL';\n                node.warn(`[SIM] ${ahu}: temperature stabilised → NORMAL`);\n            }\n            break;\n\n        case 'NORMAL':\n            // Fan ON — stable comfortable conditions with small noise\n            s.fan_status      = 'ON';\n            s.temperature     = clamp(noise(21.5, 0.4), 20.5, 23);\n            s.humidity        = clamp(noise(49,   1.5), 44,   56);\n            s.airflow         = Math.round(clamp(noise(1300, 70), 1150, 1480));\n            s.filter_dp       = Math.round(clamp(noise(122,  8),  100,  150));\n            s.damper_position = ov.damper_position\n                                    ? Number(ov.damper_position)\n                                    : Math.round(clamp(noise(55, 4), 48, 65));\n            break;\n    }\n\n    // ── Derive overall status from temperature ───────────────────────────────\n    let status, stQ;\n    if      (s.temperature >= TEMP_ALARM) { status = 'ALARM';   stQ = 'BAD';       }\n    else if (s.temperature >= TEMP_WARN)  { status = 'WARNING'; stQ = 'UNCERTAIN'; }\n    else                                  { status = 'OK';      stQ = 'GOOD';      }\n\n    // Humidity quality independent of temperature status\n    const humQ = s.humidity > 70 ? 'BAD' : s.humidity > 60 ? 'UNCERTAIN' : 'GOOD';\n\n    // Fan quality: BAD only during ALARM, otherwise GOOD\n    const fanQ = s.fan_status === 'ON' ? 'GOOD' : (stQ === 'BAD' ? 'BAD' : 'GOOD');\n\n    // Airflow quality: low airflow while fan is ON is suspicious\n    const flowQ = (s.airflow < 400 && s.fan_status === 'ON') ? 'UNCERTAIN' : 'GOOD';\n\n    messages.push({\n        topic  : `hvac/${PLANT_ID}/${ahu}`,\n        payload: {\n            plantId  : PLANT_ID,\n            stationId: ahu,\n            timestamp: new Date().toISOString(),\n            points   : {\n                temperature    : { value: +s.temperature.toFixed(1),    unit: '°C',   quality: stQ   },\n                humidity       : { value: +s.humidity.toFixed(1),        unit: '%',    quality: humQ  },\n                fan_status     : { value: s.fan_status,                  unit: '',     quality: fanQ  },\n                airflow        : { value: s.airflow,                     unit: 'm3/h', quality: flowQ },\n                filter_dp      : { value: s.filter_dp,                   unit: 'Pa',   quality: 'GOOD' },\n                damper_position: { value: Math.round(s.damper_position), unit: '%',    quality: 'GOOD' },\n                power_status   : { value: s.power_status,                unit: '',     quality: 'GOOD' },\n                status         : { value: status,                        unit: '',     quality: stQ   }\n            }\n        }\n    });\n});\n\n// ── Persist state for next tick ───────────────────────────────────────────────\nflow.set('autoSimState', state);\n\nreturn [messages];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 200,
+        "wires": [
+            [
+                "auto_sim_mqtt",
+                "auto_sim_debug"
+            ]
+        ]
+    },
+    {
+        "id": "auto_sim_mqtt",
+        "type": "mqtt out",
+        "z": "auto_sim_tab",
+        "name": "Publish → Mosquitto",
+        "topic": "",
+        "qos": "0",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8c44c13ea6274c19",
+        "x": 680,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "auto_sim_debug",
+        "type": "debug",
+        "z": "auto_sim_tab",
+        "name": "Sim Status",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": true,
+        "complete": "payload",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 680,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "auto_sim_reset_inject",
+        "type": "inject",
+        "z": "auto_sim_tab",
+        "name": "Reset Simulation",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 160,
+        "y": 360,
+        "wires": [
+            [
+                "auto_sim_reset_fn"
+            ]
+        ]
+    },
+    {
+        "id": "auto_sim_reset_fn",
+        "type": "function",
+        "z": "auto_sim_tab",
+        "name": "Reset State + Overrides",
+        "func": "// Clear simulation state → next tick re-initialises from RISING phase\nflow.set('autoSimState', null);\n// Also clear any command overrides so fan goes back to OFF\nglobal.set('ahuOverrides', {});\nnode.warn('[SIM] Simulation reset — all AHUs back to RISING phase, fan OFF');\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 360,
+        "wires": [
+            []
+        ]
     }
 ]

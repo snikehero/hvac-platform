@@ -21,12 +21,14 @@
             },
             "dialog": {
                 "export": {
-                    "pretty": true
+                    "pretty": true,
+                    "json-view": false
                 }
             }
         },
         "debug": {
-            "filter": "filterCurrent"
-        }
+            "filter": "filterAll"
+        },
+        "menu-menu-item-sidebar": false
     }
 }

@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useCallback, useEffect, useMemo } from "react";
+import type { Socket } from "socket.io-client";
 import type { HvacTelemetry } from "@/types/telemetry";
 import type { HvacEvent } from "@/types/event";
 import type { HistoryPoint } from "@/types/history";
@@ -42,6 +43,8 @@ interface TelemetryContextValue {
   /** Check if a specific AHU is connected */
   isAhuConnected: (plantId: string, stationId: string) => boolean;
   setEvents: React.Dispatch<React.SetStateAction<HvacEvent[]>>;
+  /** Raw Socket.IO socket — used by command hooks to emit events */
+  socket: Socket | null;
 }
 
 export const TelemetryContext = createContext<TelemetryContextValue | null>(
@@ -246,6 +249,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       ahuConnectionStatus: connectivity.ahuConnectionStatus,
       isAhuConnected: connectivity.isAhuConnected,
       setEvents: eventManager.setEvents,
+      socket,
     }),
     [
       telemetry,
@@ -256,6 +260,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       connected,
       connectivity.ahuConnectionStatus,
       connectivity.isAhuConnected,
+      socket,
     ],
   );
 

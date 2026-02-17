@@ -5,5 +5,6 @@ import { HvacModule } from '../hvac/hvac.module';
 @Module({
   imports: [HvacModule],
   providers: [MqttService],
+  exports: [MqttService],
 })
 export class MqttModule {}
