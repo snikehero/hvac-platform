@@ -1,4 +1,3 @@
-"use client";
 import {
   Select,
   SelectContent,
@@ -14,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useFilteredAhus } from "./hooks/useFilteredAhus";
 import { useDashboardStats } from "./hooks/useDashboardStats";
+import { useSettings } from "@/context/SettingsContext";
 
 import { DashboardWidgets } from "./components/DashboardWidgets";
 import { AhuCard } from "./components/AhuCard";
@@ -27,6 +27,7 @@ export default function DashboardEjecutivoPage() {
   const { telemetry } = useTelemetry();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { settings } = useSettings();
 
   /* -------------------- filtros -------------------- */
   const [plantFilter, setPlantFilter] = useState<string | null>(null);
@@ -36,15 +37,15 @@ export default function DashboardEjecutivoPage() {
 
   /* -------------------- datos derivados -------------------- */
 
-  // 🔥 KPIs SIEMPRE globales (no filtrados)
+  // KPIs always global (unfiltered)
   const stats = useDashboardStats(telemetry);
 
-  // 👇 Grid sí respeta filtros
+  // Grid respects filters
   const filteredAhus = useFilteredAhus(telemetry, plantFilter, statusFilter);
 
   const plants = Array.from(new Set(telemetry.map((ahu) => ahu.plantId)));
 
-  /* -------------------- acciones KPI -------------------- */
+  /* -------------------- KPI actions -------------------- */
 
   const handleFilterByStatus = (
     status: "OK" | "WARNING" | "ALARM" | "DISCONNECTED",
@@ -52,6 +53,8 @@ export default function DashboardEjecutivoPage() {
     setPlantFilter(null);
     setStatusFilter(status);
   };
+
+  const { widgets } = settings.dashboard;
 
   return (
     <div className="p-6 lg:p-8 space-y-8 lg:space-y-10">
@@ -65,28 +68,45 @@ export default function DashboardEjecutivoPage() {
         </p>
       </div>
 
-      {/* ================= HERO GLOBAL ================= */}
-      <HeroSystemStatus />
+      {/* ================= CONFIGURABLE WIDGETS ================= */}
+      {widgets
+        .filter((w) => w.visible)
+        .map((w) => {
+          switch (w.id) {
+            case "hero-system-status":
+              return <HeroSystemStatus key={w.id} />;
 
-      {/* ================= BLOQUE ESTRATÉGICO ================= */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Panel por planta (más ancho) */}
-        <div className="lg:col-span-2">
-          <HeroPlantPanel
-            telemetry={telemetry}
-            onSelectPlant={(plantId) => {
-              setPlantFilter(plantId);
-              setStatusFilter(null);
-            }}
-          />
-        </div>
-      </div>
+            case "plant-activity-block":
+              return (
+                <div key={w.id} className="space-y-8 lg:space-y-10">
+                  <div className="grid lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2">
+                      <HeroPlantPanel
+                        telemetry={telemetry}
+                        onSelectPlant={(plantId) => {
+                          setPlantFilter(plantId);
+                          setStatusFilter(null);
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <SystemActivityPanel />
+                </div>
+              );
 
-      {/* Actividad reciente */}
+            case "kpi-widgets":
+              return (
+                <DashboardWidgets
+                  key={w.id}
+                  stats={stats}
+                  onFilterStatus={handleFilterByStatus}
+                />
+              );
 
-      <SystemActivityPanel />
-      {/* ================= KPIs SECUNDARIOS ================= */}
-      <DashboardWidgets stats={stats} onFilterStatus={handleFilterByStatus} />
+            default:
+              return null;
+          }
+        })}
 
       {/* ================= FILTROS ================= */}
       <div className="border-t border-neutral-800 pt-6">
@@ -143,6 +163,7 @@ export default function DashboardEjecutivoPage() {
           </div>
         </div>
       </div>
+
       {/* ================= GRID AHUs ================= */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         {filteredAhus.map((ahu) => (

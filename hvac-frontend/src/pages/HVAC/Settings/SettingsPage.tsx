@@ -5,6 +5,8 @@ import {
   type HvacThresholds,
   type HvacNotifications,
   type HvacGeneral,
+  type HvacDashboard,
+  type DashboardWidgetConfig,
 } from "@/context/SettingsContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -37,10 +39,27 @@ import {
   AlertTriangle,
   Gauge,
   Play,
+  LayoutDashboard,
 } from "lucide-react";
 import { toast } from "sonner";
 import { audioManager } from "@/pages/HVAC/DashboardEjecutivoPage/3DDetailPage/presentation/Audio/AudioManager";
 import { useTranslation } from "@/i18n/useTranslation";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { DashboardWidgetRow } from "./DashboardWidgetRow";
 
 export default function SettingsPage() {
   const {
@@ -48,6 +67,7 @@ export default function SettingsPage() {
     updateThresholds,
     updateNotifications,
     updateGeneral,
+    updateDashboard,
     resetToDefaults,
   } = useSettings();
   const { t, tf } = useTranslation();
@@ -60,16 +80,19 @@ export default function SettingsPage() {
     settings.notifications,
   );
   const [general, setGeneral] = useState<HvacGeneral>(settings.general);
+  const [dashboard, setDashboard] = useState<HvacDashboard>(settings.dashboard);
 
   const hasChanges =
     JSON.stringify(thresholds) !== JSON.stringify(settings.thresholds) ||
     JSON.stringify(notifications) !== JSON.stringify(settings.notifications) ||
-    JSON.stringify(general) !== JSON.stringify(settings.general);
+    JSON.stringify(general) !== JSON.stringify(settings.general) ||
+    JSON.stringify(dashboard) !== JSON.stringify(settings.dashboard);
 
   function handleSave() {
     updateThresholds(thresholds);
     updateNotifications(notifications);
     updateGeneral(general);
+    updateDashboard(dashboard);
     toast.success(t.settings.toast.saved);
   }
 
@@ -77,6 +100,7 @@ export default function SettingsPage() {
     setThresholds(DEFAULT_SETTINGS.thresholds);
     setNotifications(DEFAULT_SETTINGS.notifications);
     setGeneral(DEFAULT_SETTINGS.general);
+    setDashboard(DEFAULT_SETTINGS.dashboard);
     resetToDefaults();
     toast.info(t.settings.toast.reset);
   }
@@ -89,6 +113,33 @@ export default function SettingsPage() {
     setTimeout(() => {
       audioManager.playOneShot("test-alarm");
     }, 300);
+  }
+
+  // dnd-kit sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    setDashboard((prev) => {
+      const oldIndex = prev.widgets.findIndex((w) => w.id === active.id);
+      const newIndex = prev.widgets.findIndex((w) => w.id === over.id);
+      return { widgets: arrayMove(prev.widgets, oldIndex, newIndex) };
+    });
+  }
+
+  function handleToggleWidget(
+    id: DashboardWidgetConfig["id"],
+    visible: boolean,
+  ) {
+    setDashboard((prev) => ({
+      widgets: prev.widgets.map((w) => (w.id === id ? { ...w, visible } : w)),
+    }));
   }
 
   return (
@@ -124,6 +175,10 @@ export default function SettingsPage() {
           <TabsTrigger value="general" className="gap-1.5">
             <Globe className="w-4 h-4" />
             {t.settings.tabs.general}
+          </TabsTrigger>
+          <TabsTrigger value="dashboard" className="gap-1.5">
+            <LayoutDashboard className="w-4 h-4" />
+            {t.settings.dashboard.tabLabel}
           </TabsTrigger>
         </TabsList>
 
@@ -429,6 +484,50 @@ export default function SettingsPage() {
                   <span>30s ({t.settings.general.lowConsumption})</span>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ===========================
+            TAB 4 - DASHBOARD
+           =========================== */}
+        <TabsContent value="dashboard" className="space-y-6">
+          <Card className="backdrop-blur-sm border-border/50">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <LayoutDashboard className="w-5 h-5 text-primary" />
+                {t.settings.dashboard.layoutTitle}
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                {t.settings.dashboard.layoutDesc}
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-xs text-muted-foreground">
+                {t.settings.dashboard.dragHint}
+              </p>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={dashboard.widgets.map((w) => w.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-2">
+                    {dashboard.widgets.map((widget) => (
+                      <DashboardWidgetRow
+                        key={widget.id}
+                        widget={widget}
+                        label={t.settings.dashboard.widgetLabels[widget.id]}
+                        visibleLabel={t.settings.dashboard.visibleLabel}
+                        onToggle={handleToggleWidget}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
             </CardContent>
           </Card>
         </TabsContent>

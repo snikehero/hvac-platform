@@ -253,6 +253,20 @@ export const es = {
       saved: "Configuración guardada correctamente",
       reset: "Configuración restablecida a valores por defecto",
     },
+
+    // Dashboard layout
+    dashboard: {
+      tabLabel: "Dashboard",
+      layoutTitle: "Diseño del Dashboard",
+      layoutDesc: "Activa o desactiva secciones y arrástralas para reordenarlas.",
+      widgetLabels: {
+        "hero-system-status": "Banner de Estado del Sistema",
+        "plant-activity-block": "Vista por Planta y Actividad",
+        "kpi-widgets": "Widgets KPI",
+      },
+      visibleLabel: "Visible",
+      dragHint: "Arrastra las filas para reordenar",
+    },
   },
 
   // ===== AHU Detail Content =====

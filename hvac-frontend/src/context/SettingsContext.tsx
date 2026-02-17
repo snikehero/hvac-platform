@@ -30,10 +30,25 @@ export interface HvacGeneral {
   refreshIntervalSeconds: number;
 }
 
+export type DashboardWidgetId =
+  | "hero-system-status"
+  | "plant-activity-block"
+  | "kpi-widgets";
+
+export interface DashboardWidgetConfig {
+  id: DashboardWidgetId;
+  visible: boolean;
+}
+
+export interface HvacDashboard {
+  widgets: DashboardWidgetConfig[];
+}
+
 export interface HvacSettings {
   thresholds: HvacThresholds;
   notifications: HvacNotifications;
   general: HvacGeneral;
+  dashboard: HvacDashboard;
 }
 
 /* ============================
@@ -56,9 +71,22 @@ export const DEFAULT_SETTINGS: HvacSettings = {
     language: "es",
     refreshIntervalSeconds: 5,
   },
+  dashboard: {
+    widgets: [
+      { id: "hero-system-status", visible: true },
+      { id: "plant-activity-block", visible: true },
+      { id: "kpi-widgets", visible: true },
+    ],
+  },
 };
 
 const STORAGE_KEY = "hvac-settings";
+
+const DEFAULT_WIDGET_IDS: DashboardWidgetId[] = [
+  "hero-system-status",
+  "plant-activity-block",
+  "kpi-widgets",
+];
 
 /* ============================
    Context
@@ -69,6 +97,7 @@ interface SettingsContextValue {
   updateThresholds: (patch: Partial<HvacThresholds>) => void;
   updateNotifications: (patch: Partial<HvacNotifications>) => void;
   updateGeneral: (patch: Partial<HvacGeneral>) => void;
+  updateDashboard: (dashboard: HvacDashboard) => void;
   resetToDefaults: () => void;
 }
 
@@ -77,6 +106,38 @@ const SettingsContext = createContext<SettingsContextValue | null>(null);
 /* ============================
    Provider
    ============================ */
+
+function mergeDashboard(stored: unknown): HvacDashboard {
+  if (
+    !stored ||
+    typeof stored !== "object" ||
+    !Array.isArray((stored as HvacDashboard).widgets)
+  ) {
+    return DEFAULT_SETTINGS.dashboard;
+  }
+
+  const storedWidgets = (stored as HvacDashboard).widgets;
+  const storedIds = storedWidgets.map((w) => w.id);
+
+  // Check that stored array contains exactly the default IDs (no extras, no missing)
+  const hasAllIds =
+    DEFAULT_WIDGET_IDS.every((id) => storedIds.includes(id)) &&
+    storedIds.every((id) => DEFAULT_WIDGET_IDS.includes(id as DashboardWidgetId));
+
+  if (hasAllIds) {
+    // Preserve user order; keep stored visibility
+    return { widgets: storedWidgets as DashboardWidgetConfig[] };
+  }
+
+  // Fall back: use default order, re-apply stored visibility where IDs match
+  const visibilityMap = new Map(storedWidgets.map((w) => [w.id, w.visible]));
+  return {
+    widgets: DEFAULT_SETTINGS.dashboard.widgets.map((w) => ({
+      id: w.id,
+      visible: visibilityMap.has(w.id) ? (visibilityMap.get(w.id) as boolean) : w.visible,
+    })),
+  };
+}
 
 function loadFromStorage(): HvacSettings {
   try {
@@ -90,6 +151,7 @@ function loadFromStorage(): HvacSettings {
         ...parsed.notifications,
       },
       general: { ...DEFAULT_SETTINGS.general, ...parsed.general },
+      dashboard: mergeDashboard(parsed.dashboard),
     };
   } catch {
     return DEFAULT_SETTINGS;
@@ -127,6 +189,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
+  const updateDashboard = useCallback((dashboard: HvacDashboard) => {
+    setSettings((prev) => ({ ...prev, dashboard }));
+  }, []);
+
   const resetToDefaults = useCallback(() => {
     setSettings(DEFAULT_SETTINGS);
   }, []);
@@ -138,6 +204,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         updateThresholds,
         updateNotifications,
         updateGeneral,
+        updateDashboard,
         resetToDefaults,
       }}
     >

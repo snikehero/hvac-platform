@@ -253,6 +253,20 @@ export const en = {
       saved: "Settings saved successfully",
       reset: "Settings reset to default values",
     },
+
+    // Dashboard layout
+    dashboard: {
+      tabLabel: "Dashboard",
+      layoutTitle: "Dashboard Layout",
+      layoutDesc: "Toggle visibility and drag to reorder the dashboard sections.",
+      widgetLabels: {
+        "hero-system-status": "System Status Banner",
+        "plant-activity-block": "Plant Overview & Activity",
+        "kpi-widgets": "KPI Widgets",
+      },
+      visibleLabel: "Visible",
+      dragHint: "Drag rows to reorder",
+    },
   },
 
   // ===== AHU Detail Content =====
