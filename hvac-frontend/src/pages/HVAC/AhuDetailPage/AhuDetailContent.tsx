@@ -7,7 +7,7 @@ import { useAhuHistory } from "@/hooks/useAhuHistory";
 import { useAhuEvents } from "@/hooks/useAhuEvents";
 import { useAhuHealth } from "@/hooks/useAhuHealth";
 import type { AhuHealthStatus } from "@/domain/ahu/getAhuHealth";
-import type { HvacEvent } from "@/types/event";
+import { type HvacEvent, getEventMessage } from "@/types/event";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -472,7 +472,7 @@ function EventsTimeline({ events }: EventsTimelineProps) {
 
             <div className="flex-1 space-y-1">
               <div className="flex items-center justify-between flex-wrap gap-2">
-                <p className="font-medium">{event.message}</p>
+                <p className="font-medium">{getEventMessage(event, t.eventMessages, tf)}</p>
 
                 <Badge variant={getEventVariant(event.type)}>
                   {tf(t.ahuDetailPage.events.eventTypeLabel, { type: event.type })}

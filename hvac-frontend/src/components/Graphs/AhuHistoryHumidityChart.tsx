@@ -10,6 +10,7 @@ import {
 import type { HistoryPoint } from "@/types/history";
 import type { AhuHealthStatus } from "@/domain/ahu/getAhuHealth";
 import { Droplets, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { useTranslation } from "@/i18n/useTranslation";
 
 interface Props {
   title?: string;
@@ -18,10 +19,12 @@ interface Props {
 }
 
 export function AhuHistoryHumidityChart({
-  title = "Humedad",
+  title,
   data,
   status,
 }: Props) {
+  const { t } = useTranslation();
+  const displayTitle = title ?? t.charts.humidity;
   const avgHumidity =
     data.length > 0
       ? data.reduce((acc, p) => acc + p.value, 0) / data.length
@@ -54,7 +57,7 @@ export function AhuHistoryHumidityChart({
           )}
 
           <span className="text-sm font-medium text-muted-foreground">
-            {title}
+            {displayTitle}
           </span>
         </div>
 
@@ -63,7 +66,7 @@ export function AhuHistoryHumidityChart({
             <span className="text-2xl font-black tabular-nums text-accent">
               {avgHumidity.toFixed(1)}
             </span>
-            <span className="text-xs text-muted-foreground">% avg</span>
+            <span className="text-xs text-muted-foreground">% {t.charts.avgSuffix}</span>
           </div>
         )}
       </div>
@@ -82,7 +85,7 @@ export function AhuHistoryHumidityChart({
 
         {data.length === 0 ? (
           <div className="flex items-center justify-center h-55 text-sm text-muted-foreground">
-            Sin datos históricos
+            {t.charts.noHistoricalData}
           </div>
         ) : (
           <div className="relative z-10 p-4">
@@ -159,7 +162,7 @@ export function AhuHistoryHumidityChart({
                     boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                   }}
                   labelStyle={{ color: "hsl(var(--popover-foreground))" }}
-                  formatter={(v: number) => [`${v.toFixed(1)} %`, "Humedad"]}
+                  formatter={(v: number) => [`${v.toFixed(1)} %`, displayTitle]}
                   labelFormatter={(l) => `${new Date(l).toLocaleTimeString()}`}
                 />
 

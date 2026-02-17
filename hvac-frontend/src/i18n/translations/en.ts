@@ -495,6 +495,38 @@ eventMessages: {
     sec: "s",
   },
 
+  // ===== WebSocket =====
+  websocket: {
+    connected: "Connected to server",
+    disconnected: "Disconnected from server",
+    disconnectReason: "Reason: {reason}. Reconnecting...",
+  },
+
+  // ===== Header =====
+  header: {
+    controlCenter: "Control Center",
+    online: "ONLINE",
+    offline: "OFFLINE",
+  },
+
+  // ===== Charts =====
+  charts: {
+    noData: "No data",
+    noHistoricalData: "No historical data",
+    temperature: "Temperature",
+    humidity: "Humidity",
+    avgSuffix: "avg",
+  },
+
+  // ===== Plant Health Panel =====
+  plantHealth: {
+    plant: "Plant",
+    ahus: "AHUs",
+    alarms: "Alarms",
+    warnings: "Warnings",
+    disconnected: "Disconnected",
+  },
+
   // ===== Units =====
   units: {
     celsius: "°C",

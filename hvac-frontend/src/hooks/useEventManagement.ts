@@ -5,16 +5,6 @@ import { getAhuKey } from "./useAhuConnectivity";
 
 const MAX_EVENTS = 50;
 
-function buildMessage(current: HvacEventType, previous: HvacEventType): string {
-  if (current === "ALARM") return "Unidad entró en ALARMA";
-  if (current === "WARNING") return "Unidad en condición de ADVERTENCIA";
-  if (current === "OK" && previous === "DISCONNECTED")
-    return "Unidad restableció comunicación";
-  if (current === "OK") return "Unidad volvió a estado NORMAL";
-  if (current === "DISCONNECTED") return "Unidad perdió comunicación";
-  return `Cambio de estado: ${previous} → ${current}`;
-}
-
 interface UseEventManagementReturn {
   events: HvacEvent[];
   activeCounts: Record<string, { alarms: number; warnings: number }>;
@@ -36,7 +26,9 @@ interface UseEventManagementReturn {
 }
 
 /**
- * Hook responsible for managing events and status tracking
+ * Hook responsible for managing events and status tracking.
+ * Events store raw type/previousType data; translation happens at render time
+ * via getEventMessage() to avoid language mismatch when switching locales.
  */
 export function useEventManagement(): UseEventManagementReturn {
   const [events, setEvents] = useState<HvacEvent[]>([]);
@@ -63,7 +55,8 @@ export function useEventManagement(): UseEventManagementReturn {
           ahuId: ahu.stationId,
           plantId: ahu.plantId,
           type: "DISCONNECTED",
-          message: "Unidad perdió comunicación",
+          previousType: previousStatus,
+          message: "",
         };
 
         addEvent(event);
@@ -100,7 +93,8 @@ export function useEventManagement(): UseEventManagementReturn {
             ahuId: ahu.stationId,
             plantId: ahu.plantId,
             type: status,
-            message: buildMessage(status, previousStatus ?? "OK"),
+            previousType: previousStatus ?? "OK",
+            message: "",
           };
 
           addEvent(event);

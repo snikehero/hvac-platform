@@ -8,16 +8,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/components/theme-provider";
+import { useTranslation } from "@/i18n/useTranslation";
 
 export default function AppHeader() {
   const connected = true;
   const { setTheme } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <header className="h-15 border-b border-border bg-background flex items-center justify-between px-6 shrink-0">
       {/* 🔥 Plataforma */}
       <div className="flex items-center gap-2 text-sm font-medium tracking-tight">
-        <span className="text-muted-foreground">Control Center</span>
+        <span className="text-muted-foreground">{t.header.controlCenter}</span>
       </div>
 
       {/* 🔥 Acciones derecha */}
@@ -59,7 +61,7 @@ export default function AppHeader() {
             }`}
           />
           <Badge variant={connected ? "default" : "destructive"}>
-            {connected ? "ONLINE" : "OFFLINE"}
+            {connected ? t.header.online : t.header.offline}
           </Badge>
         </div>
         {/* 👤 Usuario (placeholder futuro) */}
