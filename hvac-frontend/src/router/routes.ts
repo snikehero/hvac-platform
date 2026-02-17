@@ -6,7 +6,7 @@ export const routes = {
   hvac: {
     home: HVAC_BASE,
     dashboard: `${HVAC_BASE}/dashboard`,
-    ejecutivo: `${HVAC_BASE}/Ejecutivo`,
+    ejecutivo: `${HVAC_BASE}/ejecutivo`,
     alarms: `${HVAC_BASE}/alarms`,
     settings: `${HVAC_BASE}/settings`,
 

@@ -38,7 +38,7 @@ export function DashboardWidgets({ stats, onFilterStatus }: Props) {
         {/* Unidades Afectadas */}
         <KpiCard
           icon={AlertTriangle}
-          label="Units Affected"
+          label={t.widgets.unitsAffected}
           value={noData ? "--" : stats.affected}
           subtitle={`${stats.alarms} ${t.heroSystem.alarms} + ${stats.warnings} ${t.heroSystem.warnings}`}
           color="destructive"
@@ -50,9 +50,9 @@ export function DashboardWidgets({ stats, onFilterStatus }: Props) {
         {/* Sin Comunicación */}
         <KpiCard
           icon={WifiOff}
-          label="No Communication"
+          label={t.widgets.noCommunication}
           value={noData ? "--" : stats.disconnected}
-          subtitle="Offline Units"
+          subtitle={t.widgets.offlineUnits}
           color="warning"
           percentage={noData ? 0 : (stats.disconnected / stats.totalAhus) * 100}
           isClickable={stats.disconnected > 0}
@@ -99,6 +99,7 @@ function KpiCard({
   isClickable,
   onClick,
 }: KpiCardProps) {
+  const { t } = useTranslation();
   const colorConfig = {
     destructive: {
       gradient: "from-red-500 to-red-600",
@@ -183,7 +184,7 @@ function KpiCard({
         {/* Progress Bar */}
         <div className="space-y-1">
           <div className="flex justify-between text-xs">
-            <span className="text-muted-foreground">Impact</span>
+            <span className="text-muted-foreground">{t.widgets.impact}</span>
             <span className="font-bold">{percentage.toFixed(0)}%</span>
           </div>
 
@@ -199,7 +200,7 @@ function KpiCard({
         {isClickable && (
           <div className="pt-2 border-t border-border/50 opacity-0 group-hover:opacity-100 transition-opacity">
             <span className="text-xs text-muted-foreground font-medium">
-              Click to filter →
+              {t.widgets.clickToFilter} →
             </span>
           </div>
         )}

@@ -76,6 +76,10 @@ export const en = {
     unitsOperational: "units operational",
     overallAvg: "Overall average",
     systemWide: "system-wide",
+    unitsAffected: "Units Affected",
+    noCommunication: "No Communication",
+    offlineUnits: "Offline Units",
+    impact: "Impact",
   },
 
   // ===== Plant Panel =====
