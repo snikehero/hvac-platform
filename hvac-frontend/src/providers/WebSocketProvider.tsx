@@ -14,6 +14,7 @@ import { useHistoryManagement } from "@/hooks/useHistoryManagement";
 import { useTelemetryState } from "@/hooks/useTelemetryState";
 import { NotificationService } from "@/services/NotificationService";
 import { useSettings } from "@/context/SettingsContext";
+import { useAcks } from "@/context/AckContext";
 
 /* ---------------- CONTEXT ---------------- */
 
@@ -55,6 +56,9 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
   // Settings
   const { settings } = useSettings();
+
+  // Acknowledgment context — clear acks when a machine recovers to OK
+  const { clearAck } = useAcks();
 
   // Telemetry state
   const { telemetry, setTelemetry, updateTelemetry } = useTelemetryState();
@@ -111,8 +115,15 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
       eventManager.processStatusChange(ahu, handleAhuReconnected);
 
-      // Notify status changes
+      // When a machine recovers to OK after an alarm/warning episode,
+      // clear its ack so the next failure must be acknowledged fresh.
       const currentStatus = ahu.points.status?.value;
+      if (
+        currentStatus === "OK" &&
+        (previousStatus === "ALARM" || previousStatus === "WARNING")
+      ) {
+        clearAck(ahu.plantId, ahu.stationId);
+      }
       if (
         currentStatus &&
         (currentStatus === "ALARM" ||

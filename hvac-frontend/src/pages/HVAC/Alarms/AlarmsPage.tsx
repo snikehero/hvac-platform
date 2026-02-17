@@ -8,6 +8,8 @@ import { AhuHistoryHumidityChart } from "@/components/Graphs/AhuHistoryHumidityC
 
 import { useAhuHealth } from "@/hooks/useAhuHealth";
 import { useTranslation } from "@/i18n/useTranslation";
+import { useSettings } from "@/context/SettingsContext";
+import { useAcks } from "@/context/AckContext";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -17,6 +19,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -26,24 +29,30 @@ import {
   Thermometer,
   Droplets,
   Clock,
+  CheckCheck,
 } from "lucide-react";
 import type { HvacTelemetry } from "@/types/telemetry";
+import { toast } from "sonner";
+
+type FilterType = "ALL" | "ALARM" | "WARNING" | "ACKNOWLEDGED";
 
 export default function AlarmsPage() {
   const { telemetry, ahuConnectionStatus } = useTelemetry();
   const [selectedAhu, setSelectedAhu] = useState<HvacTelemetry | null>(null);
-  const [filterType, setFilterType] = useState<"ALL" | "ALARM" | "WARNING">(
-    "ALL",
-  );
+  const [filterType, setFilterType] = useState<FilterType>("ALL");
   const [searchAhu, setSearchAhu] = useState("");
 
   const getHealth = useAhuHealth();
   const { t, tf } = useTranslation();
+  const { settings } = useSettings();
+  const { acks, addAck, isAcknowledged } = useAcks();
+
+  const operatorName = settings.general.operatorName || "Operator";
 
   const selectedAhuHistory = useAhuHistory(selectedAhu ?? undefined);
 
   /* -------------------------------- */
-  /* Contadores usando HEALTH */
+  /* Counters using HEALTH            */
   /* -------------------------------- */
   const { activeAlarms, activeWarnings } = useMemo(() => {
     const isAhuConnected = (ahu: { plantId: string; stationId: string }) => {
@@ -54,11 +63,8 @@ export default function AlarmsPage() {
     let warnings = 0;
 
     telemetry.forEach((ahu) => {
-      // Skip disconnected AHUs
       if (!isAhuConnected(ahu)) return;
-
       const health = getHealth(ahu);
-
       if (health.status === "ALARM") alarms++;
       else if (health.status === "WARNING") warnings++;
     });
@@ -67,29 +73,49 @@ export default function AlarmsPage() {
   }, [telemetry, ahuConnectionStatus]);
 
   /* -------------------------------- */
-  /* Filtrar solo activos (no disconnected) */
+  /* Active AHUs (not acknowledged)   */
   /* -------------------------------- */
   const filteredActiveAhu = useMemo(() => {
     return telemetry.filter((ahu) => {
       const health = getHealth(ahu);
+      if (health.status !== "ALARM" && health.status !== "WARNING") return false;
 
-      // 🚫 Ignorar desconectados completamente
-      if (health.status === "DISCONNECTED") return false;
+      // Exclude acknowledged
+      if (isAcknowledged(ahu.plantId, ahu.stationId, health.status)) return false;
 
       const matchesType = filterType === "ALL" || health.status === filterType;
-
       const matchesSearch =
         searchAhu === "" ||
         ahu.stationId.toLowerCase().includes(searchAhu.toLowerCase()) ||
         ahu.plantId.toLowerCase().includes(searchAhu.toLowerCase());
 
-      return (
-        (health.status === "ALARM" || health.status === "WARNING") &&
-        matchesType &&
-        matchesSearch
-      );
+      return matchesType && matchesSearch;
     });
-  }, [telemetry, filterType, searchAhu]);
+  }, [telemetry, filterType, searchAhu, acks]);
+
+  /* -------------------------------- */
+  /* Acknowledged AHUs                */
+  /* -------------------------------- */
+  const acknowledgedAhus = useMemo(() => {
+    return telemetry.filter((ahu) => {
+      const health = getHealth(ahu);
+      if (health.status !== "ALARM" && health.status !== "WARNING") return false;
+      return !!isAcknowledged(ahu.plantId, ahu.stationId, health.status);
+    });
+  }, [telemetry, acks]);
+
+  const acknowledgedCount = acknowledgedAhus.length;
+
+  const displayedAhus =
+    filterType === "ACKNOWLEDGED" ? acknowledgedAhus : filteredActiveAhu;
+
+  /* -------------------------------- */
+  /* Handlers                         */
+  /* -------------------------------- */
+  function handleAcknowledge(ahu: HvacTelemetry, status: "ALARM" | "WARNING") {
+    addAck(ahu.plantId, ahu.stationId, status, operatorName);
+    toast.success(tf(t.alarmsPage.ackToast, { name: operatorName }));
+  }
 
   return (
     <div className="p-4 md:p-6 space-y-6">
@@ -103,9 +129,9 @@ export default function AlarmsPage() {
         </p>
       </div>
 
-      {/* KPI Cards - Mejorados */}
+      {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Alarmas Activas */}
+        {/* Active Alarms */}
         <Card
           className={`
             group relative overflow-hidden backdrop-blur-sm
@@ -114,20 +140,15 @@ export default function AlarmsPage() {
             ${activeAlarms > 0 ? "shadow-lg shadow-destructive/20 animate-pulse" : ""}
           `}
         >
-          {/* Gradient Top Border */}
           <div className="absolute top-0 inset-x-0 h-1 bg-linear-to-r from-red-500 to-red-600" />
-
-          {/* Hover Effect */}
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-linear-to-br from-destructive/10 to-transparent pointer-events-none" />
 
           <CardContent className="relative z-10 p-6 space-y-4">
-            {/* Header */}
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-destructive/10 border border-destructive/30">
                   <Bell className="w-5 h-5 text-destructive" />
                 </div>
-
                 <div>
                   <div className="text-xs uppercase tracking-wide text-muted-foreground font-medium">
                     {t.alarmsPage.criticalAlarms}
@@ -138,26 +159,20 @@ export default function AlarmsPage() {
                 </div>
               </div>
             </div>
-
-            {/* Value */}
             <div className="inline-flex items-baseline px-4 py-2 rounded-lg bg-destructive/5">
               <span className="text-4xl font-black tabular-nums text-destructive">
                 {activeAlarms}
               </span>
             </div>
-
-            {/* Progress Bar */}
             <div className="space-y-1">
               <div className="flex justify-between text-xs">
                 <span className="text-muted-foreground">{t.alarmsPage.criticality}</span>
                 <span className="font-bold">
                   {telemetry.length > 0
                     ? ((activeAlarms / telemetry.length) * 100).toFixed(0)
-                    : 0}
-                  %
+                    : 0}%
                 </span>
               </div>
-
               <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
                 <div
                   className="h-full bg-destructive transition-all duration-1000"
@@ -168,16 +183,12 @@ export default function AlarmsPage() {
               </div>
             </div>
           </CardContent>
-
-          {/* Status Dot */}
           <div className="absolute top-4 right-4">
-            <div
-              className={`w-2 h-2 rounded-full bg-destructive ${activeAlarms > 0 ? "animate-ping" : ""}`}
-            />
+            <div className={`w-2 h-2 rounded-full bg-destructive ${activeAlarms > 0 ? "animate-ping" : ""}`} />
           </div>
         </Card>
 
-        {/* Warnings Activos */}
+        {/* Active Warnings */}
         <Card
           className={`
             group relative overflow-hidden backdrop-blur-sm
@@ -186,20 +197,15 @@ export default function AlarmsPage() {
             ${activeWarnings > 0 ? "shadow-md shadow-yellow-500/10" : ""}
           `}
         >
-          {/* Gradient Top Border */}
           <div className="absolute top-0 inset-x-0 h-1 bg-linear-to-r from-yellow-500 to-orange-500" />
-
-          {/* Hover Effect */}
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-linear-to-br from-yellow-500/10 to-transparent pointer-events-none" />
 
           <CardContent className="relative z-10 p-6 space-y-4">
-            {/* Header */}
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
                   <AlertTriangle className="w-5 h-5 text-yellow-500" />
                 </div>
-
                 <div>
                   <div className="text-xs uppercase tracking-wide text-muted-foreground font-medium">
                     {t.alarmsPage.warnings}
@@ -210,26 +216,20 @@ export default function AlarmsPage() {
                 </div>
               </div>
             </div>
-
-            {/* Value */}
             <div className="inline-flex items-baseline px-4 py-2 rounded-lg bg-yellow-500/5">
               <span className="text-4xl font-black tabular-nums text-yellow-500">
                 {activeWarnings}
               </span>
             </div>
-
-            {/* Progress Bar */}
             <div className="space-y-1">
               <div className="flex justify-between text-xs">
                 <span className="text-muted-foreground">{t.alarmsPage.impact}</span>
                 <span className="font-bold">
                   {telemetry.length > 0
                     ? ((activeWarnings / telemetry.length) * 100).toFixed(0)
-                    : 0}
-                  %
+                    : 0}%
                 </span>
               </div>
-
               <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
                 <div
                   className="h-full bg-yellow-500 transition-all duration-1000"
@@ -240,22 +240,19 @@ export default function AlarmsPage() {
               </div>
             </div>
           </CardContent>
-
-          {/* Status Dot */}
           <div className="absolute top-4 right-4">
             <div className="w-2 h-2 rounded-full bg-yellow-500" />
           </div>
         </Card>
       </div>
 
-      {/* Filtros Mejorados */}
+      {/* Filters */}
       <Card className="border backdrop-blur-sm">
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-            {/* Tabs para filtro de tipo */}
             <Tabs
               value={filterType}
-              onValueChange={(v) => setFilterType(v as any)}
+              onValueChange={(v) => setFilterType(v as FilterType)}
             >
               <TabsList>
                 <TabsTrigger value="ALL" className="gap-2">
@@ -278,10 +275,16 @@ export default function AlarmsPage() {
                     {activeWarnings}
                   </Badge>
                 </TabsTrigger>
+                <TabsTrigger value="ACKNOWLEDGED" className="gap-2">
+                  <CheckCheck className="w-3 h-3" />
+                  {t.alarmsPage.acknowledged}
+                  <Badge variant="outline" className="ml-1">
+                    {acknowledgedCount}
+                  </Badge>
+                </TabsTrigger>
               </TabsList>
             </Tabs>
 
-            {/* Búsqueda */}
             <div className="relative w-full md:w-64">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -295,13 +298,17 @@ export default function AlarmsPage() {
         </CardContent>
       </Card>
 
-      {/* Grid de AHUs Afectados - Mejorado */}
+      {/* AHU Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredActiveAhu.map((ahu) => {
+        {displayedAhus.map((ahu) => {
           const health = getHealth(ahu);
           const temperature = Number(ahu.points.temperature?.value);
           const humidity = Number(ahu.points.humidity?.value);
           const timeSince = getTimeSince(ahu.timestamp, t, tf);
+          const ackRecord =
+            filterType === "ACKNOWLEDGED"
+              ? isAcknowledged(ahu.plantId, ahu.stationId, health.status as "ALARM" | "WARNING")
+              : undefined;
 
           const config =
             health.status === "ALARM"
@@ -311,7 +318,7 @@ export default function AlarmsPage() {
                   glow: "shadow-lg shadow-destructive/20",
                   badge: "destructive" as const,
                   iconColor: "text-destructive",
-                  pulse: true,
+                  pulse: filterType !== "ACKNOWLEDGED",
                 }
               : {
                   border: "border-yellow-500/50",
@@ -335,7 +342,6 @@ export default function AlarmsPage() {
                 ${config.pulse ? "animate-pulse" : ""}
               `}
             >
-              {/* Gradient Top Border */}
               <div
                 className={`absolute top-0 inset-x-0 h-1 ${
                   health.status === "ALARM"
@@ -343,8 +349,6 @@ export default function AlarmsPage() {
                     : "bg-linear-to-r from-yellow-500 to-orange-500"
                 }`}
               />
-
-              {/* Hover Effect */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-linear-to-br from-primary/5 to-transparent pointer-events-none" />
 
               <CardHeader className="relative z-10 pb-3">
@@ -357,7 +361,6 @@ export default function AlarmsPage() {
                       {ahu.plantId}
                     </p>
                   </div>
-
                   <div className="flex flex-col items-end gap-2">
                     <Badge
                       variant={config.badge}
@@ -365,7 +368,6 @@ export default function AlarmsPage() {
                     >
                       {health.status}
                     </Badge>
-
                     {health.badPoints > 0 && (
                       <span className="text-xs text-destructive font-medium">
                         {health.badPoints} {health.badPoints === 1 ? t.ahuCard.error : t.ahuCard.errors}
@@ -376,9 +378,7 @@ export default function AlarmsPage() {
               </CardHeader>
 
               <CardContent className="relative z-10 space-y-3">
-                {/* Métricas en línea */}
                 <div className="grid grid-cols-2 gap-3">
-                  {/* Temperatura */}
                   <div className="space-y-1">
                     <div className="flex items-center gap-1.5">
                       <Thermometer className="w-3 h-3 text-primary" />
@@ -393,8 +393,6 @@ export default function AlarmsPage() {
                       <span className="text-xs text-muted-foreground">°C</span>
                     </div>
                   </div>
-
-                  {/* Humedad */}
                   <div className="space-y-1">
                     <div className="flex items-center gap-1.5">
                       <Droplets className="w-3 h-3 text-accent" />
@@ -411,7 +409,6 @@ export default function AlarmsPage() {
                   </div>
                 </div>
 
-                {/* Tiempo en estado */}
                 <div className="flex items-center gap-2 pt-2 border-t border-border/50">
                   <Clock className="w-3 h-3 text-muted-foreground" />
                   <span className="text-xs text-muted-foreground">
@@ -419,15 +416,41 @@ export default function AlarmsPage() {
                   </span>
                 </div>
 
-                {/* Click hint */}
-                <div className="pt-2 border-t border-border/50 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="text-xs text-muted-foreground font-medium">
-                    {t.alarmsPage.clickDetails}
-                  </span>
-                </div>
+                {/* Ack stamp (acknowledged tab) or Ack button (active tabs) */}
+                {ackRecord ? (
+                  <div className="flex items-center gap-1.5 pt-1 border-t border-border/50">
+                    <CheckCheck className="w-3 h-3 text-green-500 shrink-0" />
+                    <span className="text-xs text-muted-foreground">
+                      {tf(t.alarmsPage.ackStamp, {
+                        name: ackRecord.acknowledgedBy,
+                        time: new Date(ackRecord.acknowledgedAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }),
+                      })}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between pt-1 border-t border-border/50">
+                    <span className="text-xs text-muted-foreground font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                      {t.alarmsPage.clickDetails}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 px-2 text-xs gap-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAcknowledge(ahu, health.status as "ALARM" | "WARNING");
+                      }}
+                    >
+                      <CheckCheck className="w-3 h-3" />
+                      {t.alarmsPage.ackButton}
+                    </Button>
+                  </div>
+                )}
               </CardContent>
 
-              {/* Status Dot */}
               <div className="absolute top-3 right-3">
                 <div
                   className={`
@@ -441,26 +464,37 @@ export default function AlarmsPage() {
           );
         })}
 
-        {filteredActiveAhu.length === 0 && (
+        {displayedAhus.length === 0 && (
           <div className="col-span-full">
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                <Bell className="w-12 h-12 text-muted-foreground/50 mb-4" />
-                <h3 className="text-lg font-semibold mb-2">
-                  {t.alarmsPage.noActiveAlarms}
-                </h3>
-                <p className="text-sm text-muted-foreground max-w-sm">
-                  {searchAhu
-                    ? t.alarmsPage.noAlarmsFound
-                    : t.alarmsPage.allSystemsNormal}
-                </p>
+                {filterType === "ACKNOWLEDGED" ? (
+                  <>
+                    <CheckCheck className="w-12 h-12 text-muted-foreground/50 mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">
+                      {t.alarmsPage.noAcknowledged}
+                    </h3>
+                  </>
+                ) : (
+                  <>
+                    <Bell className="w-12 h-12 text-muted-foreground/50 mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">
+                      {t.alarmsPage.noActiveAlarms}
+                    </h3>
+                    <p className="text-sm text-muted-foreground max-w-sm">
+                      {searchAhu
+                        ? t.alarmsPage.noAlarmsFound
+                        : t.alarmsPage.allSystemsNormal}
+                    </p>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>
         )}
       </div>
 
-      {/* Modal - Mejorado */}
+      {/* Detail Modal */}
       <Dialog open={!!selectedAhu} onOpenChange={() => setSelectedAhu(null)}>
         <DialogContent className="max-w-7xl w-[95vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -495,7 +529,6 @@ export default function AlarmsPage() {
 
           {selectedAhu && (
             <div className="space-y-6">
-              {/* Info Card */}
               <Card className="border-muted bg-muted/20">
                 <CardContent className="pt-4">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
@@ -525,13 +558,14 @@ export default function AlarmsPage() {
                       <span className="text-xs text-muted-foreground uppercase tracking-wide">
                         {t.alarmsPage.connectionStatus}
                       </span>
-                      <div className="font-bold text-green-500">{t.alarmsPage.connected}</div>
+                      <div className="font-bold text-green-500">
+                        {t.alarmsPage.connected}
+                      </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Gráficas lado a lado */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <AhuHistoryTemperatureChart
                   data={selectedAhuHistory.temperature}
@@ -555,7 +589,7 @@ export default function AlarmsPage() {
 function getTimeSince(
   timestamp: string,
   t: any,
-  tf: (text: string, values: Record<string, string | number>) => string
+  tf: (text: string, values: Record<string, string | number>) => string,
 ): string {
   const now = Date.now();
   const then = new Date(timestamp).getTime();

@@ -179,6 +179,11 @@ export const en = {
     clickDetails: "Click for details →",
     noAlarmsFound: "No AHUs match your search",
     allSystemsNormal: "All systems are operating normally",
+    acknowledged: "Acknowledged",
+    ackButton: "Acknowledge",
+    noAcknowledged: "No acknowledged alarms",
+    ackStamp: "Acked by {name} · {time}",
+    ackToast: "Alarm acknowledged by {name}",
     detailedAnalysis: "Detailed metrics analysis",
     plant: "Plant",
     lastUpdate: "Last update",
@@ -241,6 +246,9 @@ export const en = {
       refreshIntervalDesc: "Dashboard data refresh frequency.",
       realTime: "real-time",
       lowConsumption: "low consumption",
+      operatorName: "Operator Name",
+      operatorNameDesc: "Name or initials shown when acknowledging alarms.",
+      operatorNamePlaceholder: "e.g. John D.",
     },
 
     // Actions
@@ -263,6 +271,7 @@ export const en = {
         "hero-system-status": "System Status Banner",
         "plant-activity-block": "Plant Overview & Activity",
         "kpi-widgets": "KPI Widgets",
+        "plant-heat-map": "Plant Heat Map",
       },
       visibleLabel: "Visible",
       dragHint: "Drag rows to reorder",
@@ -534,6 +543,12 @@ eventMessages: {
     temperature: "Temperature",
     humidity: "Humidity",
     avgSuffix: "avg",
+  },
+
+  // ===== Plant Heat Map =====
+  plantHeatMap: {
+    title: "Plant Heat Map",
+    legend: "Legend",
   },
 
   // ===== Plant Health Panel =====

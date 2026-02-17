@@ -17,11 +17,13 @@ import { routes } from "@/router/routes";
 import AhuDetailPage from "./pages/HVAC/AhuDetailPage/AhuDetailContent";
 import SettingsPage from "./pages/HVAC/Settings/SettingsPage";
 import { SettingsProvider } from "@/context/SettingsContext";
+import { AckProvider } from "@/context/AckContext";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
       <SettingsProvider>
+        <AckProvider>
         <WebSocketProvider>
           <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
             <Toaster position="top-right" richColors expand />
@@ -62,6 +64,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
             </AppLayout>
           </ThemeProvider>
         </WebSocketProvider>
+        </AckProvider>
       </SettingsProvider>
     </BrowserRouter>
   </React.StrictMode>,

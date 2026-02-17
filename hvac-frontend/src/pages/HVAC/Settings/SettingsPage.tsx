@@ -484,6 +484,27 @@ export default function SettingsPage() {
                   <span>30s ({t.settings.general.lowConsumption})</span>
                 </div>
               </div>
+
+              <Separator />
+
+              {/* Operator Name */}
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>{t.settings.general.operatorName}</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {t.settings.general.operatorNameDesc}
+                  </p>
+                </div>
+                <Input
+                  value={general.operatorName}
+                  onChange={(e) =>
+                    setGeneral((p) => ({ ...p, operatorName: e.target.value }))
+                  }
+                  placeholder={t.settings.general.operatorNamePlaceholder}
+                  className="w-40"
+                  maxLength={30}
+                />
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

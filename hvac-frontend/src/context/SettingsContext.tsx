@@ -28,12 +28,14 @@ export interface HvacNotifications {
 export interface HvacGeneral {
   language: "es" | "en";
   refreshIntervalSeconds: number;
+  operatorName: string;
 }
 
 export type DashboardWidgetId =
   | "hero-system-status"
   | "plant-activity-block"
-  | "kpi-widgets";
+  | "kpi-widgets"
+  | "plant-heat-map";
 
 export interface DashboardWidgetConfig {
   id: DashboardWidgetId;
@@ -70,12 +72,14 @@ export const DEFAULT_SETTINGS: HvacSettings = {
   general: {
     language: "es",
     refreshIntervalSeconds: 5,
+    operatorName: "",
   },
   dashboard: {
     widgets: [
       { id: "hero-system-status", visible: true },
       { id: "plant-activity-block", visible: true },
       { id: "kpi-widgets", visible: true },
+      { id: "plant-heat-map", visible: true },
     ],
   },
 };
@@ -86,6 +90,7 @@ const DEFAULT_WIDGET_IDS: DashboardWidgetId[] = [
   "hero-system-status",
   "plant-activity-block",
   "kpi-widgets",
+  "plant-heat-map",
 ];
 
 /* ============================

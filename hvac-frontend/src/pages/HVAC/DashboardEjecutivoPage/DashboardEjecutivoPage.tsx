@@ -20,6 +20,7 @@ import { AhuCard } from "./components/AhuCard";
 import { HeroSystemStatus } from "./components/HeroSystemStatus";
 import { HeroPlantPanel } from "./components/HeroPlantPanel";
 import { SystemActivityPanel } from "./components/SystemActivityPanel";
+import { PlantHeatMap } from "./components/PlantHeatMap";
 import { routes } from "@/router/routes";
 import { useTranslation } from "@/i18n/useTranslation";
 
@@ -100,6 +101,17 @@ export default function DashboardEjecutivoPage() {
                   key={w.id}
                   stats={stats}
                   onFilterStatus={handleFilterByStatus}
+                />
+              );
+
+            case "plant-heat-map":
+              return (
+                <PlantHeatMap
+                  key={w.id}
+                  telemetry={telemetry}
+                  onNavigate={(plantId, ahuId) =>
+                    navigate(routes.hvac.ahuDetail3D(plantId, ahuId))
+                  }
                 />
               );
 
