@@ -5,7 +5,11 @@
       "Bash(grep:*)",
       "Bash(for comp in badge button card chart dialog dropdown-menu input label scroll-area select separator sheet sidebar skeleton slider switch tabs tooltip)",
       "Bash(do echo \"=== $comp ===\")",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(npm install:*)",
+      "Bash(docker compose down:*)",
+      "Bash(docker compose build:*)",
+      "Bash(docker compose:*)"
     ]
   }
 }

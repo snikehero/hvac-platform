@@ -9,7 +9,7 @@ import { HvacService } from './hvac.service';
 import { TelemetryDto } from './dto/telemetry.dto';
 
 @WebSocketGateway({
-  cors: { origin: '*' },
+  cors: { origin: process.env.CORS_ORIGIN || '*' },
 })
 export class HvacGateway implements OnGatewayConnection {
   @WebSocketServer()

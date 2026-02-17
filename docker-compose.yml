@@ -25,9 +25,8 @@ services:
       - hvac-net
 
   backend:
-    # build:
-    #   context: ./backend
-    image: snikehero/hvac-backend:1.0
+    build:
+      context: ./backend
     container_name: hvac-backend
     ports:
       - "3000:3000"
@@ -36,6 +35,9 @@ services:
       - /app/node_modules
     environment:
       MQTT_BROKER_URL: mqtt://mosquitto:1883
+      MQTT_TOPIC: hvac/#
+      CORS_ORIGIN: "*"
+      PORT: 3000
       NODE_ENV: development
     depends_on:
       - mosquitto
@@ -43,9 +45,8 @@ services:
       - hvac-net
 
   frontend:
-    # build:
-    #   context: ./hvac-frontend
-    image: snikehero/hvac-frontend:latest
+    build:
+      context: ./hvac-frontend
     container_name: hvac-frontend
     ports:
       - "8080:80"
@@ -53,8 +54,6 @@ services:
       - backend
     networks:
       - hvac-net
-    volumes:
-      - .:/app
 networks:
   hvac-net:
     driver: bridge
