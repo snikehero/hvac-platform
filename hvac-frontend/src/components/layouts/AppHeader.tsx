@@ -9,9 +9,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/components/theme-provider";
 import { useTranslation } from "@/i18n/useTranslation";
+import { useWebSocket } from "@/hooks/useWebSocket";
 
 export default function AppHeader() {
-  const connected = true;
+  const connected = useWebSocket();
   const { setTheme } = useTheme();
   const { t } = useTranslation();
 

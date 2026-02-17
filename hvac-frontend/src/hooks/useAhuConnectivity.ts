@@ -7,8 +7,6 @@ export interface AhuConnectionStatus {
   lastSeen: number;
 }
 
-const CONNECTIVITY_CHECK_INTERVAL = 5_000;
-
 function getAhuKey(plantId: string, stationId: string): string {
   return `${plantId}-${stationId}`;
 }
@@ -26,12 +24,14 @@ interface UseAhuConnectivityReturn {
 /**
  * Hook responsible for tracking AHU connectivity status
  * @param disconnectTimeoutMs - Timeout in milliseconds before marking an AHU as disconnected (defaults to STALE_THRESHOLD_MS)
+ * @param checkIntervalMs - How often (in ms) to run the connectivity check (defaults to 5000)
  */
 export function useAhuConnectivity(
   telemetry: HvacTelemetry[],
   onDisconnected: (ahu: { plantId: string; stationId: string }) => void,
   isWebSocketConnected: boolean,
   disconnectTimeoutMs: number = STALE_THRESHOLD_MS,
+  checkIntervalMs: number = 5_000,
 ): UseAhuConnectivityReturn {
   const [ahuConnectionStatus, setAhuConnectionStatus] = useState<
     Record<string, AhuConnectionStatus>
@@ -125,11 +125,11 @@ export function useAhuConnectivity(
 
     const intervalId = setInterval(
       checkConnectivity,
-      CONNECTIVITY_CHECK_INTERVAL,
+      checkIntervalMs,
     );
 
     return () => clearInterval(intervalId);
-  }, [onDisconnected, isWebSocketConnected, disconnectTimeoutMs]);
+  }, [onDisconnected, isWebSocketConnected, disconnectTimeoutMs, checkIntervalMs]);
 
   return {
     ahuConnectionStatus,

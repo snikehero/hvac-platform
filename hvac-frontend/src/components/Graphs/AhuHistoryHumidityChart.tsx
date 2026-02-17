@@ -134,7 +134,7 @@ export function AhuHistoryHumidityChart({
                 />
 
                 <YAxis
-                  domain={[0, 40]}
+                  domain={[0, 100]}
                   tick={{
                     fontSize: 12,
                     fill: "var(--chart-axis-label)", // ← Cambiar aquí

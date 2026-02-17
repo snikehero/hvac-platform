@@ -83,6 +83,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     ),
     connected, // Pass WebSocket connection status
     settings.thresholds.disconnectTimeoutSeconds * 1000, // Pass configured timeout in milliseconds
+    settings.general.refreshIntervalSeconds * 1000, // Pass configured check interval in milliseconds
   );
 
   // Event handler for reconnection

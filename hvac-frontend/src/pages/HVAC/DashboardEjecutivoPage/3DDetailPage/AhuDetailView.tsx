@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react-hooks/rules-of-hooks */
 import { getAhuHealth } from "@/domain/ahu/getAhuHealth";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAhuHistory } from "@/hooks/useAhuHistory";
@@ -92,6 +91,9 @@ export default function AhuDetailView() {
 
   const ahu = telemetry.find((a) => a.plantId === plantId && a.stationId === ahuId);
 
+  // All hooks must be called before any early return to satisfy Rules of Hooks
+  const history = useAhuHistory(ahu);
+
   if (!ahu) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
@@ -122,8 +124,6 @@ export default function AhuDetailView() {
     humidityWarning: settings.thresholds.humidityWarning,
     humidityAlarm: settings.thresholds.humidityAlarm,
   });
-
-  const history = useAhuHistory(ahu);
 
   const STATUS_UI = getStatusUiConfig();
   const config = STATUS_UI[health.status];
