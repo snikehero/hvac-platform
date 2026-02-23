@@ -169,7 +169,7 @@
         "type": "debug",
         "z": "b5eac41902843c3f",
         "name": "debug 1",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -938,7 +938,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 460,
+        "x": 470,
         "y": 280,
         "wires": [
             [
@@ -961,8 +961,8 @@
         "correl": "",
         "expiry": "",
         "broker": "8c44c13ea6274c19",
-        "x": 730,
-        "y": 260,
+        "x": 840,
+        "y": 240,
         "wires": []
     },
     {
@@ -978,8 +978,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 730,
-        "y": 320,
+        "x": 850,
+        "y": 340,
         "wires": []
     },
     {

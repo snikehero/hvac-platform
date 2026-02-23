@@ -12,7 +12,10 @@
       "Bash(docker compose:*)",
       "Bash(npx tsc:*)",
       "Bash(echo:*)",
-      "Bash(node -e:*)"
+      "Bash(node -e:*)",
+      "Bash(node --version:*)",
+      "Bash(npm test:*)",
+      "Bash(npx cypress verify:*)"
     ]
   }
 }

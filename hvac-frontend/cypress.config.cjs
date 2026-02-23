@@ -1,0 +1,16 @@
+// Cypress requires CommonJS config when the project uses "type": "module"
+const { defineConfig } = require("cypress");
+
+module.exports = defineConfig({
+  e2e: {
+    baseUrl: "http://localhost:5173",
+    supportFile: "cypress/support/e2e.ts",
+    specPattern: "cypress/e2e/**/*.cy.ts",
+    viewportWidth: 1280,
+    viewportHeight: 800,
+    defaultCommandTimeout: 8000,
+  },
+  env: {
+    wsUrl: "http://localhost:3000",
+  },
+});
