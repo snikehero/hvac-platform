@@ -8,9 +8,7 @@ import { Socket } from 'socket.io';
 import { CommandsService } from './commands.service';
 import { CommandRequestDto } from './dto/command.dto';
 
-@WebSocketGateway({
-  cors: { origin: process.env.CORS_ORIGIN || '*' },
-})
+@WebSocketGateway({ cors: true })
 export class CommandsGateway {
   constructor(private readonly commandsService: CommandsService) {}
 

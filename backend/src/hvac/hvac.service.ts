@@ -1,4 +1,4 @@
-import { Injectable, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, forwardRef, Logger } from '@nestjs/common';
 import { HvacGateway } from './hvac.gateway';
 import { InternalAhuState } from './internal/ahu-state';
 import { toTelemetryDto } from './mappers/telemetry.mapper';
@@ -6,6 +6,7 @@ import { TelemetryDto } from './dto/telemetry.dto';
 
 @Injectable()
 export class HvacService {
+  private readonly logger = new Logger(HvacService.name);
   private readonly state = new Map<string, InternalAhuState>();
 
   constructor(
@@ -13,7 +14,6 @@ export class HvacService {
     private readonly gateway: HvacGateway,
   ) {}
 
-  // 👈 ahora recibe "payload crudo", NO DTO interno
   handleTelemetry(payload: TelemetryDto) {
     const key = `${payload.plantId}-${payload.stationId}`;
 
@@ -39,15 +39,11 @@ export class HvacService {
       });
     }
 
-    // 👉 SOLO aquí se vuelve DTO
     const dto = toTelemetryDto(ahu);
     this.gateway.emitUpdate(dto);
 
-    console.log(
-      '[HVAC]',
-      payload.plantId,
-      payload.stationId,
-      Object.keys(payload.points),
+    this.logger.debug(
+      `Telemetry received — ${payload.plantId}/${payload.stationId} [${Object.keys(payload.points).join(', ')}]`,
     );
   }
 

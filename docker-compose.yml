@@ -27,12 +27,13 @@ services:
   backend:
     build:
       context: ./backend
+      target: development        # uses the dev stage: full npm ci + start:dev watch
     container_name: hvac-backend
     ports:
       - "3000:3000"
     volumes:
-      - ./backend:/app
-      - /app/node_modules
+      - ./backend:/app                        # mount source for hot-reload
+      - backend_node_modules:/app/node_modules # named volume keeps container's node_modules intact
     environment:
       MQTT_BROKER_URL: mqtt://mosquitto:1883
       MQTT_TOPIC: hvac/#
@@ -54,6 +55,10 @@ services:
       - backend
     networks:
       - hvac-net
+
+volumes:
+  backend_node_modules:   # named volume so it survives restarts but stays fresh per image build
+
 networks:
   hvac-net:
     driver: bridge

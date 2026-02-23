@@ -1,8 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { plainToInstance } from 'class-transformer';
+import { validateSync } from 'class-validator';
 import * as mqtt from 'mqtt';
 import { HvacService } from '../hvac/hvac.service';
+import { TelemetryDto } from '../hvac/dto/telemetry.dto';
 
 @Injectable()
 export class MqttService implements OnModuleInit {
@@ -57,12 +60,26 @@ export class MqttService implements OnModuleInit {
 
     this.client.on('message', (topic, message) => {
       try {
-        const payload = JSON.parse(message.toString());
+        const raw = JSON.parse(message.toString());
+
         if (topic.endsWith('/commands/response') && this.responseHandler) {
-          this.responseHandler(topic, payload);
-        } else {
-          this.hvacService.handleTelemetry(payload);
+          this.responseHandler(topic, raw);
+          return;
         }
+
+        const dto = plainToInstance(TelemetryDto, raw);
+        const errors = validateSync(dto, { skipMissingProperties: false });
+
+        if (errors.length > 0) {
+          this.logger.warn(
+            `Invalid telemetry on topic "${topic}": ${errors
+              .map((e) => Object.values(e.constraints ?? {}).join(', '))
+              .join(' | ')}`,
+          );
+          return;
+        }
+
+        this.hvacService.handleTelemetry(dto);
       } catch (err) {
         this.logger.error(`JSON parse error on topic "${topic}"`, (err as Error).message);
       }

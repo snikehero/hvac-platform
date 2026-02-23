@@ -8,9 +8,7 @@ import { Inject, forwardRef } from '@nestjs/common';
 import { HvacService } from './hvac.service';
 import { TelemetryDto } from './dto/telemetry.dto';
 
-@WebSocketGateway({
-  cors: { origin: process.env.CORS_ORIGIN || '*' },
-})
+@WebSocketGateway({ cors: true })
 export class HvacGateway implements OnGatewayConnection {
   @WebSocketServer()
   server: Server;
