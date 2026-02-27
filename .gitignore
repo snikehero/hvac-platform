@@ -1,2 +1,4 @@
 # Claude Code session data
 .claude/
+.repomix.output*
+repomix-output*
