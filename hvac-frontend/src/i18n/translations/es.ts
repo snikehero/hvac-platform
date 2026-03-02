@@ -42,6 +42,9 @@ export const es = {
     generalDashboard: "Dashboard General",
     activeHvac: "HVAC Activos",
     comingSoon: "Próximamente",
+    energy: "Analítica Energética",
+    audit: "Registro de Auditoría",
+    reports: "Reportes",
   },
 
   // ===== Hero System Status =====
@@ -202,6 +205,13 @@ export const es = {
       thresholds: "Umbrales",
       notifications: "Notificaciones",
       general: "General",
+      energy: "Energía",
+    },
+    energy: {
+      title: "Configuración de Costo Energético",
+      desc: "Configura la tarifa usada en reportes y análisis de energía.",
+      costPerKwh: "Costo por kWh",
+      currency: "Símbolo de Moneda",
     },
 
     // Thresholds
@@ -571,11 +581,117 @@ eventMessages: {
     celsius: "°C",
     percent: "%",
     rpm: "RPM",
+    kwh: "kWh",
+    kw: "kW",
   },
 
+  // ===== Energy Analytics =====
+  energy: {
+    title: "Analítica Energética",
+    subtitle: "Monitorea el consumo de energía y costos en tus sistemas HVAC",
+    totalConsumption: "Consumo Total",
+    totalCost: "Costo Total",
+    avgPerAhu: "Promedio por AHU",
+    periodDelta: "vs período anterior",
+    selectPeriod: "Seleccionar período",
+    period: {
+      last24h: "Últimas 24 horas",
+      last7d: "Últimos 7 días",
+      last30d: "Últimos 30 días",
+      custom: "Rango personalizado",
+    },
+    aggregation: {
+      hourly: "Por hora",
+      daily: "Diario",
+    },
+    chart: {
+      title: "Tendencia de Consumo",
+      noData: "Sin datos de energía para el período seleccionado",
+    },
+    ranking: {
+      title: "Ranking de Eficiencia AHU",
+      ahu: "AHU",
+      plant: "Planta",
+      consumption: "Consumo",
+      cost: "Costo",
+    },
+    comparison: {
+      title: "Comparación de Períodos",
+      current: "Actual",
+      previous: "Anterior",
+    },
+    settings: {
+      costPerKwh: "Costo por kWh",
+      currency: "Moneda",
+    },
+  },
 
+  // ===== Audit Log =====
+  auditLog: {
+    title: "Registro de Auditoría",
+    subtitle: "Seguimiento de todas las acciones de usuario y eventos del sistema",
+    noEntries: "No se encontraron registros de auditoría",
+    columns: {
+      timestamp: "Fecha/Hora",
+      actor: "Actor",
+      actionType: "Acción",
+      details: "Detalles",
+      plant: "Planta",
+      ahu: "AHU",
+    },
+    actionTypes: {
+      COMMAND_SENT: "Comando Enviado",
+      ALARM_ACKNOWLEDGED: "Alarma Reconocida",
+      ALARM_CLEARED: "Alarma Despejada",
+      SETTINGS_CHANGED: "Configuración Cambiada",
+    },
+    filters: {
+      allActions: "Todas las Acciones",
+      searchActor: "Buscar por actor...",
+      startDate: "Fecha inicio",
+      endDate: "Fecha fin",
+    },
+    export: {
+      button: "Exportar CSV",
+      filename: "registro-auditoria",
+    },
+  },
 
-  
+  // ===== Reports =====
+  reports: {
+    title: "Reportes y Exportación",
+    subtitle: "Genera y exporta reportes desde datos históricos",
+    generate: "Generar Reporte",
+    download: "Descargar",
+    preview: "Vista Previa",
+    generating: "Generando...",
+    noPreview: "Selecciona una plantilla y rango de fechas, luego haz clic en Generar",
+    templates: {
+      dailySummary: "Resumen Diario",
+      dailySummaryDesc: "Resumen del estado de todas las AHUs y eventos para un día específico",
+      alarmLog: "Registro de Alarmas",
+      alarmLogDesc: "Todas las alarmas y advertencias en el rango de fechas seleccionado",
+      energyReport: "Reporte de Energía",
+      energyReportDesc: "Análisis de consumo energético y costos",
+      ahuPerformance: "Rendimiento AHU",
+      ahuPerformanceDesc: "Métricas de rendimiento detalladas por unidad manejadora de aire",
+    },
+    dateRange: {
+      label: "Rango de Fechas",
+      start: "Desde",
+      end: "Hasta",
+      plantFilter: "ID de Planta (opcional)",
+      plantFilterPlaceholder: "ej. plant-1",
+    },
+    export: {
+      pdf: "Exportar PDF",
+      csv: "Exportar CSV",
+    },
+    history: {
+      title: "Reportes Recientes",
+      noHistory: "Aún no se han generado reportes",
+    },
+  },
 } as const;
 
 export type TranslationKeys = typeof es;

@@ -6,8 +6,10 @@ import {
   type HvacNotifications,
   type HvacGeneral,
   type HvacDashboard,
+  type HvacEnergy,
   type DashboardWidgetConfig,
 } from "@/context/SettingsContext";
+import { useAudit } from "@/context/AuditContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,6 +42,7 @@ import {
   Gauge,
   Play,
   LayoutDashboard,
+  Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 import { audioManager } from "@/pages/HVAC/DashboardEjecutivoPage/3DDetailPage/presentation/Audio/AudioManager";
@@ -68,9 +71,11 @@ export default function SettingsPage() {
     updateNotifications,
     updateGeneral,
     updateDashboard,
+    updateEnergy,
     resetToDefaults,
   } = useSettings();
   const { t, tf } = useTranslation();
+  const { logAction } = useAudit();
 
   // Local draft state so we can show "unsaved" and batch saves
   const [thresholds, setThresholds] = useState<HvacThresholds>(
@@ -81,18 +86,28 @@ export default function SettingsPage() {
   );
   const [general, setGeneral] = useState<HvacGeneral>(settings.general);
   const [dashboard, setDashboard] = useState<HvacDashboard>(settings.dashboard);
+  const [energy, setEnergy] = useState<HvacEnergy>(
+    settings.energy ?? { costPerKwh: 0.12, currency: "$" },
+  );
 
   const hasChanges =
     JSON.stringify(thresholds) !== JSON.stringify(settings.thresholds) ||
     JSON.stringify(notifications) !== JSON.stringify(settings.notifications) ||
     JSON.stringify(general) !== JSON.stringify(settings.general) ||
-    JSON.stringify(dashboard) !== JSON.stringify(settings.dashboard);
+    JSON.stringify(dashboard) !== JSON.stringify(settings.dashboard) ||
+    JSON.stringify(energy) !== JSON.stringify(settings.energy);
 
   function handleSave() {
     updateThresholds(thresholds);
     updateNotifications(notifications);
     updateGeneral(general);
     updateDashboard(dashboard);
+    updateEnergy(energy);
+    logAction({
+      actionType: "SETTINGS_CHANGED",
+      actor: general.operatorName || "Operator",
+      details: { sections: ["thresholds", "notifications", "general", "dashboard", "energy"] },
+    });
     toast.success(t.settings.toast.saved);
   }
 
@@ -101,6 +116,7 @@ export default function SettingsPage() {
     setNotifications(DEFAULT_SETTINGS.notifications);
     setGeneral(DEFAULT_SETTINGS.general);
     setDashboard(DEFAULT_SETTINGS.dashboard);
+    setEnergy(DEFAULT_SETTINGS.energy ?? { costPerKwh: 0.12, currency: "$" });
     resetToDefaults();
     toast.info(t.settings.toast.reset);
   }
@@ -179,6 +195,10 @@ export default function SettingsPage() {
           <TabsTrigger value="dashboard" className="gap-1.5">
             <LayoutDashboard className="w-4 h-4" />
             {t.settings.dashboard.tabLabel}
+          </TabsTrigger>
+          <TabsTrigger value="energy" className="gap-1.5">
+            <Zap className="w-4 h-4" />
+            {t.settings.tabs.energy}
           </TabsTrigger>
         </TabsList>
 
@@ -549,6 +569,60 @@ export default function SettingsPage() {
                   </div>
                 </SortableContext>
               </DndContext>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ===========================
+            TAB 5 - ENERGY
+           =========================== */}
+        <TabsContent value="energy" className="space-y-6">
+          <Card className="backdrop-blur-sm border-border/50">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Zap className="w-5 h-5 text-yellow-500" />
+                {t.settings.energy.title}
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                {t.settings.energy.desc}
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>{t.settings.energy.costPerKwh}</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    min={0}
+                    step={0.01}
+                    value={energy.costPerKwh}
+                    onChange={(e) =>
+                      setEnergy((p) => ({ ...p, costPerKwh: Number(e.target.value) || 0 }))
+                    }
+                    className="w-32"
+                  />
+                  <span className="text-sm text-muted-foreground font-mono">{energy.currency}/kWh</span>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>{t.settings.energy.currency}</Label>
+                </div>
+                <Input
+                  type="text"
+                  value={energy.currency}
+                  maxLength={4}
+                  onChange={(e) =>
+                    setEnergy((p) => ({ ...p, currency: e.target.value }))
+                  }
+                  className="w-24"
+                />
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

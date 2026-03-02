@@ -2,10 +2,16 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CommandsService } from './commands.service';
 import { MqttService } from '../mqtt/mqtt.service';
 import { Socket } from 'socket.io';
+import { CommandRepository } from '../database/repositories/command.repository';
 
 const mockMqttService = {
   publish: jest.fn(),
   registerResponseHandler: jest.fn(),
+};
+
+const mockCommandRepository = {
+  saveCommand: jest.fn().mockResolvedValue(undefined),
+  updateStatus: jest.fn().mockResolvedValue(undefined),
 };
 
 const makeSocket = (): jest.Mocked<Pick<Socket, 'emit'>> => ({ emit: jest.fn() });
@@ -21,6 +27,7 @@ describe('CommandsService', () => {
       providers: [
         CommandsService,
         { provide: MqttService, useValue: mockMqttService },
+        { provide: CommandRepository, useValue: mockCommandRepository },
       ],
     }).compile();
 

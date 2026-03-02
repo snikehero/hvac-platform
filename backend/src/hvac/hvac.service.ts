@@ -3,6 +3,7 @@ import { HvacGateway } from './hvac.gateway';
 import { InternalAhuState } from './internal/ahu-state';
 import { toTelemetryDto } from './mappers/telemetry.mapper';
 import { TelemetryDto } from './dto/telemetry.dto';
+import { TelemetryRepository } from '../database/repositories/telemetry.repository';
 
 @Injectable()
 export class HvacService {
@@ -12,6 +13,7 @@ export class HvacService {
   constructor(
     @Inject(forwardRef(() => HvacGateway))
     private readonly gateway: HvacGateway,
+    private readonly telemetryRepository: TelemetryRepository,
   ) {}
 
   handleTelemetry(payload: TelemetryDto) {
@@ -41,6 +43,11 @@ export class HvacService {
 
     const dto = toTelemetryDto(ahu);
     this.gateway.emitUpdate(dto);
+
+    // Persist to database asynchronously — do not block the live update path
+    this.telemetryRepository.saveTelemetry(payload).catch((err: Error) => {
+      this.logger.error(`Failed to persist telemetry for ${payload.plantId}/${payload.stationId}: ${err.message}`);
+    });
 
     this.logger.debug(
       `Telemetry received — ${payload.plantId}/${payload.stationId} [${Object.keys(payload.points).join(', ')}]`,

@@ -37,8 +37,9 @@ interface AckContextValue {
    * Clear ALL acks for an AHU (any forStatus).
    * Called automatically when the machine transitions to OK so the next
    * alarm episode always starts unacknowledged.
+   * Optional `onClear` callback is invoked when at least one ack was removed.
    */
-  clearAck: (plantId: string, ahuId: string) => void;
+  clearAck: (plantId: string, ahuId: string, onClear?: (plantId: string, ahuId: string) => void) => void;
   pruneStaleAcks: (
     currentStatuses: Record<string, string>,
   ) => void;
@@ -122,12 +123,15 @@ export function AckProvider({ children }: { children: ReactNode }) {
    * Called when the machine transitions to OK so the next alarm episode
    * starts fresh and must be acknowledged again.
    */
-  const clearAck = useCallback((plantId: string, ahuId: string) => {
+  const clearAck = useCallback((plantId: string, ahuId: string, onClear?: (plantId: string, ahuId: string) => void) => {
     setAcks((prev) => {
       const next = prev.filter(
         (a) => !(a.plantId === plantId && a.ahuId === ahuId),
       );
-      if (next.length !== prev.length) saveAcks(next);
+      if (next.length !== prev.length) {
+        saveAcks(next);
+        onClear?.(plantId, ahuId);
+      }
       return next;
     });
   }, []);

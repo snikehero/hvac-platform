@@ -16,6 +16,7 @@ import { useTelemetryState } from "@/hooks/useTelemetryState";
 import { NotificationService } from "@/services/NotificationService";
 import { useSettings } from "@/context/SettingsContext";
 import { useAcks } from "@/context/AckContext";
+import { useAudit } from "@/context/AuditContext";
 
 /* ---------------- CONTEXT ---------------- */
 
@@ -62,6 +63,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
   // Acknowledgment context — clear acks when a machine recovers to OK
   const { clearAck } = useAcks();
+  const { logAction } = useAudit();
 
   // Telemetry state
   const { telemetry, setTelemetry, updateTelemetry } = useTelemetryState();
@@ -125,7 +127,9 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         currentStatus === "OK" &&
         (previousStatus === "ALARM" || previousStatus === "WARNING")
       ) {
-        clearAck(ahu.plantId, ahu.stationId);
+        clearAck(ahu.plantId, ahu.stationId, (pId, aId) => {
+          logAction({ actionType: "ALARM_CLEARED", actor: "System", plantId: pId, ahuId: aId });
+        });
       }
       if (
         currentStatus &&
@@ -156,6 +160,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       updateTelemetry,
       handleAhuReconnected,
       settings.general.language,
+      clearAck,
+      logAction,
     ],
   );
 

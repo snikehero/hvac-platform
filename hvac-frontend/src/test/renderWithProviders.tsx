@@ -3,6 +3,7 @@ import { render } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { SettingsProvider } from "@/context/SettingsContext";
 import { AckProvider } from "@/context/AckContext";
+import { AuditProvider } from "@/context/AuditContext";
 import { TelemetryContext } from "@/providers/WebSocketProvider";
 import type { HvacTelemetry } from "@/types/telemetry";
 import type { HvacEvent } from "@/types/event";
@@ -61,10 +62,12 @@ export function renderWithProviders(
     <MemoryRouter initialEntries={[initialRoute]}>
       <SettingsProvider>
         <AckProvider>
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          <TelemetryContext.Provider value={contextValue as any}>
-            {ui}
-          </TelemetryContext.Provider>
+          <AuditProvider>
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            <TelemetryContext.Provider value={contextValue as any}>
+              {ui}
+            </TelemetryContext.Provider>
+          </AuditProvider>
         </AckProvider>
       </SettingsProvider>
     </MemoryRouter>,

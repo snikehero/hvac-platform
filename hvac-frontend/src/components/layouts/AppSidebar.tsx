@@ -7,6 +7,9 @@ import {
   Settings,
   AirVent,
   ChevronDown,
+  Zap,
+  ClipboardList,
+  FileText,
 } from "lucide-react";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useEffect, useState, useMemo } from "react";
@@ -45,6 +48,21 @@ export default function AppSidebar() {
           to: routes.hvac.settings,
           label: t.nav.settings,
           icon: Settings,
+        },
+        {
+          to: routes.hvac.energy,
+          label: t.nav.energy,
+          icon: Zap,
+        },
+        {
+          to: routes.hvac.audit,
+          label: t.nav.audit,
+          icon: ClipboardList,
+        },
+        {
+          to: routes.hvac.reports,
+          label: t.nav.reports,
+          icon: FileText,
         },
       ],
     },

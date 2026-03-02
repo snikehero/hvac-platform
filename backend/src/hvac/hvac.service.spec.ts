@@ -2,8 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { HvacService } from './hvac.service';
 import { HvacGateway } from './hvac.gateway';
 import { TelemetryDto } from './dto/telemetry.dto';
+import { TelemetryRepository } from '../database/repositories/telemetry.repository';
 
 const mockGateway = { emitUpdate: jest.fn() };
+const mockTelemetryRepository = { saveTelemetry: jest.fn().mockResolvedValue(undefined) };
 
 const basePayload = (): TelemetryDto => ({
   plantId: 'plant-1',
@@ -25,6 +27,7 @@ describe('HvacService', () => {
       providers: [
         HvacService,
         { provide: HvacGateway, useValue: mockGateway },
+        { provide: TelemetryRepository, useValue: mockTelemetryRepository },
       ],
     }).compile();
 

@@ -10,6 +10,7 @@ import { useAhuHealth } from "@/hooks/useAhuHealth";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useSettings } from "@/context/SettingsContext";
 import { useAcks } from "@/context/AckContext";
+import { useAudit } from "@/context/AuditContext";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -46,6 +47,7 @@ export default function AlarmsPage() {
   const { t, tf } = useTranslation();
   const { settings } = useSettings();
   const { acks, addAck, isAcknowledged } = useAcks();
+  const { logAction } = useAudit();
 
   const operatorName = settings.general.operatorName || "Operator";
 
@@ -114,6 +116,13 @@ export default function AlarmsPage() {
   /* -------------------------------- */
   function handleAcknowledge(ahu: HvacTelemetry, status: "ALARM" | "WARNING") {
     addAck(ahu.plantId, ahu.stationId, status, operatorName);
+    logAction({
+      actionType: "ALARM_ACKNOWLEDGED",
+      actor: operatorName,
+      plantId: ahu.plantId,
+      ahuId: ahu.stationId,
+      details: { status, ahuId: ahu.stationId },
+    });
     toast.success(tf(t.alarmsPage.ackToast, { name: operatorName }));
   }
 

@@ -1,4 +1,23 @@
 services:
+  postgres:
+    image: timescale/timescaledb:latest-pg16
+    container_name: hvac-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: hvac
+      POSTGRES_USER: hvac_user
+      POSTGRES_PASSWORD: hvac_pass
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - hvac-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hvac_user -d hvac"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   mosquitto:
     image: eclipse-mosquitto:2
     container_name: mosquitto
@@ -40,8 +59,17 @@ services:
       CORS_ORIGIN: "*"
       PORT: 3000
       NODE_ENV: development
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: hvac_user
+      DB_PASSWORD: hvac_pass
+      DB_NAME: hvac
+      DATA_RETENTION_DAYS: 90
     depends_on:
-      - mosquitto
+      postgres:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
     networks:
       - hvac-net
 
@@ -58,6 +86,7 @@ services:
 
 volumes:
   backend_node_modules:   # named volume so it survives restarts but stays fresh per image build
+  pgdata:                 # persistent PostgreSQL data volume
 
 networks:
   hvac-net:

@@ -42,6 +42,9 @@ export const en = {
     generalDashboard: "General Dashboard",
     activeHvac: "Active HVAC",
     comingSoon: "Coming Soon",
+    energy: "Energy Analytics",
+    audit: "Audit Log",
+    reports: "Reports",
   },
 
   // ===== Hero System Status =====
@@ -202,6 +205,13 @@ export const en = {
       thresholds: "Thresholds",
       notifications: "Notifications",
       general: "General",
+      energy: "Energy",
+    },
+    energy: {
+      title: "Energy Cost Settings",
+      desc: "Configure the cost rate used in energy reports and analytics.",
+      costPerKwh: "Cost per kWh",
+      currency: "Currency Symbol",
     },
 
     // Thresholds
@@ -565,5 +575,115 @@ eventMessages: {
     celsius: "°C",
     percent: "%",
     rpm: "RPM",
+    kwh: "kWh",
+    kw: "kW",
+  },
+
+  // ===== Energy Analytics =====
+  energy: {
+    title: "Energy Analytics",
+    subtitle: "Monitor power consumption and costs across your HVAC systems",
+    totalConsumption: "Total Consumption",
+    totalCost: "Total Cost",
+    avgPerAhu: "Avg per AHU",
+    periodDelta: "vs previous period",
+    selectPeriod: "Select period",
+    period: {
+      last24h: "Last 24 hours",
+      last7d: "Last 7 days",
+      last30d: "Last 30 days",
+      custom: "Custom range",
+    },
+    aggregation: {
+      hourly: "Hourly",
+      daily: "Daily",
+    },
+    chart: {
+      title: "Consumption Trend",
+      noData: "No power data available for the selected period",
+    },
+    ranking: {
+      title: "AHU Efficiency Ranking",
+      ahu: "AHU",
+      plant: "Plant",
+      consumption: "Consumption",
+      cost: "Cost",
+    },
+    comparison: {
+      title: "Period Comparison",
+      current: "Current",
+      previous: "Previous",
+    },
+    settings: {
+      costPerKwh: "Cost per kWh",
+      currency: "Currency",
+    },
+  },
+
+  // ===== Audit Log =====
+  auditLog: {
+    title: "Audit Log",
+    subtitle: "Track all user actions and system events",
+    noEntries: "No audit entries found",
+    columns: {
+      timestamp: "Timestamp",
+      actor: "Actor",
+      actionType: "Action",
+      details: "Details",
+      plant: "Plant",
+      ahu: "AHU",
+    },
+    actionTypes: {
+      COMMAND_SENT: "Command Sent",
+      ALARM_ACKNOWLEDGED: "Alarm Acknowledged",
+      ALARM_CLEARED: "Alarm Cleared",
+      SETTINGS_CHANGED: "Settings Changed",
+    },
+    filters: {
+      allActions: "All Actions",
+      searchActor: "Search by actor...",
+      startDate: "Start date",
+      endDate: "End date",
+    },
+    export: {
+      button: "Export CSV",
+      filename: "audit-log",
+    },
+  },
+
+  // ===== Reports =====
+  reports: {
+    title: "Reports & Export",
+    subtitle: "Generate and export reports from historical data",
+    generate: "Generate Report",
+    download: "Download",
+    preview: "Preview",
+    generating: "Generating...",
+    noPreview: "Select a template and date range, then click Generate",
+    templates: {
+      dailySummary: "Daily Summary",
+      dailySummaryDesc: "Overview of all AHU statuses and events for a single day",
+      alarmLog: "Alarm Log",
+      alarmLogDesc: "All alarms and warnings within the selected date range",
+      energyReport: "Energy Report",
+      energyReportDesc: "Power consumption and cost analysis",
+      ahuPerformance: "AHU Performance",
+      ahuPerformanceDesc: "Detailed performance metrics per air handling unit",
+    },
+    dateRange: {
+      label: "Date Range",
+      start: "From",
+      end: "To",
+      plantFilter: "Plant ID (optional)",
+      plantFilterPlaceholder: "e.g. plant-1",
+    },
+    export: {
+      pdf: "Export PDF",
+      csv: "Export CSV",
+    },
+    history: {
+      title: "Recent Reports",
+      noHistory: "No reports generated yet",
+    },
   },
 };

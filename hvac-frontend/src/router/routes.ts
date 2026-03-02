@@ -18,5 +18,9 @@ export const routes = {
 
     ahuDetail3D: (plantId: string, ahuId: string) =>
       `${HVAC_BASE}/plants/${plantId}/ahus/${ahuId}/detail`,
+
+    energy: `${HVAC_BASE}/energy`,
+    audit: `${HVAC_BASE}/audit`,
+    reports: `${HVAC_BASE}/reports`,
   },
 };

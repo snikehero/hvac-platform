@@ -46,11 +46,17 @@ export interface HvacDashboard {
   widgets: DashboardWidgetConfig[];
 }
 
+export interface HvacEnergy {
+  costPerKwh: number;
+  currency: string;
+}
+
 export interface HvacSettings {
   thresholds: HvacThresholds;
   notifications: HvacNotifications;
   general: HvacGeneral;
   dashboard: HvacDashboard;
+  energy: HvacEnergy;
 }
 
 /* ============================
@@ -82,6 +88,10 @@ export const DEFAULT_SETTINGS: HvacSettings = {
       { id: "plant-heat-map", visible: true },
     ],
   },
+  energy: {
+    costPerKwh: 0.12,
+    currency: "$",
+  },
 };
 
 const STORAGE_KEY = "hvac-settings";
@@ -103,6 +113,7 @@ interface SettingsContextValue {
   updateNotifications: (patch: Partial<HvacNotifications>) => void;
   updateGeneral: (patch: Partial<HvacGeneral>) => void;
   updateDashboard: (dashboard: HvacDashboard) => void;
+  updateEnergy: (patch: Partial<HvacEnergy>) => void;
   resetToDefaults: () => void;
 }
 
@@ -157,6 +168,7 @@ function loadFromStorage(): HvacSettings {
       },
       general: { ...DEFAULT_SETTINGS.general, ...parsed.general },
       dashboard: mergeDashboard(parsed.dashboard),
+      energy: { ...DEFAULT_SETTINGS.energy, ...parsed.energy },
     };
   } catch {
     return DEFAULT_SETTINGS;
@@ -198,6 +210,13 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setSettings((prev) => ({ ...prev, dashboard }));
   }, []);
 
+  const updateEnergy = useCallback((patch: Partial<HvacEnergy>) => {
+    setSettings((prev) => ({
+      ...prev,
+      energy: { ...prev.energy, ...patch },
+    }));
+  }, []);
+
   const resetToDefaults = useCallback(() => {
     setSettings(DEFAULT_SETTINGS);
   }, []);
@@ -210,6 +229,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         updateNotifications,
         updateGeneral,
         updateDashboard,
+        updateEnergy,
         resetToDefaults,
       }}
     >

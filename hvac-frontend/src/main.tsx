@@ -18,52 +18,65 @@ import AhuDetailPage from "./pages/HVAC/AhuDetailPage/AhuDetailContent";
 import SettingsPage from "./pages/HVAC/Settings/SettingsPage";
 import { SettingsProvider } from "@/context/SettingsContext";
 import { AckProvider } from "@/context/AckContext";
+import { AuditProvider } from "@/context/AuditContext";
+import EnergyPage from "./pages/HVAC/Energy/EnergyPage";
+import AuditLogPage from "./pages/HVAC/AuditLog/AuditLogPage";
+import ReportsPage from "./pages/HVAC/Reports/ReportsPage";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
       <SettingsProvider>
         <AckProvider>
-        <WebSocketProvider>
-          <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-            <Toaster position="top-right" richColors expand />
+          <AuditProvider>
+            <WebSocketProvider>
+              <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+                <Toaster position="top-right" richColors expand />
 
-            <AppLayout>
-              <Routes>
-                {/* ========================= */}
-                {/* 🔹 CORE - Plataforma     */}
-                {/* ========================= */}
-                <Route path="/" element={<HomeGlobal />} />
+                <AppLayout>
+                  <Routes>
+                    {/* ========================= */}
+                    {/* 🔹 CORE - Plataforma     */}
+                    {/* ========================= */}
+                    <Route path="/" element={<HomeGlobal />} />
 
-                {/* ========================= */}
-                {/* 🔹 HVAC MODULE            */}
-                {/* ========================= */}
-                <Route path={routes.hvac.home} element={<HomePageHVAC />} />
+                    {/* ========================= */}
+                    {/* 🔹 HVAC MODULE            */}
+                    {/* ========================= */}
+                    <Route path={routes.hvac.home} element={<HomePageHVAC />} />
 
-                <Route path={routes.hvac.dashboard} element={<DashboardHVAC />} />
+                    <Route path={routes.hvac.dashboard} element={<DashboardHVAC />} />
 
-                <Route path={routes.hvac.alarms} element={<AlarmsPage />} />
+                    <Route path={routes.hvac.alarms} element={<AlarmsPage />} />
 
-                <Route path={routes.hvac.settings} element={<SettingsPage />} />
+                    <Route path={routes.hvac.settings} element={<SettingsPage />} />
 
-                <Route
-                  path={routes.hvac.ejecutivo}
-                  element={<DashboardEjecutivoPage />}
-                />
+                    <Route
+                      path={routes.hvac.ejecutivo}
+                      element={<DashboardEjecutivoPage />}
+                    />
 
-                <Route
-                  path={routes.hvac.ahuDetailPattern}
-                  element={<AhuDetailPage />}
-                />
+                    <Route
+                      path={routes.hvac.ahuDetailPattern}
+                      element={<AhuDetailPage />}
+                    />
 
-                <Route
-                  path={routes.hvac.ahuDetail3DPattern}
-                  element={<AhuDetailView />}
-                />
-              </Routes>
-            </AppLayout>
-          </ThemeProvider>
-        </WebSocketProvider>
+                    <Route
+                      path={routes.hvac.ahuDetail3DPattern}
+                      element={<AhuDetailView />}
+                    />
+
+                    {/* ========================= */}
+                    {/* 🔹 PHASE 2 MODULES       */}
+                    {/* ========================= */}
+                    <Route path={routes.hvac.energy} element={<EnergyPage />} />
+                    <Route path={routes.hvac.audit} element={<AuditLogPage />} />
+                    <Route path={routes.hvac.reports} element={<ReportsPage />} />
+                  </Routes>
+                </AppLayout>
+              </ThemeProvider>
+            </WebSocketProvider>
+          </AuditProvider>
         </AckProvider>
       </SettingsProvider>
     </BrowserRouter>

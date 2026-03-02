@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Wind, Gauge, Send, CheckCircle2, XCircle, Clock, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCommands } from "@/hooks/useCommands";
+import { useAudit } from "@/context/AuditContext";
+import { useSettings } from "@/context/SettingsContext";
 import type { CommandRequest, CommandStatus } from "@/types/command";
 
 interface CommandsPanelProps {
@@ -55,17 +57,39 @@ export function CommandsPanel({
   currentDamperPosition,
 }: CommandsPanelProps) {
   const { sendCommand, status, lastResult, reset } = useCommands();
+  const { logAction } = useAudit();
+  const { settings } = useSettings();
   const [damperValue, setDamperValue] = useState<number>(
     typeof currentDamperPosition === "number" ? currentDamperPosition : 50,
   );
+  // Capture the last sent request so the result effect can log it
+  const lastReqRef = useRef<Omit<CommandRequest, "plantId" | "stationId"> | null>(null);
 
   const isPending = status === "pending";
 
   function send(req: Omit<CommandRequest, "plantId" | "stationId">) {
     if (status !== "idle" && status !== "success" && status !== "error" && status !== "timeout") return;
+    lastReqRef.current = req;
     reset();
     sendCommand({ plantId, stationId, ...req });
   }
+
+  useEffect(() => {
+    if (lastResult?.status === "SUCCESS" && lastReqRef.current) {
+      logAction({
+        actionType: "COMMAND_SENT",
+        actor: settings.general.operatorName || "Operator",
+        plantId,
+        ahuId: stationId,
+        details: {
+          command: lastReqRef.current.command,
+          value: lastReqRef.current.value,
+          commandId: lastResult.commandId,
+        },
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastResult]);
 
   return (
     <Card className="border-border bg-card/50 backdrop-blur-sm">
