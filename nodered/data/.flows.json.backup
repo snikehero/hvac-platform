@@ -19,7 +19,7 @@
         "id": "351e5b2e390a463c",
         "type": "tab",
         "label": "Prueba",
-        "disabled": true,
+        "disabled": false,
         "info": "Envio",
         "env": []
     },
