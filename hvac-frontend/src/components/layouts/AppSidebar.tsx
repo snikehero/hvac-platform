@@ -10,6 +10,7 @@ import {
   Zap,
   ClipboardList,
   FileText,
+  Map,
 } from "lucide-react";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useEffect, useState, useMemo } from "react";
@@ -63,6 +64,11 @@ export default function AppSidebar() {
           to: routes.hvac.reports,
           label: t.nav.reports,
           icon: FileText,
+        },
+        {
+          to: routes.hvac.floorPlan,
+          label: t.nav.floorPlan,
+          icon: Map,
         },
       ],
     },

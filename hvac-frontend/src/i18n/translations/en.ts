@@ -45,6 +45,7 @@ export const en = {
     energy: "Energy Analytics",
     audit: "Audit Log",
     reports: "Reports",
+    floorPlan: "Floor Plan",
   },
 
   // ===== Hero System Status =====
@@ -685,5 +686,18 @@ eventMessages: {
       title: "Recent Reports",
       noHistory: "No reports generated yet",
     },
+  },
+
+  // ===== Floor Plan =====
+  floorPlan: {
+    title: "Floor Plan",
+    subtitle: "Visualize AHU locations with live status on a building floor plan",
+    addFloor: "Add Floor",
+    addAhu: "Add AHU",
+    floorName: "Floor Name",
+    floorNamePlaceholder: "e.g. Ground Floor",
+    create: "Create",
+    noFloors: "No floors configured",
+    noFloorsHint: "Add your first floor to start placing AHU markers",
   },
 };

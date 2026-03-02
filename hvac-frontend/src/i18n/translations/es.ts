@@ -45,6 +45,7 @@ export const es = {
     energy: "Analítica Energética",
     audit: "Registro de Auditoría",
     reports: "Reportes",
+    floorPlan: "Plano de Planta",
   },
 
   // ===== Hero System Status =====
@@ -691,6 +692,19 @@ eventMessages: {
       title: "Reportes Recientes",
       noHistory: "Aún no se han generado reportes",
     },
+  },
+
+  // ===== Floor Plan =====
+  floorPlan: {
+    title: "Plano de Planta",
+    subtitle: "Visualiza la ubicación de las AHUs con estado en vivo en el plano del edificio",
+    addFloor: "Agregar Piso",
+    addAhu: "Agregar AHU",
+    floorName: "Nombre del Piso",
+    floorNamePlaceholder: "ej. Planta Baja",
+    create: "Crear",
+    noFloors: "Sin pisos configurados",
+    noFloorsHint: "Agrega tu primer piso para comenzar a colocar marcadores de AHU",
   },
 } as const;
 

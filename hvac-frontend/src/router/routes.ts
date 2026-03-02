@@ -22,5 +22,6 @@ export const routes = {
     energy: `${HVAC_BASE}/energy`,
     audit: `${HVAC_BASE}/audit`,
     reports: `${HVAC_BASE}/reports`,
+    floorPlan: `${HVAC_BASE}/floorplan`,
   },
 };

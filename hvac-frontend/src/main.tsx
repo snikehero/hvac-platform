@@ -19,9 +19,11 @@ import SettingsPage from "./pages/HVAC/Settings/SettingsPage";
 import { SettingsProvider } from "@/context/SettingsContext";
 import { AckProvider } from "@/context/AckContext";
 import { AuditProvider } from "@/context/AuditContext";
+import { FloorPlanProvider } from "@/context/FloorPlanContext";
 import EnergyPage from "./pages/HVAC/Energy/EnergyPage";
 import AuditLogPage from "./pages/HVAC/AuditLog/AuditLogPage";
 import ReportsPage from "./pages/HVAC/Reports/ReportsPage";
+import FloorPlanPage from "./pages/HVAC/FloorPlan/FloorPlanPage";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
@@ -29,6 +31,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
       <SettingsProvider>
         <AckProvider>
           <AuditProvider>
+            <FloorPlanProvider>
             <WebSocketProvider>
               <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
                 <Toaster position="top-right" richColors expand />
@@ -72,10 +75,16 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                     <Route path={routes.hvac.energy} element={<EnergyPage />} />
                     <Route path={routes.hvac.audit} element={<AuditLogPage />} />
                     <Route path={routes.hvac.reports} element={<ReportsPage />} />
+
+                    {/* ========================= */}
+                    {/* 🔹 PHASE 4 MODULES       */}
+                    {/* ========================= */}
+                    <Route path={routes.hvac.floorPlan} element={<FloorPlanPage />} />
                   </Routes>
                 </AppLayout>
               </ThemeProvider>
             </WebSocketProvider>
+            </FloorPlanProvider>
           </AuditProvider>
         </AckProvider>
       </SettingsProvider>
