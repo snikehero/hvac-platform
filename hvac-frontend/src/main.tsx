@@ -23,6 +23,7 @@ import MachineDesignerListPage from "./pages/MachineDesigner/MachineDesignerList
 import MachineDesignerFormPage from "./pages/MachineDesigner/MachineDesignerFormPage";
 import MachineDashboardPage from "./pages/Machine/MachineDashboardPage";
 import MachineDetailPage from "./pages/Machine/MachineDetailPage";
+import UnifiedAlarmsPage from "./pages/Alarms/UnifiedAlarmsPage";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
@@ -40,6 +41,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                 {/* CORE - Plataforma         */}
                 {/* ========================= */}
                 <Route path="/" element={<HomeGlobal />} />
+                <Route path={routes.general.alarms} element={<UnifiedAlarmsPage />} />
 
                 {/* ========================= */}
                 {/* HVAC MODULE               */}

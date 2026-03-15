@@ -1,5 +1,7 @@
+/** @deprecated Use DeviceEventType from "@/types/device-event" instead */
 export type HvacEventType = "OK" | "WARNING" | "ALARM" | "DISCONNECTED"
 
+/** @deprecated Use DeviceEvent from "@/types/device-event" instead */
 export interface HvacEvent {
   timestamp: string
   ahuId: string

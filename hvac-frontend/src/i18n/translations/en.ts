@@ -44,6 +44,9 @@ export const en = {
     generalDashboard: "General Dashboard",
     activeHvac: "Active HVAC",
     comingSoon: "Coming Soon",
+    generalSection: "General",
+    overview: "Overview",
+    unifiedAlarms: "Alarms",
   },
 
   // ===== Hero System Status =====
@@ -192,6 +195,17 @@ export const en = {
     errorPoints: "Error points",
     connectionStatus: "Connection status",
     connected: "Connected",
+  },
+
+  // ===== Unified Alarms =====
+  unifiedAlarms: {
+    title: "Unified Alarm System",
+    subtitle: "Real-time monitoring of all devices with alarms and warnings",
+    filterByType: "Filter by type",
+    allTypes: "All Types",
+    searchPlaceholder: "Search device or plant...",
+    noDevicesFound: "No devices match your search",
+    machineType: "Machine Type",
   },
 
   // ===== Settings Page =====
@@ -510,6 +524,11 @@ eventMessages: {
     ahuNormal: "AHU {stationId} returned to NORMAL",
     ahuDisconnected: "AHU {stationId} disconnected",
     ahuReconnected: "AHU {stationId} reconnected",
+    deviceAlarm: "{machineType} {stationId} in ALARM",
+    deviceWarning: "{machineType} {stationId} in WARNING",
+    deviceNormal: "{machineType} {stationId} returned to NORMAL",
+    deviceDisconnected: "{machineType} {stationId} disconnected",
+    deviceReconnected: "{machineType} {stationId} reconnected",
     plant: "Plant {plantId}",
     noDataTimeout: "No data for more than {minutes} minutes",
   },

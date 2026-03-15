@@ -13,7 +13,9 @@ import {
 } from "@/hooks/useAhuConnectivity";
 import { useDeviceConnectivity, type DeviceConnectionStatus } from "@/hooks/useDeviceConnectivity";
 import type { MachineEvent } from "@/types/machine-event";
+import type { DeviceEvent } from "@/types/device-event";
 import { useEventManagement } from "@/hooks/useEventManagement";
+import { useDeviceEventManagement } from "@/hooks/useDeviceEventManagement";
 import { useHistoryManagement } from "@/hooks/useHistoryManagement";
 import { useTelemetryState } from "@/hooks/useTelemetryState";
 import { NotificationService } from "@/services/NotificationService";
@@ -54,6 +56,14 @@ interface TelemetryContextValue {
   machineConnectionStatus: Record<string, DeviceConnectionStatus>;
   isMachineConnected: (machineKey: string) => boolean;
   machineEvents: MachineEvent[];
+  /** Unified device events from ALL machine types (including HVAC) */
+  deviceEvents: DeviceEvent[];
+  /** Active alarm/warning counts for ALL device types */
+  deviceActiveCounts: Record<string, { alarms: number; warnings: number }>;
+  /** Total active alarms across ALL machine types */
+  totalAlarms: number;
+  /** Total active warnings across ALL machine types */
+  totalWarnings: number;
 }
 
 export const TelemetryContext = createContext<TelemetryContextValue | null>(
@@ -82,6 +92,9 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
   // Machine events
   const [machineEvents, setMachineEvents] = useState<MachineEvent[]>([]);
+
+  // Unified device event management (all machine types including HVAC)
+  const deviceEventManager = useDeviceEventManagement();
 
   // Machine connectivity
   const machineConnectivity = useDeviceConnectivity(
@@ -321,6 +334,20 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     });
   }, [machineConnectivity.setConnectionStatus]);
 
+  // Handle unified device_event from backend (all machine types including HVAC)
+  const handleDeviceEvent = useCallback((event: DeviceEvent) => {
+    deviceEventManager.addEvent(event);
+
+    // When a device transitions to OK, clear its acks so the next
+    // alarm episode starts unacknowledged.
+    if (
+      event.type === "OK" &&
+      (event.previousType === "ALARM" || event.previousType === "WARNING")
+    ) {
+      clearAck(event.plantId, event.instanceId, event.machineType);
+    }
+  }, [deviceEventManager.addEvent, clearAck]);
+
   // WebSocket event listeners
   useEffect(() => {
     if (!socket) return;
@@ -330,6 +357,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     socket.on("machine_snapshot", handleMachineSnapshot);
     socket.on("machine_update", handleMachineUpdate);
     socket.on("machine_event", handleMachineEvent);
+    socket.on("device_event", handleDeviceEvent);
 
     return () => {
       socket.off("hvac_snapshot", handleHvacSnapshot);
@@ -337,8 +365,9 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       socket.off("machine_snapshot", handleMachineSnapshot);
       socket.off("machine_update", handleMachineUpdate);
       socket.off("machine_event", handleMachineEvent);
+      socket.off("device_event", handleDeviceEvent);
     };
-  }, [socket, handleHvacSnapshot, handleHvacUpdate, handleMachineSnapshot, handleMachineUpdate, handleMachineEvent]);
+  }, [socket, handleHvacSnapshot, handleHvacUpdate, handleMachineSnapshot, handleMachineUpdate, handleMachineEvent, handleDeviceEvent]);
 
   // Mark all devices as disconnected when WebSocket disconnects
   useEffect(() => {
@@ -364,6 +393,10 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       machineConnectionStatus: machineConnectivity.connectionStatus,
       isMachineConnected: machineConnectivity.isConnected,
       machineEvents,
+      deviceEvents: deviceEventManager.allEvents,
+      deviceActiveCounts: deviceEventManager.activeCounts,
+      totalAlarms: deviceEventManager.totalAlarms,
+      totalWarnings: deviceEventManager.totalWarnings,
     }),
     [
       telemetry,
@@ -379,6 +412,10 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       machineConnectivity.connectionStatus,
       machineConnectivity.isConnected,
       machineEvents,
+      deviceEventManager.allEvents,
+      deviceEventManager.activeCounts,
+      deviceEventManager.totalAlarms,
+      deviceEventManager.totalWarnings,
     ],
   );
 

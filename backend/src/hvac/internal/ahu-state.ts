@@ -9,4 +9,6 @@ export interface InternalAhuState {
   stationId: string;
   lastUpdate: Date;
   points: Map<string, InternalHvacPoint>;
+  isConnected: boolean;
+  lastHealthStatus: string;
 }

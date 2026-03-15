@@ -16,6 +16,7 @@ import {
 import { routes } from "@/router/routes";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAhuHealth } from "@/hooks/useAhuHealth";
+import { getDeviceHealth, type DeviceHealthThresholds } from "@/domain/device/getDeviceHealth";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useMachineTypes } from "@/context/MachineTypeContext";
 import { useMachineTelemetry } from "@/hooks/useMachineTelemetry";
@@ -44,6 +45,23 @@ export default function HomeGlobal() {
 
   const getHealth = useAhuHealth();
 
+  // Build thresholds per machine type for generic health evaluation
+  const thresholdsMap = useMemo(() => {
+    const map: Record<string, DeviceHealthThresholds> = {};
+    for (const mt of machineTypes) {
+      const th: DeviceHealthThresholds = {};
+      for (const v of mt.variables) {
+        const config = v.cardConfig as Record<string, unknown> | null;
+        if (!config) continue;
+        const warning = typeof config.warning === "number" ? config.warning : undefined;
+        const alarm = typeof config.alarm === "number" ? config.alarm : undefined;
+        if (warning != null || alarm != null) th[v.key] = { warning, alarm };
+      }
+      map[mt.slug] = th;
+    }
+    return map;
+  }, [machineTypes]);
+
   const metrics = useMemo(() => {
     const activeAhus = telemetry.filter((ahu) => {
       const key = `${ahu.plantId}-${ahu.stationId}`;
@@ -57,15 +75,36 @@ export default function HomeGlobal() {
 
     const totalDevices = activeAhus.length + activeMachines.length;
 
-    const activeAlarms = activeAhus.reduce((acc, ahu) => {
+    // HVAC alarms/warnings
+    let activeAlarms = activeAhus.reduce((acc, ahu) => {
       const health = getHealth(ahu);
       return acc + (health.status === "ALARM" ? 1 : 0);
     }, 0);
 
-    const warnings = activeAhus.reduce((acc, ahu) => {
+    let warnings = activeAhus.reduce((acc, ahu) => {
       const health = getHealth(ahu);
       return acc + (health.status === "WARNING" ? 1 : 0);
     }, 0);
+
+    // Generic machine alarms/warnings
+    for (const [slug, instances] of Object.entries(allMachineTelemetry)) {
+      for (const inst of instances) {
+        const key = `${inst.plantId}-${inst.stationId}`;
+        if (!isMachineConnected(key)) continue;
+
+        const points: Record<string, { value: unknown; quality?: string; unit?: string }> = {};
+        for (const [pKey, pVal] of Object.entries(inst.points)) {
+          points[pKey] = { value: pVal.value, quality: pVal.quality, unit: pVal.unit };
+        }
+
+        const health = getDeviceHealth(points, {
+          isConnected: true,
+          thresholds: thresholdsMap[slug],
+        });
+        if (health.status === "ALARM") activeAlarms++;
+        else if (health.status === "WARNING") warnings++;
+      }
+    }
 
     const machinePlants = new Set(activeMachines.map(m => m.plantId));
     const ahuPlants = new Set(activeAhus.map((t) => t.plantId));
@@ -87,7 +126,7 @@ export default function HomeGlobal() {
       avgTemp,
       healthy: totalDevices - activeAlarms - warnings,
     };
-  }, [telemetry, ahuConnectionStatus, getHealth, allMachineTelemetry, isMachineConnected]);
+  }, [telemetry, ahuConnectionStatus, getHealth, allMachineTelemetry, isMachineConnected, thresholdsMap]);
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">

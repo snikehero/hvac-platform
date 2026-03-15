@@ -3,6 +3,11 @@ const HVAC_BASE = "/hvac";
 export const routes = {
   home: "/",
 
+  general: {
+    overview: "/",
+    alarms: "/alarms",
+  },
+
   hvac: {
     home: HVAC_BASE,
     dashboard: `${HVAC_BASE}/dashboard`,

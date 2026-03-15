@@ -94,11 +94,38 @@ const DEFAULT_WIDGET_IDS: DashboardWidgetId[] = [
 ];
 
 /* ============================
+   Global / HVAC-specific views
+   ============================ */
+
+/** Settings that apply to ALL machine types */
+export interface GlobalSettings {
+  general: HvacGeneral;
+  notifications: HvacNotifications;
+  disconnectTimeoutSeconds: number;
+}
+
+/** Settings specific to the HVAC module */
+export interface HvacSpecificSettings {
+  thresholds: {
+    temperatureWarning: number;
+    temperatureAlarm: number;
+    humidityWarning: number;
+    humidityAlarm: number;
+  };
+  dashboard: HvacDashboard;
+}
+
+/* ============================
    Context
    ============================ */
 
 interface SettingsContextValue {
+  /** Full settings object (backward compatible) */
   settings: HvacSettings;
+  /** Global settings applicable to all machine types */
+  globalSettings: GlobalSettings;
+  /** HVAC-specific settings */
+  hvacSettings: HvacSpecificSettings;
   updateThresholds: (patch: Partial<HvacThresholds>) => void;
   updateNotifications: (patch: Partial<HvacNotifications>) => void;
   updateGeneral: (patch: Partial<HvacGeneral>) => void;
@@ -202,10 +229,29 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setSettings(DEFAULT_SETTINGS);
   }, []);
 
+  // Convenience views — derived from the single settings object
+  const globalSettings: GlobalSettings = {
+    general: settings.general,
+    notifications: settings.notifications,
+    disconnectTimeoutSeconds: settings.thresholds.disconnectTimeoutSeconds,
+  };
+
+  const hvacSettings: HvacSpecificSettings = {
+    thresholds: {
+      temperatureWarning: settings.thresholds.temperatureWarning,
+      temperatureAlarm: settings.thresholds.temperatureAlarm,
+      humidityWarning: settings.thresholds.humidityWarning,
+      humidityAlarm: settings.thresholds.humidityAlarm,
+    },
+    dashboard: settings.dashboard,
+  };
+
   return (
     <SettingsContext.Provider
       value={{
         settings,
+        globalSettings,
+        hvacSettings,
         updateThresholds,
         updateNotifications,
         updateGeneral,

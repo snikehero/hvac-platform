@@ -15,6 +15,7 @@ import {
   GenericTelemetryDto,
   GenericPointDto,
 } from './dto/generic-telemetry.dto';
+import type { DeviceEventType } from '../common/dto/device-event.dto';
 
 interface MachinePointState {
   value: number | string | boolean;
@@ -28,6 +29,7 @@ interface MachineInstanceState {
   lastUpdate: Date;
   points: Map<string, MachinePointState>;
   isConnected: boolean;
+  lastHealthStatus: DeviceEventType;
 }
 
 @Injectable()
@@ -81,6 +83,7 @@ export class MachineService implements OnModuleInit, OnModuleDestroy {
           now - instance.lastUpdate.getTime() > TIMEOUT
         ) {
           instance.isConnected = false;
+          instance.lastHealthStatus = 'DISCONNECTED';
 
           this.gateway.emitEvent({
             type: 'DISCONNECTED',
@@ -155,6 +158,7 @@ export class MachineService implements OnModuleInit, OnModuleDestroy {
         lastUpdate: new Date(),
         points: new Map(),
         isConnected: true,
+        lastHealthStatus: 'OK',
       };
       typeState.set(key, instance);
     } else {
@@ -182,12 +186,61 @@ export class MachineService implements OnModuleInit, OnModuleDestroy {
       });
     }
 
+    // Evaluate health status and emit event on transitions
+    const newHealth = this.evaluateHealth(instance);
+    if (newHealth !== instance.lastHealthStatus) {
+      const previousType = instance.lastHealthStatus;
+      instance.lastHealthStatus = newHealth;
+
+      this.gateway.emitEvent({
+        type: newHealth,
+        previousType,
+        timestamp: new Date().toISOString(),
+        machineType: machineTypeSlug,
+        instanceId: instance.stationId,
+        plantId: instance.plantId,
+        message: `Machine ${machineTypeSlug} (${instance.plantId}/${instance.stationId}) status: ${newHealth}`,
+      });
+
+      this.logger.log(
+        `Machine health change: ${key} ${previousType} → ${newHealth}`,
+      );
+    }
+
     const dto = this.instanceToDto(instance, payload.timestamp);
     this.gateway.emitUpdate(machineTypeSlug, dto);
 
     this.logger.debug(
       `Machine telemetry — ${machineTypeSlug}/${payload.plantId}/${payload.stationId} [${Object.keys(payload.points).join(', ')}]`,
     );
+  }
+
+  /**
+   * Evaluate the health status of a machine instance based on its points.
+   * Priority: status point ALARM > BAD quality > status point WARNING > OK
+   */
+  private evaluateHealth(instance: MachineInstanceState): DeviceEventType {
+    const statusPoint = instance.points.get('status');
+
+    // 1. Explicit ALARM from status point
+    if (statusPoint?.value === 'ALARM') return 'ALARM';
+
+    // 2. Any point with BAD quality → WARNING
+    let hasBadQuality = false;
+    for (const point of instance.points.values()) {
+      if (point.quality === 'BAD') {
+        hasBadQuality = true;
+        break;
+      }
+    }
+
+    // 3. Explicit WARNING from status point
+    if (statusPoint?.value === 'WARNING') return 'WARNING';
+
+    // 4. BAD quality → WARNING
+    if (hasBadQuality) return 'WARNING';
+
+    return 'OK';
   }
 
   getSnapshot(machineTypeSlug: string): GenericTelemetryDto[] {

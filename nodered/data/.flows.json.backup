@@ -399,7 +399,7 @@
         "type": "function",
         "z": "0b645bfed5d9f7be",
         "name": "function 1",
-        "func": "msg.payload = \n{\n  \"plantId\": \"planta-norte\",\n  \"stationId\": \"motor-01\",\n  \"timestamp\": \"2026-03-14T10:30:00.000Z\",\n  \"points\": {\n    \"rpm\":        { \"value\": 2850,  \"unit\": \"RPM\",  \"quality\": \"GOOD\" },\n    \"corriente\":  { \"value\": 14.7,  \"unit\": \"A\",    \"quality\": \"GOOD\" },\n    \"temperatura\":{ \"value\": 68.3,  \"unit\": \"°C\",   \"quality\": \"GOOD\" }\n  }\n}\nreturn msg;",
+        "func": "msg.payload = \n{\n  \"plantId\": \"planta-norte\",\n  \"stationId\": \"motor-01\",\n  \"timestamp\": \"2026-03-14T10:30:00.000Z\",\n  \"points\": {\n    \"rpm\":        { \"value\": 2850,  \"unit\": \"RPM\",  \"quality\": \"BAD\" },\n    \"corriente\":  { \"value\": 14.7,  \"unit\": \"A\",    \"quality\": \"BAD\" },\n    \"temperatura\":{ \"value\": 68.3,  \"unit\": \"°C\",   \"quality\": \"BAD\" }\n  }\n}\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,

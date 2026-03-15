@@ -2,6 +2,7 @@ import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { GenericTelemetryDto } from './dto/generic-telemetry.dto';
+import type { DeviceEventDto } from '../common/dto/device-event.dto';
 
 export interface MachineUpdatePayload extends GenericTelemetryDto {
   machineType: string;
@@ -35,7 +36,9 @@ export class MachineGateway {
     this.server.emit('machine_update', data);
   }
 
-  emitEvent(event: any) {
+  emitEvent(event: DeviceEventDto) {
+    this.server.emit('device_event', event);
+    // Backward compatibility: also emit on legacy channel
     this.server.emit('machine_event', event);
   }
 }

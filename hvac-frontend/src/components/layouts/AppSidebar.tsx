@@ -46,14 +46,28 @@ function getIconComponent(iconName?: string): LucideIcon {
 }
 
 export default function AppSidebar() {
-  const { telemetry, ahuConnectionStatus } = useTelemetry();
+  const { telemetry, ahuConnectionStatus, totalAlarms, totalWarnings } = useTelemetry();
   const navigate = useNavigate();
   const getHealth = useAhuHealth();
   const { t } = useTranslation();
   const { machineTypes } = useMachineTypes();
 
+  const totalUnifiedAlerts = totalAlarms + totalWarnings;
+
   // Build dynamic categories from machine types
   const categories = useMemo(() => {
+    const generalCategory = {
+      name: t.nav.generalSection ?? "General",
+      items: [
+        { to: routes.general.overview, label: t.nav.overview ?? "Overview", icon: Home },
+        {
+          to: routes.general.alarms,
+          label: t.nav.unifiedAlarms ?? "Alarms",
+          icon: Bell,
+        },
+      ],
+    };
+
     const hvacCategory = {
       name: "HVAC",
       items: [
@@ -103,7 +117,7 @@ export default function AppSidebar() {
       ],
     };
 
-    return [hvacCategory, ...dynamicCategories, designerCategory];
+    return [generalCategory, hvacCategory, ...dynamicCategories, designerCategory];
   }, [t, machineTypes]);
 
   const activeAlarms = useMemo(() => {
@@ -127,7 +141,10 @@ export default function AppSidebar() {
     }
   }, [activeAlarms, prevCount]);
 
-  const [openCategories, setOpenCategories] = useState<string[]>(["HVAC"]);
+  const [openCategories, setOpenCategories] = useState<string[]>([
+    t.nav.generalSection ?? "General",
+    "HVAC",
+  ]);
 
   const toggleCategory = (name: string) => {
     setOpenCategories((prev) =>
@@ -179,7 +196,7 @@ export default function AppSidebar() {
                       <NavLink
                         key={to}
                         to={to}
-                        end={to === routes.hvac.home}
+                        end={to === routes.hvac.home || to === routes.general.overview}
                         className={({ isActive }) =>
                           `relative flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all duration-200
      ${
@@ -201,6 +218,11 @@ export default function AppSidebar() {
                             />
                             <span className="flex-1">{label}</span>
 
+                            {to === routes.general.alarms && totalUnifiedAlerts > 0 && (
+                              <span className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-xs font-semibold text-white">
+                                {totalUnifiedAlerts}
+                              </span>
+                            )}
                             {to === routes.hvac.alarms && activeAlarms > 0 && (
                               <span className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-xs font-semibold text-white">
                                 {activeAlarms}
