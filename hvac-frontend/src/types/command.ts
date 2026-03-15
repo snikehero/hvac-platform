@@ -1,9 +1,10 @@
 export type CommandStatus = 'idle' | 'pending' | 'success' | 'error' | 'timeout';
 
 export interface CommandRequest {
+  machineType: string;
   plantId: string;
   stationId: string;
-  command: 'fan_status' | 'damper_position';
+  command: string;
   value: string | number;
 }
 

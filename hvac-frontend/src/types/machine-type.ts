@@ -12,6 +12,15 @@ export interface MachineVariable {
   cardConfig?: Record<string, unknown>;
 }
 
+export interface MachineCommand {
+  id: string;
+  key: string;
+  label: string;
+  commandType: "toggle" | "range" | "select";
+  config?: Record<string, unknown>;
+  displayOrder: number;
+}
+
 export interface MachineType {
   id: string;
   name: string;
@@ -20,6 +29,7 @@ export interface MachineType {
   description?: string;
   icon?: string;
   variables: MachineVariable[];
+  commands: MachineCommand[];
   createdAt?: string;
   updatedAt?: string;
 }
@@ -43,6 +53,14 @@ export interface CreateMachineVariablePayload {
   cardConfig?: Record<string, unknown>;
 }
 
+export interface CreateMachineCommandPayload {
+  key: string;
+  label: string;
+  commandType: "toggle" | "range" | "select";
+  config?: Record<string, unknown>;
+  displayOrder?: number;
+}
+
 export interface CreateMachineTypePayload {
   name: string;
   slug: string;
@@ -50,6 +68,7 @@ export interface CreateMachineTypePayload {
   description?: string;
   icon?: string;
   variables: CreateMachineVariablePayload[];
+  commands?: CreateMachineCommandPayload[];
 }
 
 export type UpdateMachineTypePayload = Partial<CreateMachineTypePayload>;

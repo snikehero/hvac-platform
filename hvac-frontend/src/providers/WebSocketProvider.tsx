@@ -17,10 +17,12 @@ import type { DeviceEvent } from "@/types/device-event";
 import { useEventManagement } from "@/hooks/useEventManagement";
 import { useDeviceEventManagement } from "@/hooks/useDeviceEventManagement";
 import { useHistoryManagement } from "@/hooks/useHistoryManagement";
+import { useDeviceHistoryManagement, type DeviceHistoryData } from "@/hooks/useDeviceHistoryManagement";
 import { useTelemetryState } from "@/hooks/useTelemetryState";
 import { NotificationService } from "@/services/NotificationService";
 import { useSettings } from "@/context/SettingsContext";
 import { useAcks } from "@/context/AckContext";
+import { useMachineTypes } from "@/context/MachineTypeContext";
 
 /* ---------------- CONTEXT ---------------- */
 
@@ -64,6 +66,10 @@ interface TelemetryContextValue {
   totalAlarms: number;
   /** Total active warnings across ALL machine types */
   totalWarnings: number;
+  /** History data for generic machine variables (keyed by instance) */
+  machineHistory: DeviceHistoryData;
+  /** Get history for a specific machine instance */
+  getInstanceHistory: (machineType: string, plantId: string, stationId: string) => Record<string, import("@/types/history").HistoryPoint[]>;
 }
 
 export const TelemetryContext = createContext<TelemetryContextValue | null>(
@@ -81,6 +87,9 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
   // Acknowledgment context — clear acks when a machine recovers to OK
   const { clearAck } = useAcks();
+
+  // Machine type definitions (for determining tracked variables)
+  const { machineTypes } = useMachineTypes();
 
   // Telemetry state
   const { telemetry, setTelemetry, updateTelemetry } = useTelemetryState();
@@ -109,6 +118,9 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
   // History management (declare early)
   const historyManager = useHistoryManagement();
+
+  // Device history management (generic machines)
+  const deviceHistoryManager = useDeviceHistoryManagement();
 
   // Connectivity tracking - pass a ref callback to avoid circular dependency
   const connectivity = useAhuConnectivity(
@@ -256,10 +268,30 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     ],
   );
 
+  // Helper: get tracked variable keys for a machine type
+  const getTrackedVarKeys = useCallback(
+    (machineTypeSlug: string): string[] => {
+      const mt = machineTypes.find((t) => t.slug === machineTypeSlug);
+      if (!mt) return [];
+      return mt.variables
+        .filter((v) => v.cardConfig?.trackHistory === true)
+        .map((v) => v.key);
+    },
+    [machineTypes],
+  );
+
   // Handle machine_snapshot events (generic machines)
   const handleMachineSnapshot = useCallback(
     (data: Record<string, MachineTelemetry[]>) => {
       setMachineTelemetry(data);
+
+      // Initialize device history from snapshot
+      for (const [slug, instances] of Object.entries(data)) {
+        const trackedKeys = getTrackedVarKeys(slug);
+        if (trackedKeys.length > 0) {
+          deviceHistoryManager.initializeFromSnapshot(slug, instances, trackedKeys);
+        }
+      }
 
       const newConnectionStatus: Record<string, DeviceConnectionStatus> = {};
       const now = Date.now();
@@ -275,7 +307,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
       machineConnectivity.setConnectionStatus(newConnectionStatus);
     },
-    [machineConnectivity.updateLastSeen, machineConnectivity.setConnectionStatus],
+    [machineConnectivity.updateLastSeen, machineConnectivity.setConnectionStatus, getTrackedVarKeys, deviceHistoryManager.initializeFromSnapshot],
   );
 
   // Handle machine_update events (generic machines)
@@ -285,6 +317,12 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       const key = `${data.plantId}-${data.stationId}`;
 
       machineConnectivity.updateLastSeen(key);
+
+      // Update device history for tracked variables
+      const trackedKeys = getTrackedVarKeys(machineType);
+      if (trackedKeys.length > 0) {
+        deviceHistoryManager.updateHistory(machineType, data, trackedKeys);
+      }
 
       setMachineTelemetry((prev) => {
         const typeInstances = prev[machineType] ?? [];
@@ -304,7 +342,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         return { ...prev, [machineType]: updated };
       });
     },
-    [machineConnectivity.updateLastSeen],
+    [machineConnectivity.updateLastSeen, getTrackedVarKeys, deviceHistoryManager.updateHistory],
   );
 
   // Handle machine_event from backend
@@ -397,6 +435,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       deviceActiveCounts: deviceEventManager.activeCounts,
       totalAlarms: deviceEventManager.totalAlarms,
       totalWarnings: deviceEventManager.totalWarnings,
+      machineHistory: deviceHistoryManager.history,
+      getInstanceHistory: deviceHistoryManager.getInstanceHistory,
     }),
     [
       telemetry,
@@ -416,6 +456,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       deviceEventManager.activeCounts,
       deviceEventManager.totalAlarms,
       deviceEventManager.totalWarnings,
+      deviceHistoryManager.history,
+      deviceHistoryManager.getInstanceHistory,
     ],
   );
 

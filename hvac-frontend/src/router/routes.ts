@@ -33,8 +33,14 @@ export const routes = {
   },
 
   machine: {
-    dashboard: (machineType: string) => `/machines/${machineType}`,
-    dashboardPattern: "/machines/:machineType",
+    home: (machineType: string) => `/machines/${machineType}`,
+    homePattern: "/machines/:machineType",
+    dashboard: (machineType: string) => `/machines/${machineType}/dashboard`,
+    dashboardPattern: "/machines/:machineType/dashboard",
+    alarms: (machineType: string) => `/machines/${machineType}/alarms`,
+    alarmsPattern: "/machines/:machineType/alarms",
+    settings: (machineType: string) => `/machines/${machineType}/settings`,
+    settingsPattern: "/machines/:machineType/settings",
     detail: (
       machineType: string,
       plantId: string,

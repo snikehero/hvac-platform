@@ -18,6 +18,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { useMachineTelemetry } from "@/hooks/useMachineTelemetry";
 import { useEffect, useState, useMemo } from "react";
 import { useAhuHealth } from "@/hooks/useAhuHealth";
 import { routes } from "@/router/routes";
@@ -47,6 +48,7 @@ function getIconComponent(iconName?: string): LucideIcon {
 
 export default function AppSidebar() {
   const { telemetry, ahuConnectionStatus, totalAlarms, totalWarnings } = useTelemetry();
+  const { deviceActiveCounts } = useMachineTelemetry();
   const navigate = useNavigate();
   const getHealth = useAhuHealth();
   const { t } = useTranslation();
@@ -98,11 +100,14 @@ export default function AppSidebar() {
     const dynamicCategories = machineTypes.map((mt) => ({
       name: mt.name,
       items: [
+        { to: routes.machine.home(mt.slug), label: t.nav.homeHvac ?? "Home", icon: Home },
         {
           to: routes.machine.dashboard(mt.slug),
-          label: `Dashboard`,
+          label: t.machineDashboard?.dashboard ?? "Dashboard",
           icon: getIconComponent(mt.icon),
         },
+        { to: routes.machine.alarms(mt.slug), label: t.nav.alarms ?? "Alarms", icon: Bell },
+        { to: routes.machine.settings(mt.slug), label: t.nav.settings ?? "Settings", icon: Settings },
       ],
     }));
 
@@ -119,6 +124,21 @@ export default function AppSidebar() {
 
     return [generalCategory, hvacCategory, ...dynamicCategories, designerCategory];
   }, [t, machineTypes]);
+
+  // Per-machine-type alarm counts
+  const machineTypeAlarmCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const mt of machineTypes) {
+      let total = 0;
+      for (const [key, val] of Object.entries(deviceActiveCounts)) {
+        if (key.startsWith(`${mt.slug}-`)) {
+          total += val.alarms + val.warnings;
+        }
+      }
+      counts[mt.slug] = total;
+    }
+    return counts;
+  }, [machineTypes, deviceActiveCounts]);
 
   const activeAlarms = useMemo(() => {
     return telemetry.reduce((acc, ahu) => {
@@ -228,6 +248,15 @@ export default function AppSidebar() {
                                 {activeAlarms}
                               </span>
                             )}
+                            {machineTypes.map((mt) => {
+                              const alarmRoute = routes.machine.alarms(mt.slug);
+                              const count = machineTypeAlarmCounts[mt.slug] ?? 0;
+                              return to === alarmRoute && count > 0 ? (
+                                <span key={mt.slug} className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-xs font-semibold text-white">
+                                  {count}
+                                </span>
+                              ) : null;
+                            })}
                           </>
                         )}
                       </NavLink>

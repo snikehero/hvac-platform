@@ -8,6 +8,7 @@ import { MachineDesignerModule } from './machine-designer/machine-designer.modul
 import { MachineModule } from './machine/machine.module';
 import { MachineTypeEntity } from './machine-designer/entities/machine-type.entity';
 import { MachineVariableEntity } from './machine-designer/entities/machine-variable.entity';
+import { MachineCommandEntity } from './machine-designer/entities/machine-command.entity';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { MachineVariableEntity } from './machine-designer/entities/machine-varia
     TypeOrmModule.forRoot({
       type: 'better-sqlite3',
       database: 'data/machine-designer.sqlite',
-      entities: [MachineTypeEntity, MachineVariableEntity],
+      entities: [MachineTypeEntity, MachineVariableEntity, MachineCommandEntity],
       synchronize: true,
     }),
     HvacModule,

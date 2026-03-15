@@ -624,6 +624,9 @@ eventMessages: {
     noVariablesError: "At least one variable is required",
     noVariablesYet: "No variables defined yet. Add variables that this machine will send via MQTT.",
     invalidVariables: "All variables must have a key and label",
+    commands: "Commands",
+    addCommand: "Add Command",
+    noCommandsYet: "No commands defined. Commands allow you to send control instructions to devices.",
   },
 
   // ===== Machine Dashboard =====

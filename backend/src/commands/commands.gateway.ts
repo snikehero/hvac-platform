@@ -13,11 +13,11 @@ export class CommandsGateway {
   constructor(private readonly commandsService: CommandsService) {}
 
   @SubscribeMessage('command:execute')
-  handleCommandExecute(
+  async handleCommandExecute(
     @MessageBody() dto: CommandRequestDto,
     @ConnectedSocket() client: Socket,
   ) {
-    const commandId = this.commandsService.executeCommand(dto, client);
+    const commandId = await this.commandsService.executeCommand(dto, client);
     client.emit('command:acknowledged', {
       commandId,
       timestamp: new Date().toISOString(),

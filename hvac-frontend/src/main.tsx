@@ -21,8 +21,11 @@ import { AckProvider } from "@/context/AckContext";
 import { MachineTypeProvider } from "@/context/MachineTypeContext";
 import MachineDesignerListPage from "./pages/MachineDesigner/MachineDesignerListPage";
 import MachineDesignerFormPage from "./pages/MachineDesigner/MachineDesignerFormPage";
+import MachineHomePage from "./pages/Machine/MachineHomePage";
 import MachineDashboardPage from "./pages/Machine/MachineDashboardPage";
 import MachineDetailPage from "./pages/Machine/MachineDetailPage";
+import MachineSettingsPage from "./pages/Machine/MachineSettingsPage";
+import MachineAlarmsPage from "./pages/Machine/MachineAlarmsPage";
 import UnifiedAlarmsPage from "./pages/Alarms/UnifiedAlarmsPage";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
@@ -86,11 +89,23 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                 />
 
                 {/* ========================= */}
-                {/* GENERIC MACHINE DASHBOARDS*/}
+                {/* GENERIC MACHINE PAGES     */}
                 {/* ========================= */}
+                <Route
+                  path={routes.machine.homePattern}
+                  element={<MachineHomePage />}
+                />
                 <Route
                   path={routes.machine.dashboardPattern}
                   element={<MachineDashboardPage />}
+                />
+                <Route
+                  path={routes.machine.alarmsPattern}
+                  element={<MachineAlarmsPage />}
+                />
+                <Route
+                  path={routes.machine.settingsPattern}
+                  element={<MachineSettingsPage />}
                 />
                 <Route
                   path={routes.machine.detailPattern}

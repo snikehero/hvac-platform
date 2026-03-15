@@ -630,6 +630,9 @@ eventMessages: {
     noVariablesError: "Se requiere al menos una variable",
     noVariablesYet: "No hay variables definidas. Agrega variables que esta maquina enviara via MQTT.",
     invalidVariables: "Todas las variables deben tener clave y etiqueta",
+    commands: "Comandos",
+    addCommand: "Agregar Comando",
+    noCommandsYet: "No hay comandos definidos. Los comandos te permiten enviar instrucciones de control a los dispositivos.",
   },
 
   // ===== Machine Dashboard =====

@@ -1,6 +1,7 @@
-import { useContext, useMemo } from "react";
+import { useCallback, useContext, useMemo } from "react";
 import { TelemetryContext } from "@/providers/WebSocketProvider";
 import type { MachineTelemetry } from "@/types/machine-type";
+import type { HistoryPoint } from "@/types/history";
 
 /**
  * Access machine telemetry data from the WebSocket context.
@@ -27,6 +28,13 @@ export function useMachineTelemetry(machineType?: string) {
     return ctx.machineTelemetry[machineType] ?? [];
   }, [ctx.machineTelemetry, machineType]);
 
+  const getInstanceHistory = useCallback(
+    (mt: string, plantId: string, stationId: string): Record<string, HistoryPoint[]> => {
+      return ctx.getInstanceHistory(mt, plantId, stationId);
+    },
+    [ctx.getInstanceHistory],
+  );
+
   return {
     allMachineTelemetry: ctx.machineTelemetry,
     machineTelemetry: instances,
@@ -39,5 +47,7 @@ export function useMachineTelemetry(machineType?: string) {
     deviceActiveCounts: ctx.deviceActiveCounts,
     totalAlarms: ctx.totalAlarms,
     totalWarnings: ctx.totalWarnings,
+    machineHistory: ctx.machineHistory,
+    getInstanceHistory,
   };
 }

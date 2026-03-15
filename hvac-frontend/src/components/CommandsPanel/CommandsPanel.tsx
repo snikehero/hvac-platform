@@ -9,6 +9,7 @@ import type { CommandRequest, CommandStatus } from "@/types/command";
 interface CommandsPanelProps {
   plantId: string;
   stationId: string;
+  machineType?: string;
   currentFanStatus?: string;
   currentDamperPosition?: number;
 }
@@ -51,6 +52,7 @@ function StatusBadge({ status }: { status: CommandStatus }) {
 export function CommandsPanel({
   plantId,
   stationId,
+  machineType = "hvac",
   currentFanStatus,
   currentDamperPosition,
 }: CommandsPanelProps) {
@@ -61,10 +63,10 @@ export function CommandsPanel({
 
   const isPending = status === "pending";
 
-  function send(req: Omit<CommandRequest, "plantId" | "stationId">) {
+  function send(req: Omit<CommandRequest, "machineType" | "plantId" | "stationId">) {
     if (status !== "idle" && status !== "success" && status !== "error" && status !== "timeout") return;
     reset();
-    sendCommand({ plantId, stationId, ...req });
+    sendCommand({ machineType, plantId, stationId, ...req });
   }
 
   return (

@@ -3,14 +3,19 @@ import { IsString, IsNotEmpty, IsIn, IsDateString, IsOptional } from 'class-vali
 export class CommandRequestDto {
   @IsString()
   @IsNotEmpty()
+  machineType: string;
+
+  @IsString()
+  @IsNotEmpty()
   plantId: string;
 
   @IsString()
   @IsNotEmpty()
   stationId: string;
 
-  @IsIn(['fan_status', 'damper_position'])
-  command: 'fan_status' | 'damper_position';
+  @IsString()
+  @IsNotEmpty()
+  command: string;
 
   @IsNotEmpty()
   value: string | number;

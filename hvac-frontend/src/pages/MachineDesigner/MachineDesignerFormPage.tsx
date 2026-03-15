@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Plus, Trash2, GripVertical, ArrowLeft, Eye } from "lucide-react";
+import { Plus, Trash2, GripVertical, ArrowLeft, Eye, Send } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -24,6 +24,7 @@ import { routes } from "@/router/routes";
 import { useTranslation } from "@/i18n/useTranslation";
 import type {
   CreateMachineVariablePayload,
+  CreateMachineCommandPayload,
   MachineType,
 } from "@/types/machine-type";
 import {
@@ -72,6 +73,12 @@ interface VariableRow extends CreateMachineVariablePayload {
   _id: string; // local ID for drag-and-drop
 }
 
+interface CommandRow extends CreateMachineCommandPayload {
+  _id: string;
+}
+
+const COMMAND_TYPES = ["toggle", "range", "select"] as const;
+
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -93,6 +100,7 @@ export default function MachineDesignerFormPage() {
   const [description, setDescription] = useState("");
   const [icon, setIcon] = useState("");
   const [variables, setVariables] = useState<VariableRow[]>([]);
+  const [commands, setCommands] = useState<CommandRow[]>([]);
   const [saving, setSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
@@ -127,6 +135,18 @@ export default function MachineDesignerFormPage() {
               color: v.color,
               displayOrder: v.displayOrder,
               cardConfig: v.cardConfig,
+            })),
+        );
+        setCommands(
+          (mt.commands ?? [])
+            .sort((a, b) => a.displayOrder - b.displayOrder)
+            .map((c) => ({
+              _id: c.id,
+              key: c.key,
+              label: c.label,
+              commandType: c.commandType as "toggle" | "range" | "select",
+              config: c.config,
+              displayOrder: c.displayOrder,
             })),
         );
       })
@@ -196,6 +216,67 @@ export default function MachineDesignerFormPage() {
     );
   };
 
+  // Command management
+  const addCommand = () => {
+    setCommands((prev) => [
+      ...prev,
+      {
+        _id: crypto.randomUUID(),
+        key: "",
+        label: "",
+        commandType: "toggle",
+        config: { onValue: "ON", offValue: "OFF" },
+        displayOrder: prev.length,
+      },
+    ]);
+  };
+
+  const removeCommand = (cmdId: string) => {
+    setCommands((prev) => prev.filter((c) => c._id !== cmdId));
+  };
+
+  const updateCommand = (
+    cmdId: string,
+    field: keyof CreateMachineCommandPayload,
+    value: unknown,
+  ) => {
+    setCommands((prev) =>
+      prev.map((c) => {
+        if (c._id !== cmdId) return c;
+        if (field === "commandType") {
+          // Reset config when changing command type
+          const defaults: Record<string, Record<string, unknown>> = {
+            toggle: { onValue: "ON", offValue: "OFF" },
+            range: { min: 0, max: 100, step: 1, unit: "%" },
+            select: { options: ["LOW", "MEDIUM", "HIGH"] },
+          };
+          return { ...c, commandType: value as "toggle" | "range" | "select", config: defaults[value as string] ?? {} };
+        }
+        return { ...c, [field]: value };
+      }),
+    );
+  };
+
+  const updateCommandConfig = (cmdId: string, field: string, value: unknown) => {
+    setCommands((prev) =>
+      prev.map((c) =>
+        c._id === cmdId
+          ? { ...c, config: { ...(c.config || {}), [field]: value } }
+          : c,
+      ),
+    );
+  };
+
+  const handleCommandDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    setCommands((prev) => {
+      const oldIndex = prev.findIndex((c) => c._id === active.id);
+      const newIndex = prev.findIndex((c) => c._id === over.id);
+      return arrayMove(prev, oldIndex, newIndex);
+    });
+  };
+
   // DnD sensors
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -259,6 +340,15 @@ export default function MachineDesignerFormPage() {
           displayOrder: i,
           cardConfig: v.cardConfig,
         })),
+        commands: commands
+          .filter((c) => c.key.trim() && c.label.trim())
+          .map((c, i) => ({
+            key: c.key.trim(),
+            label: c.label.trim(),
+            commandType: c.commandType,
+            config: c.config,
+            displayOrder: i,
+          })),
       };
 
       if (isEdit && id) {
@@ -276,7 +366,7 @@ export default function MachineDesignerFormPage() {
     } finally {
       setSaving(false);
     }
-  }, [name, slug, mqttTopic, description, icon, variables, isEdit, id, refetch, navigate, t]);
+  }, [name, slug, mqttTopic, description, icon, variables, commands, isEdit, id, refetch, navigate, t]);
 
   // Preview data
   const previewPoints = useMemo(() => {
@@ -428,6 +518,56 @@ export default function MachineDesignerFormPage() {
                       onUpdateConfig={updateVariableConfig}
                       onRemove={removeVariable}
                       t={t}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Commands */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Send className="h-4 w-4" />
+              {t.machineDesigner?.commands ?? "Commands"}
+              <Badge variant="secondary">{commands.length}</Badge>
+            </CardTitle>
+            <Button variant="outline" size="sm" onClick={addCommand}>
+              <Plus className="h-4 w-4 mr-1" />
+              {t.machineDesigner?.addCommand ?? "Add Command"}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {commands.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <p>
+                {t.machineDesigner?.noCommandsYet ??
+                  "No commands defined. Commands allow you to send control instructions to devices."}
+              </p>
+            </div>
+          ) : (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleCommandDragEnd}
+            >
+              <SortableContext
+                items={commands.map((c) => c._id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-3">
+                  {commands.map((c) => (
+                    <SortableCommandRow
+                      key={c._id}
+                      command={c}
+                      onUpdate={updateCommand}
+                      onUpdateConfig={updateCommandConfig}
+                      onRemove={removeCommand}
                     />
                   ))}
                 </div>
@@ -693,6 +833,185 @@ function SortableVariableRow({
         size="sm"
         className="mt-5 h-8 w-8 p-0 text-destructive hover:text-destructive"
         onClick={() => onRemove(variable._id)}
+      >
+        <Trash2 className="h-3.5 w-3.5" />
+      </Button>
+    </div>
+  );
+}
+
+/* ─── Sortable Command Row ─── */
+
+function SortableCommandRow({
+  command,
+  onUpdate,
+  onUpdateConfig,
+  onRemove,
+}: {
+  command: CommandRow;
+  onUpdate: (id: string, field: keyof CreateMachineCommandPayload, value: unknown) => void;
+  onUpdateConfig: (id: string, field: string, value: unknown) => void;
+  onRemove: (id: string) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: command._id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-start gap-2 p-3 rounded-lg border border-border bg-card"
+    >
+      <button
+        type="button"
+        className="mt-2 cursor-grab text-muted-foreground hover:text-foreground"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="h-4 w-4" />
+      </button>
+
+      <div className="flex-1 space-y-2">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+          <div className="space-y-1">
+            <Label className="text-xs">Key</Label>
+            <Input
+              value={command.key}
+              onChange={(e) => onUpdate(command._id, "key", e.target.value)}
+              placeholder="e.g. speed"
+              className="h-8 text-sm font-mono"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Label</Label>
+            <Input
+              value={command.label}
+              onChange={(e) => onUpdate(command._id, "label", e.target.value)}
+              placeholder="e.g. Motor Speed"
+              className="h-8 text-sm"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Type</Label>
+            <select
+              value={command.commandType}
+              onChange={(e) => onUpdate(command._id, "commandType", e.target.value)}
+              className="h-8 w-full rounded-md border border-input bg-background px-2 text-sm"
+            >
+              {COMMAND_TYPES.map((ct) => (
+                <option key={ct} value={ct}>
+                  {ct}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Dynamic config fields based on command type */}
+        {command.commandType === "toggle" && (
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground">ON Value</Label>
+              <Input
+                value={(command.config?.onValue as string) ?? "ON"}
+                onChange={(e) => onUpdateConfig(command._id, "onValue", e.target.value)}
+                className="h-7 text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground">OFF Value</Label>
+              <Input
+                value={(command.config?.offValue as string) ?? "OFF"}
+                onChange={(e) => onUpdateConfig(command._id, "offValue", e.target.value)}
+                className="h-7 text-xs"
+              />
+            </div>
+          </div>
+        )}
+
+        {command.commandType === "range" && (
+          <div className="grid grid-cols-4 gap-2 pt-2 border-t border-border">
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground">Min</Label>
+              <Input
+                type="number"
+                value={(command.config?.min as number) ?? 0}
+                onChange={(e) => onUpdateConfig(command._id, "min", Number(e.target.value))}
+                className="h-7 text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground">Max</Label>
+              <Input
+                type="number"
+                value={(command.config?.max as number) ?? 100}
+                onChange={(e) => onUpdateConfig(command._id, "max", Number(e.target.value))}
+                className="h-7 text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground">Step</Label>
+              <Input
+                type="number"
+                value={(command.config?.step as number) ?? 1}
+                onChange={(e) => onUpdateConfig(command._id, "step", Number(e.target.value))}
+                className="h-7 text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground">Unit</Label>
+              <Input
+                value={(command.config?.unit as string) ?? ""}
+                onChange={(e) => onUpdateConfig(command._id, "unit", e.target.value)}
+                className="h-7 text-xs"
+                placeholder="%"
+              />
+            </div>
+          </div>
+        )}
+
+        {command.commandType === "select" && (
+          <div className="pt-2 border-t border-border space-y-1">
+            <Label className="text-[10px] text-muted-foreground">
+              Options (comma-separated)
+            </Label>
+            <Input
+              value={
+                Array.isArray(command.config?.options)
+                  ? (command.config.options as string[]).join(", ")
+                  : ""
+              }
+              onChange={(e) =>
+                onUpdateConfig(
+                  command._id,
+                  "options",
+                  e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
+                )
+              }
+              className="h-7 text-xs"
+              placeholder="LOW, MEDIUM, HIGH"
+            />
+          </div>
+        )}
+      </div>
+
+      <Button
+        variant="ghost"
+        size="sm"
+        className="mt-5 h-8 w-8 p-0 text-destructive hover:text-destructive"
+        onClick={() => onRemove(command._id)}
       >
         <Trash2 className="h-3.5 w-3.5" />
       </Button>

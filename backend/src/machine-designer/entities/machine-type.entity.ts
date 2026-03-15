@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { MachineVariableEntity } from './machine-variable.entity';
+import { MachineCommandEntity } from './machine-command.entity';
 
 @Entity('machine_types')
 export class MachineTypeEntity {
@@ -39,4 +40,10 @@ export class MachineTypeEntity {
     eager: true,
   })
   variables: MachineVariableEntity[];
+
+  @OneToMany(() => MachineCommandEntity, (c) => c.machineType, {
+    cascade: true,
+    eager: true,
+  })
+  commands: MachineCommandEntity[];
 }

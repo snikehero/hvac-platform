@@ -9,6 +9,7 @@ import {
   IsNumber,
   IsObject,
 } from 'class-validator';
+import { CreateMachineCommandDto } from './create-machine-command.dto';
 
 export class CreateMachineVariableDto {
   @IsString()
@@ -68,4 +69,10 @@ export class CreateMachineTypeDto {
   @ValidateNested({ each: true })
   @Type(() => CreateMachineVariableDto)
   variables: CreateMachineVariableDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateMachineCommandDto)
+  commands?: CreateMachineCommandDto[];
 }

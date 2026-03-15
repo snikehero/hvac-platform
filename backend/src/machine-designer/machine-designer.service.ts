@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MachineTypeEntity } from './entities/machine-type.entity';
 import { MachineVariableEntity } from './entities/machine-variable.entity';
+import { MachineCommandEntity } from './entities/machine-command.entity';
 import { CreateMachineTypeDto } from './dto/create-machine-type.dto';
 import { UpdateMachineTypeDto } from './dto/update-machine-type.dto';
 
@@ -20,6 +21,8 @@ export class MachineDesignerService {
     private readonly machineTypeRepo: Repository<MachineTypeEntity>,
     @InjectRepository(MachineVariableEntity)
     private readonly machineVariableRepo: Repository<MachineVariableEntity>,
+    @InjectRepository(MachineCommandEntity)
+    private readonly machineCommandRepo: Repository<MachineCommandEntity>,
   ) {}
 
   async findAll(): Promise<MachineTypeEntity[]> {
@@ -72,6 +75,15 @@ export class MachineDesignerService {
           cardConfig: v.cardConfig,
         }),
       ),
+      commands: (dto.commands ?? []).map((c, i) =>
+        this.machineCommandRepo.create({
+          key: c.key,
+          label: c.label,
+          commandType: c.commandType ?? 'toggle',
+          config: c.config,
+          displayOrder: c.displayOrder ?? i,
+        }),
+      ),
     });
 
     const saved = await this.machineTypeRepo.save(machineType);
@@ -100,6 +112,20 @@ export class MachineDesignerService {
           color: v.color ?? 'primary',
           displayOrder: v.displayOrder ?? i,
           cardConfig: v.cardConfig,
+        }),
+      );
+    }
+
+    if (dto.commands !== undefined) {
+      await this.machineCommandRepo.delete({ machineTypeId: id });
+      existing.commands = dto.commands.map((c, i) =>
+        this.machineCommandRepo.create({
+          machineTypeId: id,
+          key: c.key,
+          label: c.label,
+          commandType: c.commandType ?? 'toggle',
+          config: c.config,
+          displayOrder: c.displayOrder ?? i,
         }),
       );
     }
