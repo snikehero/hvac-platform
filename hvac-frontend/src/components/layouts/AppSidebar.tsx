@@ -7,6 +7,15 @@ import {
   Settings,
   AirVent,
   ChevronDown,
+  Cpu,
+  Wrench,
+  Cog,
+  Gauge,
+  Zap,
+  Thermometer,
+  Fan,
+  Activity,
+  type LucideIcon,
 } from "lucide-react";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useEffect, useState, useMemo } from "react";
@@ -14,15 +23,38 @@ import { useAhuHealth } from "@/hooks/useAhuHealth";
 import { routes } from "@/router/routes";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "@/i18n/useTranslation";
+import { useMachineTypes } from "@/context/MachineTypeContext";
+
+/** Map of icon names to lucide components */
+const ICON_MAP: Record<string, LucideIcon> = {
+  Cpu,
+  Wrench,
+  Cog,
+  Gauge,
+  Zap,
+  Thermometer,
+  Fan,
+  Activity,
+  AirVent,
+  Settings,
+  LayoutDashboard,
+};
+
+function getIconComponent(iconName?: string): LucideIcon {
+  if (!iconName) return Cpu;
+  return ICON_MAP[iconName] ?? Cpu;
+}
 
 export default function AppSidebar() {
   const { telemetry, ahuConnectionStatus } = useTelemetry();
   const navigate = useNavigate();
   const getHealth = useAhuHealth();
   const { t } = useTranslation();
+  const { machineTypes } = useMachineTypes();
 
-  const categories = [
-    {
+  // Build dynamic categories from machine types
+  const categories = useMemo(() => {
+    const hvacCategory = {
       name: "HVAC",
       items: [
         { to: routes.hvac.home, label: t.nav.homeHvac, icon: Home },
@@ -47,16 +79,32 @@ export default function AppSidebar() {
           icon: Settings,
         },
       ],
-    },
-    {
-      name: "Proyecto 2",
-      items: [],
-    },
-    {
-      name: "Proyecto 3",
-      items: [],
-    },
-  ];
+    };
+
+    const dynamicCategories = machineTypes.map((mt) => ({
+      name: mt.name,
+      items: [
+        {
+          to: routes.machine.dashboard(mt.slug),
+          label: `Dashboard`,
+          icon: getIconComponent(mt.icon),
+        },
+      ],
+    }));
+
+    const designerCategory = {
+      name: t.machineDesigner?.title ?? "Machine Designer",
+      items: [
+        {
+          to: routes.machineDesigner.list,
+          label: t.machineDesigner?.manage ?? "Manage Types",
+          icon: Wrench,
+        },
+      ],
+    };
+
+    return [hvacCategory, ...dynamicCategories, designerCategory];
+  }, [t, machineTypes]);
 
   const activeAlarms = useMemo(() => {
     return telemetry.reduce((acc, ahu) => {
@@ -79,7 +127,6 @@ export default function AppSidebar() {
     }
   }, [activeAlarms, prevCount]);
 
-  // 🔥 Categorías abiertas por defecto
   const [openCategories, setOpenCategories] = useState<string[]>(["HVAC"]);
 
   const toggleCategory = (name: string) => {
@@ -105,7 +152,6 @@ export default function AppSidebar() {
 
           return (
             <div key={category.name}>
-              {/* 🔹 Category Header */}
               <button
                 onClick={() => toggleCategory(category.name)}
                 className="flex w-full items-center justify-between px-3 py-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-widest hover:text-foreground transition"
@@ -118,7 +164,6 @@ export default function AppSidebar() {
                 />
               </button>
 
-              {/* 🔹 Category Content */}
               <div
                 className={`overflow-hidden transition-all duration-300 ${
                   isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
@@ -146,7 +191,6 @@ export default function AppSidebar() {
                       >
                         {({ isActive }) => (
                           <>
-                            {/* 🔥 Barra vertical activa */}
                             {isActive && (
                               <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r bg-primary" />
                             )}
@@ -157,7 +201,6 @@ export default function AppSidebar() {
                             />
                             <span className="flex-1">{label}</span>
 
-                            {/* 🔴 Badge dinámico solo para Alarmas */}
                             {to === routes.hvac.alarms && activeAlarms > 0 && (
                               <span className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-xs font-semibold text-white">
                                 {activeAlarms}

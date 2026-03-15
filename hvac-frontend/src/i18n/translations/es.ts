@@ -16,6 +16,8 @@ export const es = {
     apply: "Aplicar",
     reset: "Restablecer",
     and: "y",
+    back: "Volver",
+    saving: "Guardando...",
   },
 
   // ===== Status =====
@@ -573,9 +575,57 @@ eventMessages: {
     rpm: "RPM",
   },
 
+  // ===== Machine Designer =====
+  machineDesigner: {
+    title: "Machine Designer",
+    subtitle: "Define tipos de maquina personalizados con sus variables y layouts de dashboard",
+    createNew: "Crear Tipo de Maquina",
+    editMachine: "Editar Tipo de Maquina",
+    deleteMachine: "Eliminar Tipo de Maquina",
+    confirmDelete: "Estas seguro de que quieres eliminar este tipo de maquina? Esta accion no se puede deshacer.",
+    name: "Nombre",
+    slug: "Slug",
+    mqttTopic: "Topic MQTT",
+    description: "Descripcion",
+    descriptionPlaceholder: "Breve descripcion de este tipo de maquina",
+    icon: "Icono",
+    variables: "Variables",
+    addVariable: "Agregar Variable",
+    variableKey: "Clave",
+    variableLabel: "Etiqueta",
+    variableType: "Tipo de Dato",
+    variableUnit: "Unidad",
+    cardType: "Tipo de Card",
+    color: "Color",
+    preview: "Vista Previa del Dashboard",
+    showPreview: "Mostrar Vista Previa",
+    hidePreview: "Ocultar Vista Previa",
+    basicInfo: "Informacion Basica",
+    noMachineTypes: "No hay tipos de maquina definidos",
+    noMachineTypesDesc: "Crea tu primer tipo de maquina para empezar a monitorear equipo personalizado via MQTT.",
+    saved: "Tipo de maquina guardado exitosamente",
+    deleted: "Tipo de maquina eliminado exitosamente",
+    topicHint: "Usa # para wildcard multi-nivel (ej. motor/#)",
+    manage: "Gestionar Tipos",
+    requiredFields: "Nombre, slug y topic MQTT son requeridos",
+    noVariablesError: "Se requiere al menos una variable",
+    noVariablesYet: "No hay variables definidas. Agrega variables que esta maquina enviara via MQTT.",
+    invalidVariables: "Todas las variables deben tener clave y etiqueta",
+  },
 
+  // ===== Machine Dashboard =====
+  machineDashboard: {
+    dashboard: "Dashboard",
+    connected: "Conectado",
+    disconnected: "Desconectado",
+    instances: "instancias",
+    noInstances: "No hay instancias conectadas",
+    noInstancesDesc: "Esperando mensajes MQTT. Asegurate de que tus dispositivos esten enviando datos.",
+    plant: "Planta",
+    lastUpdate: "Ultima actualizacion",
+    waitingForData: "Esperando datos de esta instancia...",
+  },
 
-  
 } as const;
 
 export type TranslationKeys = typeof es;

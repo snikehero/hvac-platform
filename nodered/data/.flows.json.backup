@@ -19,7 +19,7 @@
         "id": "351e5b2e390a463c",
         "type": "tab",
         "label": "Prueba",
-        "disabled": true,
+        "disabled": false,
         "info": "Envio",
         "env": []
     },
@@ -363,6 +363,90 @@
         "statusType": "auto",
         "x": 300,
         "y": 320,
+        "wires": []
+    },
+    {
+        "id": "6e1c8153d1f802ef",
+        "type": "inject",
+        "z": "0b645bfed5d9f7be",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 140,
+        "y": 800,
+        "wires": [
+            [
+                "68c55ab69948c624"
+            ]
+        ]
+    },
+    {
+        "id": "68c55ab69948c624",
+        "type": "function",
+        "z": "0b645bfed5d9f7be",
+        "name": "function 1",
+        "func": "msg.payload = \n{\n  \"plantId\": \"planta-norte\",\n  \"stationId\": \"motor-01\",\n  \"timestamp\": \"2026-03-14T10:30:00.000Z\",\n  \"points\": {\n    \"rpm\":        { \"value\": 2850,  \"unit\": \"RPM\",  \"quality\": \"GOOD\" },\n    \"corriente\":  { \"value\": 14.7,  \"unit\": \"A\",    \"quality\": \"GOOD\" },\n    \"temperatura\":{ \"value\": 68.3,  \"unit\": \"°C\",   \"quality\": \"GOOD\" }\n  }\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 800,
+        "wires": [
+            [
+                "4606c5aa67944637",
+                "20a8461747a9179e"
+            ]
+        ]
+    },
+    {
+        "id": "4606c5aa67944637",
+        "type": "mqtt out",
+        "z": "0b645bfed5d9f7be",
+        "name": "",
+        "topic": "motor/planta-norte/motor-01",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8c44c13ea6274c19",
+        "x": 740,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "20a8461747a9179e",
+        "type": "debug",
+        "z": "0b645bfed5d9f7be",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 620,
+        "y": 900,
         "wires": []
     },
     {

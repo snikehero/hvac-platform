@@ -19,4 +19,23 @@ export const routes = {
     ahuDetail3D: (plantId: string, ahuId: string) =>
       `${HVAC_BASE}/plants/${plantId}/ahus/${ahuId}/detail`,
   },
+
+  machineDesigner: {
+    list: "/machine-designer",
+    create: "/machine-designer/create",
+    edit: (id: string) => `/machine-designer/${id}/edit`,
+    editPattern: "/machine-designer/:id/edit",
+  },
+
+  machine: {
+    dashboard: (machineType: string) => `/machines/${machineType}`,
+    dashboardPattern: "/machines/:machineType",
+    detail: (
+      machineType: string,
+      plantId: string,
+      stationId: string,
+    ) => `/machines/${machineType}/plants/${plantId}/stations/${stationId}`,
+    detailPattern:
+      "/machines/:machineType/plants/:plantId/stations/:stationId",
+  },
 };

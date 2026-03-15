@@ -1,10 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useCallback, useEffect, useMemo } from "react";
+import { createContext, useCallback, useEffect, useMemo, useState } from "react";
 import type { Socket } from "socket.io-client";
 import type { HvacTelemetry } from "@/types/telemetry";
 import type { HvacEvent } from "@/types/event";
 import type { HistoryPoint } from "@/types/history";
+import type { MachineTelemetry } from "@/types/machine-type";
 import { useWebSocketConnection } from "@/hooks/useWebSocketConnection";
 import {
   useAhuConnectivity,
@@ -45,6 +46,8 @@ interface TelemetryContextValue {
   setEvents: React.Dispatch<React.SetStateAction<HvacEvent[]>>;
   /** Raw Socket.IO socket — used by command hooks to emit events */
   socket: Socket | null;
+  /** Machine telemetry keyed by machine type slug */
+  machineTelemetry: Record<string, MachineTelemetry[]>;
 }
 
 export const TelemetryContext = createContext<TelemetryContextValue | null>(
@@ -65,6 +68,11 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
   // Telemetry state
   const { telemetry, setTelemetry, updateTelemetry } = useTelemetryState();
+
+  // Machine telemetry state (generic machines)
+  const [machineTelemetry, setMachineTelemetry] = useState<
+    Record<string, MachineTelemetry[]>
+  >({});
 
   // Event management (declare early)
   const eventManager = useEventManagement();
@@ -218,18 +226,55 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     ],
   );
 
+  // Handle machine_snapshot events (generic machines)
+  const handleMachineSnapshot = useCallback(
+    (data: Record<string, MachineTelemetry[]>) => {
+      setMachineTelemetry(data);
+    },
+    [],
+  );
+
+  // Handle machine_update events (generic machines)
+  const handleMachineUpdate = useCallback(
+    (data: MachineTelemetry) => {
+      const { machineType } = data;
+      setMachineTelemetry((prev) => {
+        const typeInstances = prev[machineType] ?? [];
+        const key = `${data.plantId}-${data.stationId}`;
+        const existingIdx = typeInstances.findIndex(
+          (inst) =>
+            `${inst.plantId}-${inst.stationId}` === key,
+        );
+
+        const updated = [...typeInstances];
+        if (existingIdx >= 0) {
+          updated[existingIdx] = data;
+        } else {
+          updated.push(data);
+        }
+
+        return { ...prev, [machineType]: updated };
+      });
+    },
+    [],
+  );
+
   // WebSocket event listeners
   useEffect(() => {
     if (!socket) return;
 
     socket.on("hvac_snapshot", handleHvacSnapshot);
     socket.on("hvac_update", handleHvacUpdate);
+    socket.on("machine_snapshot", handleMachineSnapshot);
+    socket.on("machine_update", handleMachineUpdate);
 
     return () => {
       socket.off("hvac_snapshot", handleHvacSnapshot);
       socket.off("hvac_update", handleHvacUpdate);
+      socket.off("machine_snapshot", handleMachineSnapshot);
+      socket.off("machine_update", handleMachineUpdate);
     };
-  }, [socket, handleHvacSnapshot, handleHvacUpdate]);
+  }, [socket, handleHvacSnapshot, handleHvacUpdate, handleMachineSnapshot, handleMachineUpdate]);
 
   // Mark all AHUs as disconnected when WebSocket disconnects
   useEffect(() => {
@@ -250,6 +295,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       isAhuConnected: connectivity.isAhuConnected,
       setEvents: eventManager.setEvents,
       socket,
+      machineTelemetry,
     }),
     [
       telemetry,
@@ -261,6 +307,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       connectivity.ahuConnectionStatus,
       connectivity.isAhuConnected,
       socket,
+      machineTelemetry,
     ],
   );
 

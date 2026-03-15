@@ -10,12 +10,15 @@ import {
   ArrowRight,
   Zap,
   Eye,
+  Cpu,
 } from "lucide-react";
 
 import { routes } from "@/router/routes";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAhuHealth } from "@/hooks/useAhuHealth";
 import { useTranslation } from "@/i18n/useTranslation";
+import { useMachineTypes } from "@/context/MachineTypeContext";
+import { useMachineTelemetry } from "@/hooks/useMachineTelemetry";
 
 import {
   Card,
@@ -32,6 +35,8 @@ export default function HomeGlobal() {
   const { telemetry, ahuConnectionStatus, connected } = useTelemetry();
   const [mounted, setMounted] = useState(false);
   const { t, tf } = useTranslation();
+  const { machineTypes } = useMachineTypes();
+  const { allMachineTelemetry } = useMachineTelemetry();
 
   useEffect(() => {
     setMounted(true);
@@ -268,21 +273,44 @@ export default function HomeGlobal() {
                 t={t}
               />
 
-              <ModuleCard
-                title={t.homeGlobal.energyManagement}
-                description={t.homeGlobal.energyManagementDesc}
-                status={t.homeGlobal.statusComingSoon}
-                eta="Q2 2026"
-                t={t}
-              />
+              {machineTypes.map((mt) => {
+                const instanceCount = (allMachineTelemetry[mt.slug] ?? []).length;
+                return (
+                  <ModuleCard
+                    key={mt.id}
+                    icon={Cpu}
+                    title={mt.name}
+                    description={mt.description ?? `${mt.name} monitoring module`}
+                    status={t.homeGlobal.statusActive}
+                    metrics={{
+                      devices: instanceCount,
+                      uptime: `${mt.variables.length} vars`,
+                    }}
+                    onClick={() => navigate(routes.machine.dashboard(mt.slug))}
+                    t={t}
+                  />
+                );
+              })}
 
-              <ModuleCard
-                title={t.homeGlobal.processControl}
-                description={t.homeGlobal.processControlDesc}
-                status={t.homeGlobal.statusComingSoon}
-                eta="Q3 2026"
-                t={t}
-              />
+              {machineTypes.length === 0 && (
+                <>
+                  <ModuleCard
+                    title={t.homeGlobal.energyManagement}
+                    description={t.homeGlobal.energyManagementDesc}
+                    status={t.homeGlobal.statusComingSoon}
+                    eta="Q2 2026"
+                    t={t}
+                  />
+
+                  <ModuleCard
+                    title={t.homeGlobal.processControl}
+                    description={t.homeGlobal.processControlDesc}
+                    status={t.homeGlobal.statusComingSoon}
+                    eta="Q3 2026"
+                    t={t}
+                  />
+                </>
+              )}
             </div>
           </div>
         </section>

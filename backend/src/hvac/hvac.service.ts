@@ -1,18 +1,51 @@
-import { Injectable, Inject, forwardRef, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  forwardRef,
+  Logger,
+  OnModuleInit,
+} from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
+import { validateSync, type ValidationError } from 'class-validator';
 import { HvacGateway } from './hvac.gateway';
 import { InternalAhuState } from './internal/ahu-state';
 import { toTelemetryDto } from './mappers/telemetry.mapper';
 import { TelemetryDto } from './dto/telemetry.dto';
+import { MqttService } from '../mqtt/mqtt.service';
 
 @Injectable()
-export class HvacService {
+export class HvacService implements OnModuleInit {
   private readonly logger = new Logger(HvacService.name);
   private readonly state = new Map<string, InternalAhuState>();
 
   constructor(
     @Inject(forwardRef(() => HvacGateway))
     private readonly gateway: HvacGateway,
+    private readonly mqttService: MqttService,
   ) {}
+
+  onModuleInit() {
+    this.mqttService.registerTopicHandler(
+      'hvac/#',
+      (_topic: string, raw: unknown) => {
+        const dto = plainToInstance(TelemetryDto, raw);
+        const errors = validateSync(dto, { skipMissingProperties: false });
+
+        if (errors.length > 0) {
+          this.logger.warn(
+            `Invalid telemetry on topic "${_topic}": ${errors
+              .map((e: ValidationError) =>
+                Object.values(e.constraints ?? {}).join(', '),
+              )
+              .join(' | ')}`,
+          );
+          return;
+        }
+
+        this.handleTelemetry(dto);
+      },
+    );
+  }
 
   handleTelemetry(payload: TelemetryDto) {
     const key = `${payload.plantId}-${payload.stationId}`;
