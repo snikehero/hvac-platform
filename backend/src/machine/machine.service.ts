@@ -4,6 +4,7 @@ import {
   forwardRef,
   Logger,
   OnModuleInit,
+  OnModuleDestroy,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { validateSync, type ValidationError } from 'class-validator';
@@ -26,10 +27,11 @@ interface MachineInstanceState {
   stationId: string;
   lastUpdate: Date;
   points: Map<string, MachinePointState>;
+  isConnected: boolean;
 }
 
 @Injectable()
-export class MachineService implements OnModuleInit {
+export class MachineService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(MachineService.name);
 
   /** Map<machineTypeSlug, Map<instanceKey, MachineInstanceState>> */
@@ -40,7 +42,9 @@ export class MachineService implements OnModuleInit {
     @Inject(forwardRef(() => MachineDesignerService))
     private readonly designerService: MachineDesignerService,
     private readonly gateway: MachineGateway,
-  ) {}
+  ) { }
+
+  private timer: NodeJS.Timeout;
 
   async onModuleInit() {
     // Provide snapshot function to gateway
@@ -56,6 +60,41 @@ export class MachineService implements OnModuleInit {
     this.logger.log(
       `Initialized ${machineTypes.length} machine type(s): ${machineTypes.map((mt) => mt.slug).join(', ') || 'none'}`,
     );
+
+    this.timer = setInterval(() => this.checkConnectivity(), 5000);
+  }
+
+  onModuleDestroy() {
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
+  }
+
+  private checkConnectivity() {
+    const now = Date.now();
+    const TIMEOUT = 60000;
+
+    for (const [slug, typeState] of this.state) {
+      for (const [key, instance] of typeState) {
+        if (
+          instance.isConnected &&
+          now - instance.lastUpdate.getTime() > TIMEOUT
+        ) {
+          instance.isConnected = false;
+
+          this.gateway.emitEvent({
+            type: 'DISCONNECTED',
+            timestamp: new Date().toISOString(),
+            machineType: slug,
+            instanceId: instance.stationId,
+            plantId: instance.plantId,
+            message: `Machine ${slug} (${instance.plantId}/${instance.stationId}) disconnected`,
+          });
+
+          this.logger.warn(`Machine timeout: ${key} disconnected`);
+        }
+      }
+    }
   }
 
   /** Register a new machine type for MQTT handling (called on startup and when new types are created) */
@@ -115,11 +154,25 @@ export class MachineService implements OnModuleInit {
         stationId: payload.stationId,
         lastUpdate: new Date(),
         points: new Map(),
+        isConnected: true,
       };
       typeState.set(key, instance);
+    } else {
+      if (!instance.isConnected) {
+        instance.isConnected = true;
+        this.gateway.emitEvent({
+          type: 'RECONNECTED',
+          timestamp: new Date().toISOString(),
+          machineType: machineTypeSlug,
+          instanceId: instance.stationId,
+          plantId: instance.plantId,
+          message: `Machine ${machineTypeSlug} (${instance.plantId}/${instance.stationId}) reconnected`,
+        });
+        this.logger.log(`Machine reconnected: ${key}`);
+      }
     }
 
-    instance.lastUpdate = new Date(payload.timestamp);
+    instance.lastUpdate = new Date();
 
     for (const [pointKey, point] of Object.entries(payload.points)) {
       instance.points.set(pointKey, {

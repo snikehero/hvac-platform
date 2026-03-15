@@ -34,4 +34,8 @@ export class MachineGateway {
     const data: MachineUpdatePayload = { machineType, ...payload };
     this.server.emit('machine_update', data);
   }
+
+  emitEvent(event: any) {
+    this.server.emit('machine_event', event);
+  }
 }

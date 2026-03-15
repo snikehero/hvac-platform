@@ -20,7 +20,7 @@ export default function MachineDashboardPage() {
   }>();
   const navigate = useNavigate();
   const { machineTypes } = useMachineTypes();
-  const { instances, connected } = useMachineTelemetry(machineTypeSlug);
+  const { instances, connected, isMachineConnected } = useMachineTelemetry(machineTypeSlug);
   const { t } = useTranslation();
 
   const machineType = useMemo(
@@ -119,67 +119,76 @@ export default function MachineDashboardPage() {
                 {t.machineDashboard?.plant ?? "Plant"}: {plantId}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {plantInstances.map((inst) => (
-                  <Card
-                    key={`${inst.plantId}-${inst.stationId}`}
-                    className="hover:shadow-md transition-shadow cursor-pointer group"
-                    onClick={() =>
-                      navigate(
-                        routes.machine.detail(
-                          machineTypeSlug!,
-                          inst.plantId,
-                          inst.stationId,
-                        ),
-                      )
-                    }
-                  >
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-base">
-                          {inst.stationId}
-                        </CardTitle>
-                        <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </div>
-                      <CardDescription className="text-xs font-mono">
-                        {inst.plantId}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      {sortedVariables.map((varDef) => {
-                        const point = inst.points[varDef.key];
-                        return (
-                          <div
-                            key={varDef.key}
-                            className="flex items-center justify-between text-sm"
-                          >
-                            <span className="text-muted-foreground">
-                              {varDef.label}
-                            </span>
-                            <span className="font-semibold tabular-nums">
-                              {point
-                                ? typeof point.value === "boolean"
-                                  ? point.value
-                                    ? "ON"
-                                    : "OFF"
-                                  : String(point.value)
-                                : "--"}
-                              {point?.unit && (
-                                <span className="text-xs text-muted-foreground ml-1">
-                                  {point.unit}
-                                </span>
-                              )}
-                            </span>
-                          </div>
-                        );
-                      })}
-                      <div className="pt-2 border-t border-border">
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(inst.timestamp).toLocaleString()}
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                {plantInstances.map((inst) => {
+                  const isInstConnected = connected && isMachineConnected(`${inst.plantId}-${inst.stationId}`);
+                  return (
+                    <Card
+                      key={`${inst.plantId}-${inst.stationId}`}
+                      className="hover:shadow-md transition-shadow cursor-pointer group"
+                      onClick={() =>
+                        navigate(
+                          routes.machine.detail(
+                            machineTypeSlug!,
+                            inst.plantId,
+                            inst.stationId,
+                          ),
+                        )
+                      }
+                    >
+                      <CardHeader className="pb-2">
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <div
+                              className={`h-2.5 w-2.5 rounded-full ${isInstConnected
+                                  ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"
+                                  : "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
+                                }`}
+                            />
+                            {inst.stationId}
+                          </CardTitle>
+                          <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                        <CardDescription className="text-xs font-mono">
+                          {inst.plantId}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-2">
+                        {sortedVariables.map((varDef) => {
+                          const point = inst.points[varDef.key];
+                          return (
+                            <div
+                              key={varDef.key}
+                              className="flex items-center justify-between text-sm"
+                            >
+                              <span className="text-muted-foreground">
+                                {varDef.label}
+                              </span>
+                              <span className="font-semibold tabular-nums">
+                                {point
+                                  ? typeof point.value === "boolean"
+                                    ? point.value
+                                      ? "ON"
+                                      : "OFF"
+                                    : String(point.value)
+                                  : "--"}
+                                {point?.unit && (
+                                  <span className="text-xs text-muted-foreground ml-1">
+                                    {point.unit}
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                          );
+                        })}
+                        <div className="pt-2 border-t border-border">
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(inst.timestamp).toLocaleString()}
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )
+                })}
               </div>
             </div>
           ))}

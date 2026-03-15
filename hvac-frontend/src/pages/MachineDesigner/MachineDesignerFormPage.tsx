@@ -37,6 +37,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { renderMetricCard } from "@/components/MetricCards/renderMetricCard";
 
 const CARD_TYPES = [
   "generic",
@@ -48,6 +49,8 @@ const CARD_TYPES = [
   "power",
   "filter",
   "gauge",
+  "rpm",
+  "current",
 ];
 
 const COLORS = [
@@ -172,6 +175,27 @@ export default function MachineDesignerFormPage() {
     );
   };
 
+  const updateVariableConfig = (
+    id: string,
+    field: string,
+    value: string | number,
+  ) => {
+    setVariables((prev) =>
+      prev.map((v) => {
+        if (v._id === id) {
+          return {
+            ...v,
+            cardConfig: {
+              ...(v.cardConfig || {}),
+              [field]: value,
+            },
+          };
+        }
+        return v;
+      }),
+    );
+  };
+
   // DnD sensors
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -195,7 +219,7 @@ export default function MachineDesignerFormPage() {
     if (!name.trim() || !slug.trim() || !mqttTopic.trim()) {
       toast.error(
         t.machineDesigner?.requiredFields ??
-          "Name, slug, and MQTT topic are required",
+        "Name, slug, and MQTT topic are required",
       );
       return;
     }
@@ -203,7 +227,7 @@ export default function MachineDesignerFormPage() {
     if (variables.length === 0) {
       toast.error(
         t.machineDesigner?.noVariablesError ??
-          "At least one variable is required",
+        "At least one variable is required",
       );
       return;
     }
@@ -212,7 +236,7 @@ export default function MachineDesignerFormPage() {
     if (invalidVars.length > 0) {
       toast.error(
         t.machineDesigner?.invalidVariables ??
-          "All variables must have a key and label",
+        "All variables must have a key and label",
       );
       return;
     }
@@ -401,6 +425,7 @@ export default function MachineDesignerFormPage() {
                       key={v._id}
                       variable={v}
                       onUpdate={updateVariable}
+                      onUpdateConfig={updateVariableConfig}
                       onRemove={removeVariable}
                       t={t}
                     />
@@ -441,38 +466,16 @@ export default function MachineDesignerFormPage() {
                 .map((v) => {
                   const point = previewPoints[v.key];
                   return (
-                    <Card
-                      key={v._id}
-                      className="border-border bg-card"
-                    >
-                      <CardContent className="p-4 space-y-2">
-                        <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
-                          {v.label || v.key}
-                        </div>
-                        <div className="text-2xl font-bold tabular-nums">
-                          {point
-                            ? typeof point.value === "boolean"
-                              ? point.value
-                                ? "ON"
-                                : "OFF"
-                              : String(point.value)
-                            : "--"}
-                          {point?.unit && (
-                            <span className="text-sm text-muted-foreground ml-1">
-                              {point.unit}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex gap-1">
-                          <Badge variant="outline" className="text-[10px]">
-                            {v.cardType}
-                          </Badge>
-                          <Badge variant="outline" className="text-[10px]">
-                            {v.dataType}
-                          </Badge>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <div key={v._id}>
+                      {renderMetricCard({
+                        cardType: v.cardType || "generic",
+                        label: v.label || v.key,
+                        value: point?.value ?? "--",
+                        unit: v.unit || "",
+                        color: v.color as any || "primary",
+                        cardConfig: v.cardConfig,
+                      })}
+                    </div>
                   );
                 })}
             </div>
@@ -503,6 +506,7 @@ export default function MachineDesignerFormPage() {
 function SortableVariableRow({
   variable,
   onUpdate,
+  onUpdateConfig,
   onRemove,
   t,
 }: {
@@ -512,6 +516,7 @@ function SortableVariableRow({
     field: keyof CreateMachineVariablePayload,
     value: string,
   ) => void;
+  onUpdateConfig: (id: string, field: string, value: string | number) => void;
   onRemove: (id: string) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t: any;
@@ -602,7 +607,7 @@ function SortableVariableRow({
             ))}
           </select>
         </div>
-        <div className="space-y-1">
+        <div className="space-y-1 col-span-2 md:col-span-2">
           <Label className="text-xs">{t.machineDesigner?.color ?? "Color"}</Label>
           <select
             value={variable.color ?? "primary"}
@@ -616,6 +621,71 @@ function SortableVariableRow({
             ))}
           </select>
         </div>
+
+        {/* Dynamic Card Config Fields */}
+        {(variable.cardType === "rpm" || variable.cardType === "gauge") && (
+          <div className="col-span-2 md:col-span-4 grid grid-cols-3 gap-2 mt-2 pt-2 border-t border-border">
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground">Min (RPM)</Label>
+              <Input
+                type="number"
+                value={(variable.cardConfig?.min as number) ?? 0}
+                onChange={(e) => onUpdateConfig(variable._id, "min", Number(e.target.value))}
+                className="h-7 text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground">Max (RPM)</Label>
+              <Input
+                type="number"
+                value={(variable.cardConfig?.max as number) ?? 3600}
+                onChange={(e) => onUpdateConfig(variable._id, "max", Number(e.target.value))}
+                className="h-7 text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground">Target (RPM)</Label>
+              <Input
+                type="number"
+                value={(variable.cardConfig?.target as number) ?? 1800}
+                onChange={(e) => onUpdateConfig(variable._id, "target", Number(e.target.value))}
+                className="h-7 text-xs"
+              />
+            </div>
+          </div>
+        )}
+
+        {variable.cardType === "current" && (
+          <div className="col-span-2 md:col-span-4 grid grid-cols-3 gap-2 mt-2 pt-2 border-t border-border">
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground">Min Current</Label>
+              <Input
+                type="number"
+                value={(variable.cardConfig?.min as number) ?? 0}
+                onChange={(e) => onUpdateConfig(variable._id, "min", Number(e.target.value))}
+                className="h-7 text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground">Max Current</Label>
+              <Input
+                type="number"
+                value={(variable.cardConfig?.max as number) ?? 100}
+                onChange={(e) => onUpdateConfig(variable._id, "max", Number(e.target.value))}
+                className="h-7 text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground">Critical Level</Label>
+              <Input
+                type="number"
+                value={(variable.cardConfig?.critical as number) ?? 80}
+                onChange={(e) => onUpdateConfig(variable._id, "critical", Number(e.target.value))}
+                className="h-7 text-xs"
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <Button

@@ -11,6 +11,8 @@ import {
   useAhuConnectivity,
   type AhuConnectionStatus,
 } from "@/hooks/useAhuConnectivity";
+import { useDeviceConnectivity, type DeviceConnectionStatus } from "@/hooks/useDeviceConnectivity";
+import type { MachineEvent } from "@/types/machine-event";
 import { useEventManagement } from "@/hooks/useEventManagement";
 import { useHistoryManagement } from "@/hooks/useHistoryManagement";
 import { useTelemetryState } from "@/hooks/useTelemetryState";
@@ -48,6 +50,10 @@ interface TelemetryContextValue {
   socket: Socket | null;
   /** Machine telemetry keyed by machine type slug */
   machineTelemetry: Record<string, MachineTelemetry[]>;
+  /** Generic machine connectivity */
+  machineConnectionStatus: Record<string, DeviceConnectionStatus>;
+  isMachineConnected: (machineKey: string) => boolean;
+  machineEvents: MachineEvent[];
 }
 
 export const TelemetryContext = createContext<TelemetryContextValue | null>(
@@ -73,6 +79,17 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const [machineTelemetry, setMachineTelemetry] = useState<
     Record<string, MachineTelemetry[]>
   >({});
+
+  // Machine events
+  const [machineEvents, setMachineEvents] = useState<MachineEvent[]>([]);
+
+  // Machine connectivity
+  const machineConnectivity = useDeviceConnectivity(
+    connected,
+    undefined, // We don't notify from client anymore, the backend emits `machine_event`
+    settings.thresholds.disconnectTimeoutSeconds * 1000,
+    settings.general.refreshIntervalSeconds * 1000
+  );
 
   // Event management (declare early)
   const eventManager = useEventManagement();
@@ -230,14 +247,32 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const handleMachineSnapshot = useCallback(
     (data: Record<string, MachineTelemetry[]>) => {
       setMachineTelemetry(data);
+
+      const newConnectionStatus: Record<string, DeviceConnectionStatus> = {};
+      const now = Date.now();
+
+      Object.values(data).flat().forEach((inst) => {
+        const key = `${inst.plantId}-${inst.stationId}`;
+        newConnectionStatus[key] = {
+          isConnected: true,
+          lastSeen: now,
+        };
+        machineConnectivity.updateLastSeen(key);
+      });
+
+      machineConnectivity.setConnectionStatus(newConnectionStatus);
     },
-    [],
+    [machineConnectivity.updateLastSeen, machineConnectivity.setConnectionStatus],
   );
 
   // Handle machine_update events (generic machines)
   const handleMachineUpdate = useCallback(
     (data: MachineTelemetry) => {
       const { machineType } = data;
+      const key = `${data.plantId}-${data.stationId}`;
+
+      machineConnectivity.updateLastSeen(key);
+
       setMachineTelemetry((prev) => {
         const typeInstances = prev[machineType] ?? [];
         const key = `${data.plantId}-${data.stationId}`;
@@ -256,8 +291,35 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         return { ...prev, [machineType]: updated };
       });
     },
-    [],
+    [machineConnectivity.updateLastSeen],
   );
+
+  // Handle machine_event from backend
+  const handleMachineEvent = useCallback((event: MachineEvent) => {
+    setMachineEvents((prev) => [event, ...prev].slice(0, 100)); // Keep last 100
+
+    // Optionally show a toast based on event type
+    import("sonner").then(({ toast }) => {
+      if (event.type === 'DISCONNECTED') {
+        toast.error(`🔴 ${event.message}`, {
+          description: `Plant: ${event.plantId}`,
+        });
+
+        // Force local connection status to false when server says strictly disconnected
+        machineConnectivity.setConnectionStatus((prev) => ({
+          ...prev,
+          [`${event.plantId}-${event.instanceId}`]: {
+            ...(prev[`${event.plantId}-${event.instanceId}`] || { lastSeen: Date.now() }),
+            isConnected: false
+          }
+        }));
+      } else if (event.type === 'RECONNECTED') {
+        toast.success(`🟢 ${event.message}`, {
+          description: `Plant: ${event.plantId}`,
+        });
+      }
+    });
+  }, [machineConnectivity.setConnectionStatus]);
 
   // WebSocket event listeners
   useEffect(() => {
@@ -267,21 +329,24 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     socket.on("hvac_update", handleHvacUpdate);
     socket.on("machine_snapshot", handleMachineSnapshot);
     socket.on("machine_update", handleMachineUpdate);
+    socket.on("machine_event", handleMachineEvent);
 
     return () => {
       socket.off("hvac_snapshot", handleHvacSnapshot);
       socket.off("hvac_update", handleHvacUpdate);
       socket.off("machine_snapshot", handleMachineSnapshot);
       socket.off("machine_update", handleMachineUpdate);
+      socket.off("machine_event", handleMachineEvent);
     };
-  }, [socket, handleHvacSnapshot, handleHvacUpdate, handleMachineSnapshot, handleMachineUpdate]);
+  }, [socket, handleHvacSnapshot, handleHvacUpdate, handleMachineSnapshot, handleMachineUpdate, handleMachineEvent]);
 
-  // Mark all AHUs as disconnected when WebSocket disconnects
+  // Mark all devices as disconnected when WebSocket disconnects
   useEffect(() => {
     if (!connected) {
       connectivity.markAllAsDisconnected();
+      machineConnectivity.markAllAsDisconnected();
     }
-  }, [connected, connectivity.markAllAsDisconnected]);
+  }, [connected, connectivity.markAllAsDisconnected, machineConnectivity.markAllAsDisconnected]);
 
   // Memoize context value
   const contextValue = useMemo<TelemetryContextValue>(
@@ -296,6 +361,9 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       setEvents: eventManager.setEvents,
       socket,
       machineTelemetry,
+      machineConnectionStatus: machineConnectivity.connectionStatus,
+      isMachineConnected: machineConnectivity.isConnected,
+      machineEvents,
     }),
     [
       telemetry,
@@ -308,6 +376,9 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       connectivity.isAhuConnected,
       socket,
       machineTelemetry,
+      machineConnectivity.connectionStatus,
+      machineConnectivity.isConnected,
+      machineEvents,
     ],
   );
 

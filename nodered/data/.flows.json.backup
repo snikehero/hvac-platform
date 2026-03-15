@@ -956,12 +956,12 @@
         "z": "351e5b2e390a463c",
         "name": "Live State — 5s  [DISABLED: replaced by Auto Simulation tab]",
         "props": [],
-        "repeat": "5",
+        "repeat": "",
         "crontab": "",
         "once": false,
         "onceDelay": "1",
         "topic": "",
-        "x": 830,
+        "x": 660,
         "y": 360,
         "wires": [
             [

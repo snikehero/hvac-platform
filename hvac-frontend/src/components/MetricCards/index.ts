@@ -12,4 +12,6 @@ export { AirflowCard } from "./components/AirflowCard";
 export { DamperCard } from "./components/DamperCard";
 export { PowerCard } from "./components/PowerCard";
 export { FilterCard } from "./components/FilterCard";
+export { RpmCard } from "./components/RpmCard";
+export { CurrentCard } from "./components/CurrentCard";
 export { GenericCard } from "./components/GenericCard";

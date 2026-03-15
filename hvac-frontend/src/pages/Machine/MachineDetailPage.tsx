@@ -7,12 +7,11 @@ import { routes } from "@/router/routes";
 import { useTranslation } from "@/i18n/useTranslation";
 import {
   Card,
-  CardHeader,
-  CardTitle,
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { renderMetricCard } from "@/components/MetricCards/renderMetricCard";
 
 export default function MachineDetailPage() {
   const { machineType: machineTypeSlug, plantId, stationId } = useParams<{
@@ -42,8 +41,8 @@ export default function MachineDetailPage() {
     () =>
       machineType
         ? [...machineType.variables].sort(
-            (a, b) => a.displayOrder - b.displayOrder,
-          )
+          (a, b) => a.displayOrder - b.displayOrder,
+        )
         : [],
     [machineType],
   );
@@ -56,31 +55,7 @@ export default function MachineDetailPage() {
     );
   }
 
-  const colorMap: Record<string, string> = {
-    primary: "border-primary/30 bg-primary/5",
-    accent: "border-accent/30 bg-accent/5",
-    success: "border-green-500/30 bg-green-500/5",
-    warning: "border-yellow-500/30 bg-yellow-500/5",
-    destructive: "border-destructive/30 bg-destructive/5",
-    "chart-1": "border-chart-1/30 bg-chart-1/5",
-    "chart-2": "border-chart-2/30 bg-chart-2/5",
-    "chart-3": "border-chart-3/30 bg-chart-3/5",
-    "chart-4": "border-chart-4/30 bg-chart-4/5",
-    "chart-5": "border-chart-5/30 bg-chart-5/5",
-  };
 
-  const textColorMap: Record<string, string> = {
-    primary: "text-primary",
-    accent: "text-accent",
-    success: "text-green-500",
-    warning: "text-yellow-500",
-    destructive: "text-destructive",
-    "chart-1": "text-chart-1",
-    "chart-2": "text-chart-2",
-    "chart-3": "text-chart-3",
-    "chart-4": "text-chart-4",
-    "chart-5": "text-chart-5",
-  };
 
   return (
     <div className="space-y-6">
@@ -135,54 +110,19 @@ export default function MachineDetailPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {sortedVariables.map((varDef) => {
               const point = instance.points[varDef.key];
-              const cardColor = colorMap[varDef.color] ?? colorMap.primary;
-              const labelColor =
-                textColorMap[varDef.color] ?? textColorMap.primary;
 
               return (
-                <Card key={varDef.key} className={`border ${cardColor}`}>
-                  <CardHeader className="pb-2">
-                    <CardTitle
-                      className={`text-sm font-medium uppercase tracking-wider ${labelColor}`}
-                    >
-                      {varDef.label}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold tabular-nums">
-                      {point
-                        ? typeof point.value === "boolean"
-                          ? point.value
-                            ? "ON"
-                            : "OFF"
-                          : typeof point.value === "number"
-                            ? Number.isInteger(point.value)
-                              ? point.value
-                              : point.value.toFixed(2)
-                            : String(point.value)
-                        : "--"}
-                      {point?.unit && (
-                        <span className="text-lg text-muted-foreground ml-1">
-                          {point.unit}
-                        </span>
-                      )}
-                    </div>
-                    {point?.quality && (
-                      <Badge
-                        variant="outline"
-                        className={`mt-2 text-xs ${
-                          point.quality === "GOOD"
-                            ? "text-green-500 border-green-500/30"
-                            : point.quality === "BAD"
-                              ? "text-destructive border-destructive/30"
-                              : "text-yellow-500 border-yellow-500/30"
-                        }`}
-                      >
-                        {point.quality}
-                      </Badge>
-                    )}
-                  </CardContent>
-                </Card>
+                <div key={varDef.key} className="h-full">
+                  {renderMetricCard({
+                    cardType: varDef.cardType,
+                    label: varDef.label,
+                    value: point?.value ?? 0,
+                    unit: point?.unit ?? "",
+                    quality: point?.quality,
+                    color: varDef.color as any,
+                    cardConfig: varDef.cardConfig as Record<string, unknown>,
+                  })}
+                </div>
               );
             })}
           </div>

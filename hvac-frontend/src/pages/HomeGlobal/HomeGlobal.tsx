@@ -36,7 +36,7 @@ export default function HomeGlobal() {
   const [mounted, setMounted] = useState(false);
   const { t, tf } = useTranslation();
   const { machineTypes } = useMachineTypes();
-  const { allMachineTelemetry } = useMachineTelemetry();
+  const { allMachineTelemetry, isMachineConnected } = useMachineTelemetry();
 
   useEffect(() => {
     setMounted(true);
@@ -50,7 +50,12 @@ export default function HomeGlobal() {
       return ahuConnectionStatus[key]?.isConnected;
     });
 
-    const totalDevices = activeAhus.length;
+    const activeMachines = Object.values(allMachineTelemetry).flat().filter((inst) => {
+      const key = `${inst.plantId}-${inst.stationId}`;
+      return isMachineConnected(key);
+    });
+
+    const totalDevices = activeAhus.length + activeMachines.length;
 
     const activeAlarms = activeAhus.reduce((acc, ahu) => {
       const health = getHealth(ahu);
@@ -62,14 +67,16 @@ export default function HomeGlobal() {
       return acc + (health.status === "WARNING" ? 1 : 0);
     }, 0);
 
-    const plants = new Set(activeAhus.map((t) => t.plantId)).size;
+    const machinePlants = new Set(activeMachines.map(m => m.plantId));
+    const ahuPlants = new Set(activeAhus.map((t) => t.plantId));
+    const plants = new Set([...machinePlants, ...ahuPlants]).size;
 
     const avgTemp =
       activeAhus.length > 0
         ? activeAhus.reduce((acc, ahu) => {
-            const temp = ahu.points.temperature?.value;
-            return acc + (typeof temp === "number" ? temp : 0);
-          }, 0) / activeAhus.length
+          const temp = ahu.points.temperature?.value;
+          return acc + (typeof temp === "number" ? temp : 0);
+        }, 0) / activeAhus.length
         : 0;
 
     return {
@@ -80,7 +87,7 @@ export default function HomeGlobal() {
       avgTemp,
       healthy: totalDevices - activeAlarms - warnings,
     };
-  }, [telemetry, ahuConnectionStatus, getHealth]);
+  }, [telemetry, ahuConnectionStatus, getHealth, allMachineTelemetry, isMachineConnected]);
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
@@ -349,12 +356,12 @@ function MetricCard({
   value: number;
   suffix?: string;
   variant?:
-    | "primary"
-    | "accent"
-    | "success"
-    | "warning"
-    | "destructive"
-    | "chart";
+  | "primary"
+  | "accent"
+  | "success"
+  | "warning"
+  | "destructive"
+  | "chart";
   alert?: boolean;
   pulse?: boolean;
   decimal?: boolean;
@@ -486,11 +493,11 @@ function SystemStatus({
             <p className="text-sm text-muted-foreground font-mono">
               {connected
                 ? tf(
-                    metrics.plants !== 1
-                      ? t.homeGlobal.monitoringDevicesPlural
-                      : t.homeGlobal.monitoringDevices,
-                    { devices: metrics.totalDevices, plants: metrics.plants }
-                  )
+                  metrics.plants !== 1
+                    ? t.homeGlobal.monitoringDevicesPlural
+                    : t.homeGlobal.monitoringDevices,
+                  { devices: metrics.totalDevices, plants: metrics.plants }
+                )
                 : t.homeGlobal.reconnecting}
             </p>
           </div>
@@ -571,8 +578,8 @@ function ModuleCard({
   status: string;
   metrics?: { devices: number; uptime: string };
   eta?: string;
-    onClick?: () => void;
-    t: any;
+  onClick?: () => void;
+  t: any;
 }) {
   const isActive = status === t.homeGlobal.statusActive;
 
@@ -581,10 +588,9 @@ function ModuleCard({
       onClick={isActive ? onClick : undefined}
       className={`
         group relative overflow-hidden border transition-all duration-300
-        ${
-          isActive
-            ? "border-primary/30 bg-linear-to-br from-primary/10 to-accent/10 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/20 cursor-pointer hover:scale-[1.02]"
-            : "border-border bg-card/50 opacity-60"
+        ${isActive
+          ? "border-primary/30 bg-linear-to-br from-primary/10 to-accent/10 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/20 cursor-pointer hover:scale-[1.02]"
+          : "border-border bg-card/50 opacity-60"
         }
       `}
     >

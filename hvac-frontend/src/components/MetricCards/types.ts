@@ -11,6 +11,8 @@ export type MetricType =
   | "damper"
   | "power"
   | "filter"
+  | "rpm"
+  | "current"
   | "generic";
 
 export type MetricQuality = "GOOD" | "BAD" | "UNCERTAIN";
@@ -72,6 +74,20 @@ export interface FilterCardProps extends BaseMetricCardProps {
 export interface GenericCardProps extends BaseMetricCardProps {
   type: "generic";
   icon?: LucideIcon;
+}
+
+export interface RpmCardProps extends BaseMetricCardProps {
+  type: "rpm";
+  min?: number;
+  max?: number;
+  target?: number;
+}
+
+export interface CurrentCardProps extends BaseMetricCardProps {
+  type: "current";
+  min?: number;
+  max?: number;
+  critical?: number;
 }
 
 export interface MetricCardBaseProps {

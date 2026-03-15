@@ -32,5 +32,8 @@ export function useMachineTelemetry(machineType?: string) {
     machineTelemetry: instances,
     instances: typeInstances,
     connected: ctx.connected,
+    machineConnectionStatus: ctx.machineConnectionStatus,
+    isMachineConnected: ctx.isMachineConnected,
+    machineEvents: ctx.machineEvents,
   };
 }

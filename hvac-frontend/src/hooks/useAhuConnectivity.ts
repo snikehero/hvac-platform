@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback } from "react";
 import { STALE_THRESHOLD_MS } from "@/domain/ahu/constants";
 import type { HvacTelemetry } from "@/types/telemetry";
+import {
+  useDeviceConnectivity,
+  type DeviceConnectionStatus,
+} from "./useDeviceConnectivity";
 
-export interface AhuConnectionStatus {
-  isConnected: boolean;
-  lastSeen: number;
-}
+export type AhuConnectionStatus = DeviceConnectionStatus;
 
 function getAhuKey(plantId: string, stationId: string): string {
   return `${plantId}-${stationId}`;
@@ -33,109 +34,59 @@ export function useAhuConnectivity(
   disconnectTimeoutMs: number = STALE_THRESHOLD_MS,
   checkIntervalMs: number = 5_000,
 ): UseAhuConnectivityReturn {
-  const [ahuConnectionStatus, setAhuConnectionStatus] = useState<
-    Record<string, AhuConnectionStatus>
-  >({});
+  const handleDisconnected = useCallback(
+    (deviceKey: string) => {
+      // Find the telemetry object to know plantId and stationId
+      // Or we can just parse the deviceKey since it's `plantId-stationId`
+      const ahu = telemetry.find(
+        (t) => getAhuKey(t.plantId, t.stationId) === deviceKey,
+      );
 
-  const lastSeenRef = useRef<Record<string, number>>({});
-  const telemetryRef = useRef<HvacTelemetry[]>(telemetry);
-
-  // Keep telemetry ref in sync
-  useEffect(() => {
-    telemetryRef.current = telemetry;
-  }, [telemetry]);
-
-  const updateLastSeen = useCallback((plantId: string, stationId: string) => {
-    const key = getAhuKey(plantId, stationId);
-    const now = Date.now();
-    lastSeenRef.current[key] = now;
-
-    setAhuConnectionStatus((prev) => ({
-      ...prev,
-      [key]: { isConnected: true, lastSeen: now },
-    }));
-  }, []);
-
-  const isAhuConnected = useCallback(
-    (plantId: string, stationId: string): boolean => {
-      const key = getAhuKey(plantId, stationId);
-      const status = ahuConnectionStatus[key];
-      if (!status) return false;
-      return status.isConnected;
+      if (ahu) {
+        onDisconnected({ plantId: ahu.plantId, stationId: ahu.stationId });
+      } else {
+        // Fallback in case telemetry is empty or ahu is not found
+        const [plantId, stationId] = deviceKey.split("-");
+        if (plantId && stationId) {
+          onDisconnected({ plantId, stationId });
+        }
+      }
     },
-    [ahuConnectionStatus],
+    [onDisconnected, telemetry],
   );
 
-  const markAllAsDisconnected = useCallback(() => {
-    setAhuConnectionStatus((prev) => {
-      const updated = { ...prev };
-      Object.keys(updated).forEach((key) => {
-        updated[key] = {
-          ...updated[key],
-          isConnected: false,
-        };
-      });
-      return updated;
-    });
-  }, []);
+  const {
+    connectionStatus,
+    isConnected,
+    updateLastSeen,
+    setConnectionStatus,
+    markAllAsDisconnected,
+  } = useDeviceConnectivity(
+    isWebSocketConnected,
+    handleDisconnected,
+    disconnectTimeoutMs,
+    checkIntervalMs,
+  );
 
-  // Periodic connectivity check
-  useEffect(() => {
-    // Don't check AHU connectivity if WebSocket is disconnected
-    if (!isWebSocketConnected) {
-      return;
-    }
+  const updateAhuLastSeen = useCallback(
+    (plantId: string, stationId: string) => {
+      updateLastSeen(getAhuKey(plantId, stationId));
+    },
+    [updateLastSeen],
+  );
 
-    const checkConnectivity = () => {
-      const now = Date.now();
-
-      Object.entries(lastSeenRef.current).forEach(([key, lastSeen]) => {
-        const isStale = now - lastSeen > disconnectTimeoutMs;
-
-        if (isStale) {
-          const ahu = telemetryRef.current.find(
-            (t) => getAhuKey(t.plantId, t.stationId) === key,
-          );
-
-          if (ahu) {
-            // Only notify if the status is changing from connected to disconnected
-            setAhuConnectionStatus((prev) => {
-              const wasConnected = prev[key]?.isConnected !== false;
-
-              // Only call onDisconnected if state is changing
-              if (wasConnected) {
-                // Use setTimeout to ensure state update happens first
-                setTimeout(() => {
-                  onDisconnected({ plantId: ahu.plantId, stationId: ahu.stationId });
-                }, 0);
-              }
-
-              return {
-                ...prev,
-                [key]: {
-                  ...prev[key],
-                  isConnected: false,
-                },
-              };
-            });
-          }
-        }
-      });
-    };
-
-    const intervalId = setInterval(
-      checkConnectivity,
-      checkIntervalMs,
-    );
-
-    return () => clearInterval(intervalId);
-  }, [onDisconnected, isWebSocketConnected, disconnectTimeoutMs, checkIntervalMs]);
+  const isAhuConnected = useCallback(
+    (plantId: string, stationId: string) => {
+      return isConnected(getAhuKey(plantId, stationId));
+    },
+    [isConnected],
+  );
 
   return {
-    ahuConnectionStatus,
+    ahuConnectionStatus: connectionStatus,
     isAhuConnected,
-    updateLastSeen,
-    setConnectionStatus: setAhuConnectionStatus,
+    updateLastSeen: updateAhuLastSeen,
+    setConnectionStatus,
     markAllAsDisconnected,
   };
 }
