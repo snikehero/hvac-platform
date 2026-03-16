@@ -2,21 +2,14 @@ import "./index.css";
 
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
 import HomeGlobal from "./pages/HomeGlobal/HomeGlobal";
 import AppLayout from "@/components/layouts/AppLayout";
-import HomePageHVAC from "./pages/HVAC/HomePage/HomepageHVAC";
 import { WebSocketProvider } from "./providers/WebSocketProvider";
-import DashboardHVAC from "@/pages/HVAC/DashboardHVAC/DashboardHVAC";
-import AlarmsPage from "./pages/HVAC/Alarms/AlarmsPage";
-import DashboardEjecutivoPage from "./pages/HVAC/DashboardEjecutivoPage/DashboardEjecutivoPage";
 import { Toaster } from "sonner";
-import AhuDetailView from "./pages/HVAC/DashboardEjecutivoPage/3DDetailPage/AhuDetailView";
 import { routes } from "@/router/routes";
-import AhuDetailPage from "./pages/HVAC/AhuDetailPage/AhuDetailContent";
-import SettingsPage from "./pages/HVAC/Settings/SettingsPage";
-import { SettingsProvider } from "@/context/SettingsContext";
+import { GlobalSettingsProvider } from "@/context/GlobalSettingsContext";
 import { AckProvider } from "@/context/AckContext";
 import { MachineTypeProvider } from "@/context/MachineTypeContext";
 import MachineDesignerListPage from "./pages/MachineDesigner/MachineDesignerListPage";
@@ -31,7 +24,7 @@ import UnifiedAlarmsPage from "./pages/Alarms/UnifiedAlarmsPage";
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
-      <SettingsProvider>
+      <GlobalSettingsProvider>
         <AckProvider>
         <MachineTypeProvider>
         <WebSocketProvider>
@@ -41,36 +34,21 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
             <AppLayout>
               <Routes>
                 {/* ========================= */}
-                {/* CORE - Plataforma         */}
+                {/* CORE - Platform           */}
                 {/* ========================= */}
                 <Route path="/" element={<HomeGlobal />} />
                 <Route path={routes.general.alarms} element={<UnifiedAlarmsPage />} />
 
                 {/* ========================= */}
-                {/* HVAC MODULE               */}
+                {/* HVAC LEGACY REDIRECTS     */}
                 {/* ========================= */}
-                <Route path={routes.hvac.home} element={<HomePageHVAC />} />
-
-                <Route path={routes.hvac.dashboard} element={<DashboardHVAC />} />
-
-                <Route path={routes.hvac.alarms} element={<AlarmsPage />} />
-
-                <Route path={routes.hvac.settings} element={<SettingsPage />} />
-
-                <Route
-                  path={routes.hvac.ejecutivo}
-                  element={<DashboardEjecutivoPage />}
-                />
-
-                <Route
-                  path={routes.hvac.ahuDetailPattern}
-                  element={<AhuDetailPage />}
-                />
-
-                <Route
-                  path={routes.hvac.ahuDetail3DPattern}
-                  element={<AhuDetailView />}
-                />
+                <Route path="/hvac" element={<Navigate to="/machines/hvac" replace />} />
+                <Route path="/hvac/dashboard" element={<Navigate to="/machines/hvac/dashboard" replace />} />
+                <Route path="/hvac/alarms" element={<Navigate to="/machines/hvac/alarms" replace />} />
+                <Route path="/hvac/settings" element={<Navigate to="/machines/hvac/settings" replace />} />
+                <Route path="/hvac/ejecutivo" element={<Navigate to="/machines/hvac" replace />} />
+                <Route path="/hvac/plants/:plantId/ahus/:ahuId" element={<Navigate to="/machines/hvac" replace />} />
+                <Route path="/hvac/plants/:plantId/ahus/:ahuId/detail" element={<Navigate to="/machines/hvac" replace />} />
 
                 {/* ========================= */}
                 {/* MACHINE DESIGNER          */}
@@ -117,7 +95,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         </WebSocketProvider>
         </MachineTypeProvider>
         </AckProvider>
-      </SettingsProvider>
+      </GlobalSettingsProvider>
     </BrowserRouter>
   </React.StrictMode>,
 );

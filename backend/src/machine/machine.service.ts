@@ -52,6 +52,10 @@ export class MachineService implements OnModuleInit, OnModuleDestroy {
     // Provide snapshot function to gateway
     this.gateway.setSnapshotProvider(() => this.getSnapshotAll());
 
+    // Ensure system types (HVAC) are seeded before reading
+    // This handles the case where MachineService initializes before MachineDesignerService
+    await this.designerService.ensureSystemTypes();
+
     // Load all machine types from DB and register handlers
     const machineTypes = await this.designerService.findAll();
 

@@ -10,6 +10,7 @@ import {
 import type { HistoryPoint } from "@/types/history";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTranslation } from "@/i18n/useTranslation";
 
 interface DeviceHistoryChartProps {
   title: string;
@@ -28,6 +29,7 @@ export function DeviceHistoryChart({
   height = 200,
   showGrid = true,
 }: DeviceHistoryChartProps) {
+  const { t } = useTranslation();
   const avg =
     data.length > 0
       ? data.reduce((acc, p) => acc + p.value, 0) / data.length
@@ -55,7 +57,7 @@ export function DeviceHistoryChart({
                 {avg.toFixed(1)}
               </span>
               {unit && (
-                <span className="text-xs text-muted-foreground">{unit} avg</span>
+                <span className="text-xs text-muted-foreground">{unit} {t.historyChart.avg}</span>
               )}
             </div>
           )}
@@ -68,7 +70,7 @@ export function DeviceHistoryChart({
 
           {data.length === 0 ? (
             <div className="flex items-center justify-center text-sm text-muted-foreground" style={{ height }}>
-              No data available
+              {t.historyChart.noData}
             </div>
           ) : (
             <div className="relative z-10 p-4">

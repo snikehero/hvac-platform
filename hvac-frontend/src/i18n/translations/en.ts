@@ -641,4 +641,106 @@ eventMessages: {
     lastUpdate: "Last update",
     waitingForData: "Waiting for data from this instance...",
   },
+
+  // ===== Generic Machine Pages =====
+  machinePages: {
+    // MachineHomePage
+    machineTypeNotFound: "Machine type not found.",
+    systemHealth: "System Health",
+    avgMetric: "Average Metric",
+    connectedCount: "Connected",
+    activeAlerts: "Active Alerts",
+    systemOverview: "System Overview",
+    operational: "Operational",
+    warnings: "Warnings",
+    critical: "Critical",
+    offline: "Offline",
+    serverOnline: "Server Online",
+    serverOffline: "Server Offline",
+    viewInstances: "View all instances and their status",
+    viewAlarms: "View active alarms and warnings",
+    configureSettings: "Configure thresholds and notifications",
+    healthCritical: "CRITICAL",
+    healthDegraded: "DEGRADED",
+    healthHealthy: "HEALTHY",
+    healthNoData: "NO DATA",
+
+    // MachineDetailPage
+    overview: "Overview",
+    events: "Events",
+    commands: "Commands",
+
+    // MachineDashboardPage
+    liveMonitoring: "Live Monitoring",
+    total: "Total",
+    ok: "OK",
+    warning: "Warning",
+    alarm: "Alarm",
+    noInstancesMatch: "No instances match the selected filter.",
+    showAll: "Show all",
+    plant: "Plant",
+    alarmSingular: "alarm",
+    alarmPlural: "alarms",
+    warningSingular: "warning",
+    warningPlural: "warnings",
+    on: "ON",
+    off: "OFF",
+
+    // MachineAlarmsPage
+    back: "Back",
+    alarms: "Alarms",
+    activeAlertCount: "{count} active alert(s)",
+    noActiveAlarms: "No active alarms",
+    allNormal: "All {name} instances are operating normally.",
+    acknowledge: "Acknowledge",
+    acknowledged: "Acknowledged",
+    alarmAcknowledged: "Alarm acknowledged: {id}",
+    viewDetails: "View Details",
+    badPointSingular: "bad point",
+    badPointPlural: "bad points",
+
+    // MachineSettingsPage
+    settings: "Settings",
+    configureThresholds: "Configure thresholds and notifications",
+    thresholds: "Thresholds",
+    notificationsTab: "Notifications",
+    noThresholdVars: "No variables with threshold configuration found.",
+    warningThreshold: "Warning Threshold",
+    alarmThreshold: "Alarm Threshold",
+    defaultValue: "Default: {value}",
+    notSet: "Not set",
+    resetDefaults: "Reset to Defaults",
+    soundNotifications: "Sound Notifications",
+    enableSound: "Enable sound alerts",
+    volume: "Volume",
+  },
+
+  // ===== Device Event Timeline =====
+  deviceTimeline: {
+    title: "Event Timeline",
+    count: "{count} events",
+    noEvents: "No events recorded",
+    noEventsDesc: "This device has no recent events.",
+  },
+
+  // ===== Generic Commands Panel =====
+  commandsPanel: {
+    title: "Commands",
+    noCommands: "No commands configured for this machine type.",
+    sending: "Sending...",
+    success: "Success",
+    error: "Error",
+    timeout: "Timeout",
+    on: "ON",
+    off: "OFF",
+    current: "Current: {value}",
+    setTo: "Set {label} to {value}",
+    send: "Send",
+  },
+
+  // ===== Device History Chart =====
+  historyChart: {
+    noData: "No data available",
+    avg: "avg",
+  },
 };

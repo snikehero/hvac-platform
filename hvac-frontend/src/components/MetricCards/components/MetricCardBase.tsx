@@ -53,7 +53,7 @@ export function MetricCardBase({
     },
   };
 
-  const colors = colorClasses[color];
+  const colors = colorClasses[color] ?? colorClasses.primary;
 
   const qualityColor =
     quality === "BAD"

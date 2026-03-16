@@ -10,6 +10,7 @@ import {
   Wifi,
   Clock,
 } from "lucide-react";
+import { useTranslation } from "@/i18n/useTranslation";
 
 interface DeviceEventTimelineProps {
   events: DeviceEvent[];
@@ -20,6 +21,7 @@ export function DeviceEventTimeline({
   events,
   maxEvents = 50,
 }: DeviceEventTimelineProps) {
+  const { t, tf } = useTranslation();
   const displayEvents = events.slice(0, maxEvents);
 
   if (displayEvents.length === 0) {
@@ -27,9 +29,9 @@ export function DeviceEventTimeline({
       <Card className="border-dashed">
         <CardContent className="p-12 text-center">
           <CheckCircle2 className="w-12 h-12 mx-auto text-green-500 mb-4" />
-          <p className="text-lg font-semibold">No events recorded</p>
+          <p className="text-lg font-semibold">{t.deviceTimeline.noEvents}</p>
           <p className="text-sm text-muted-foreground">
-            This device has no recent events.
+            {t.deviceTimeline.noEventsDesc}
           </p>
         </CardContent>
       </Card>
@@ -41,9 +43,9 @@ export function DeviceEventTimeline({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Activity className="w-5 h-5 text-primary" />
-          Event Timeline
+          {t.deviceTimeline.title}
           <Badge variant="outline" className="ml-auto font-mono">
-            {displayEvents.length} events
+            {tf(t.deviceTimeline.count, { count: displayEvents.length })}
           </Badge>
         </CardTitle>
       </CardHeader>

@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { useTelemetry } from "@/hooks/useTelemetry";
+import { useState, useEffect, useCallback, useContext } from "react";
+import { TelemetryContext } from "@/providers/WebSocketProvider";
 import type { CommandRequest, CommandResult, CommandStatus } from "@/types/command";
 
 interface UseCommandsReturn {
@@ -10,7 +10,8 @@ interface UseCommandsReturn {
 }
 
 export function useCommands(): UseCommandsReturn {
-  const { socket } = useTelemetry();
+  const ctx = useContext(TelemetryContext);
+  const socket = ctx?.socket ?? null;
   const [status, setStatus] = useState<CommandStatus>("idle");
   const [lastResult, setLastResult] = useState<CommandResult | null>(null);
 

@@ -15,6 +15,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useMachineTypes } from "@/context/MachineTypeContext";
 import { useMachineSettings } from "@/hooks/useMachineSettings";
 import { routes } from "@/router/routes";
+import { useTranslation } from "@/i18n/useTranslation";
 
 export default function MachineSettingsPage() {
   const { machineType: slug } = useParams<{ machineType: string }>();
@@ -27,6 +28,7 @@ export default function MachineSettingsPage() {
     resetToDefaults,
     defaults,
   } = useMachineSettings(slug ?? "");
+  const { t, tf } = useTranslation();
 
   const machineType = useMemo(
     () => machineTypes.find((mt) => mt.slug === slug),
@@ -50,7 +52,7 @@ export default function MachineSettingsPage() {
   if (!machineType) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Machine type not found.</p>
+        <p className="text-muted-foreground">{t.machinePages.machineTypeNotFound}</p>
       </div>
     );
   }
@@ -65,16 +67,16 @@ export default function MachineSettingsPage() {
           onClick={() => navigate(routes.machine.home(slug!))}
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back
+          {t.machinePages.back}
         </Button>
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-primary/10 text-primary">
             <Cpu className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">{machineType.name} Settings</h1>
+            <h1 className="text-xl font-bold">{machineType.name} {t.machinePages.settings}</h1>
             <p className="text-sm text-muted-foreground">
-              Configure thresholds and notifications
+              {t.machinePages.configureThresholds}
             </p>
           </div>
         </div>
@@ -84,11 +86,11 @@ export default function MachineSettingsPage() {
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="thresholds">
             <Gauge className="w-4 h-4 mr-2" />
-            Thresholds
+            {t.machinePages.thresholds}
           </TabsTrigger>
           <TabsTrigger value="notifications">
             <Bell className="w-4 h-4 mr-2" />
-            Notifications
+            {t.machinePages.notificationsTab}
           </TabsTrigger>
         </TabsList>
 
@@ -97,7 +99,7 @@ export default function MachineSettingsPage() {
           {numericVariables.length === 0 ? (
             <Card className="border-dashed">
               <CardContent className="p-8 text-center text-muted-foreground">
-                No variables with threshold configuration found.
+                {t.machinePages.noThresholdVars}
               </CardContent>
             </Card>
           ) : (
@@ -122,13 +124,13 @@ export default function MachineSettingsPage() {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                           <label className="text-xs font-medium text-yellow-500">
-                            Warning Threshold
+                            {t.machinePages.warningThreshold}
                           </label>
                           <input
                             type="number"
                             value={th.warning ?? ""}
                             placeholder={
-                              def.warning != null ? `Default: ${def.warning}` : "Not set"
+                              def.warning != null ? tf(t.machinePages.defaultValue, { value: def.warning }) : t.machinePages.notSet
                             }
                             onChange={(e) =>
                               updateThresholds(v.key, {
@@ -142,13 +144,13 @@ export default function MachineSettingsPage() {
                         </div>
                         <div className="space-y-1.5">
                           <label className="text-xs font-medium text-destructive">
-                            Alarm Threshold
+                            {t.machinePages.alarmThreshold}
                           </label>
                           <input
                             type="number"
                             value={th.alarm ?? ""}
                             placeholder={
-                              def.alarm != null ? `Default: ${def.alarm}` : "Not set"
+                              def.alarm != null ? tf(t.machinePages.defaultValue, { value: def.alarm }) : t.machinePages.notSet
                             }
                             onChange={(e) =>
                               updateThresholds(v.key, {
@@ -173,7 +175,7 @@ export default function MachineSettingsPage() {
                   onClick={resetToDefaults}
                 >
                   <RotateCcw className="w-3 h-3 mr-2" />
-                  Reset to Defaults
+                  {t.machinePages.resetDefaults}
                 </Button>
               </div>
             </>
@@ -186,12 +188,12 @@ export default function MachineSettingsPage() {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <Volume2 className="w-4 h-4 text-primary" />
-                Sound Notifications
+                {t.machinePages.soundNotifications}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm">Enable sound alerts</span>
+                <span className="text-sm">{t.machinePages.enableSound}</span>
                 <button
                   onClick={() =>
                     updateNotifications({
@@ -215,7 +217,7 @@ export default function MachineSettingsPage() {
               {settings.notifications.soundEnabled && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Volume</span>
+                    <span className="text-sm">{t.machinePages.volume}</span>
                     <span className="text-sm font-mono text-muted-foreground">
                       {Math.round(settings.notifications.soundVolume * 100)}%
                     </span>

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCommands } from "@/hooks/useCommands";
+import { useTranslation } from "@/i18n/useTranslation";
 import type { MachineCommand } from "@/types/machine-type";
 import type { CommandRequest, CommandStatus } from "@/types/command";
 
@@ -16,27 +17,28 @@ interface GenericCommandsPanelProps {
 }
 
 function StatusBadge({ status }: { status: CommandStatus }) {
+  const { t } = useTranslation();
   if (status === "idle") return null;
 
   const config = {
     pending: {
       icon: <Loader2 className="w-3 h-3 animate-spin" />,
-      label: "Sending...",
+      label: t.commandsPanel.sending,
       className: "bg-blue-500/20 text-blue-400 border-blue-500/30",
     },
     success: {
       icon: <CheckCircle2 className="w-3 h-3" />,
-      label: "Success",
+      label: t.commandsPanel.success,
       className: "bg-green-500/20 text-green-400 border-green-500/30",
     },
     error: {
       icon: <XCircle className="w-3 h-3" />,
-      label: "Error",
+      label: t.commandsPanel.error,
       className: "bg-destructive/20 text-destructive border-destructive/30",
     },
     timeout: {
       icon: <Clock className="w-3 h-3" />,
-      label: "Timeout",
+      label: t.commandsPanel.timeout,
       className: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
     },
   };
@@ -57,6 +59,7 @@ export function GenericCommandsPanel({
   commands,
   currentPoints,
 }: GenericCommandsPanelProps) {
+  const { t } = useTranslation();
   const { sendCommand, status, lastResult, reset } = useCommands();
   const isPending = status === "pending";
 
@@ -76,7 +79,7 @@ export function GenericCommandsPanel({
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
             <Send className="w-4 h-4 text-primary" />
-            Commands
+            {t.commandsPanel.title}
           </CardTitle>
           <StatusBadge status={status} />
         </div>
@@ -100,7 +103,7 @@ export function GenericCommandsPanel({
 
         {sortedCommands.length === 0 && (
           <p className="text-sm text-muted-foreground text-center py-4">
-            No commands configured for this machine type.
+            {t.commandsPanel.noCommands}
           </p>
         )}
       </CardContent>
@@ -150,9 +153,10 @@ function CommandControl({ command, currentValue, isPending, onSend }: CommandCon
 }
 
 function ToggleControl({ command, currentValue, isPending, onSend }: CommandControlProps) {
+  const { t } = useTranslation();
   const config = (command.config ?? {}) as { onValue?: string; offValue?: string };
-  const onValue = config.onValue ?? "ON";
-  const offValue = config.offValue ?? "OFF";
+  const onValue = config.onValue ?? t.commandsPanel.on;
+  const offValue = config.offValue ?? t.commandsPanel.off;
   const currentStr = String(currentValue ?? "");
 
   return (
@@ -197,6 +201,7 @@ function ToggleControl({ command, currentValue, isPending, onSend }: CommandCont
 }
 
 function RangeControl({ command, currentValue, isPending, onSend }: CommandControlProps) {
+  const { t, tf } = useTranslation();
   const config = (command.config ?? {}) as {
     min?: number;
     max?: number;
@@ -218,7 +223,7 @@ function RangeControl({ command, currentValue, isPending, onSend }: CommandContr
         <span className="text-sm font-medium">{command.label}</span>
         {currentValue !== undefined && (
           <Badge variant="outline" className="text-muted-foreground">
-            Current: {String(currentValue)}{unit}
+            {tf(t.commandsPanel.current, { value: `${String(currentValue)}${unit}` })}
           </Badge>
         )}
       </div>
@@ -245,13 +250,14 @@ function RangeControl({ command, currentValue, isPending, onSend }: CommandContr
         onClick={() => onSend({ command: command.key, value: localValue })}
       >
         <Send className="w-3 h-3 mr-2" />
-        Set {command.label} to {localValue}{unit}
+        {tf(t.commandsPanel.setTo, { label: command.label, value: `${localValue}${unit}` })}
       </Button>
     </div>
   );
 }
 
 function SelectControl({ command, currentValue, isPending, onSend }: CommandControlProps) {
+  const { t, tf } = useTranslation();
   const config = (command.config ?? {}) as { options?: string[] };
   const options = config.options ?? [];
   const [selected, setSelected] = useState<string>(
@@ -264,7 +270,7 @@ function SelectControl({ command, currentValue, isPending, onSend }: CommandCont
         <span className="text-sm font-medium">{command.label}</span>
         {currentValue !== undefined && (
           <Badge variant="outline" className="text-muted-foreground">
-            Current: {String(currentValue)}
+            {tf(t.commandsPanel.current, { value: String(currentValue) })}
           </Badge>
         )}
       </div>
@@ -288,7 +294,7 @@ function SelectControl({ command, currentValue, isPending, onSend }: CommandCont
           onClick={() => onSend({ command: command.key, value: selected })}
         >
           <Send className="w-3 h-3 mr-1" />
-          Send
+          {t.commandsPanel.send}
         </Button>
       </div>
     </div>

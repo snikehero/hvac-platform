@@ -29,6 +29,9 @@ export class MachineTypeEntity {
   @Column({ nullable: true })
   icon: string;
 
+  @Column({ default: false })
+  isSystem: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 

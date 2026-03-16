@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Pencil, Trash2, Cpu, Wifi } from "lucide-react";
+import { Plus, Pencil, Trash2, Cpu, Wifi, Shield } from "lucide-react";
 import { useMachineTypes } from "@/context/MachineTypeContext";
 import { MachineDesignerApi } from "@/services/MachineDesignerApi";
 import { routes } from "@/router/routes";
@@ -117,13 +117,21 @@ export default function MachineDesignerListPage() {
                       </CardDescription>
                     </div>
                   </div>
-                  <Badge
-                    variant="outline"
-                    className="text-xs font-mono gap-1"
-                  >
-                    <Wifi className="h-3 w-3" />
-                    {mt.mqttTopic}
-                  </Badge>
+                  <div className="flex items-center gap-1.5">
+                    {mt.isSystem && (
+                      <Badge variant="secondary" className="text-xs gap-1">
+                        <Shield className="h-3 w-3" />
+                        System
+                      </Badge>
+                    )}
+                    <Badge
+                      variant="outline"
+                      className="text-xs font-mono gap-1"
+                    >
+                      <Wifi className="h-3 w-3" />
+                      {mt.mqttTopic}
+                    </Badge>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -163,15 +171,17 @@ export default function MachineDesignerListPage() {
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                      disabled={deleting === mt.id}
-                      onClick={() => handleDelete(mt.id, mt.name)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                    {!mt.isSystem && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                        disabled={deleting === mt.id}
+                        onClick={() => handleDelete(mt.id, mt.name)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardContent>

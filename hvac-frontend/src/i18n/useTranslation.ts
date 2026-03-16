@@ -1,4 +1,4 @@
-import { useSettings } from "@/context/SettingsContext";
+import { useGlobalSettings } from "@/context/GlobalSettingsContext";
 import { translations, type Language } from "./translations";
 
 /**
@@ -6,8 +6,8 @@ import { translations, type Language } from "./translations";
  * @returns Object containing the current language and translation functions
  */
 export function useTranslation() {
-  const { settings } = useSettings();
-  const language = settings.general.language as Language;
+  const { settings } = useGlobalSettings();
+  const language = settings.language as Language;
   const t = translations[language];
 
   /**

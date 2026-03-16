@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { HvacModule } from './hvac/hvac.module';
 import { MqttModule } from './mqtt/mqtt.module';
 import { CommandsModule } from './commands/commands.module';
 import { MachineDesignerModule } from './machine-designer/machine-designer.module';
@@ -19,7 +18,6 @@ import { MachineCommandEntity } from './machine-designer/entities/machine-comman
       entities: [MachineTypeEntity, MachineVariableEntity, MachineCommandEntity],
       synchronize: true,
     }),
-    HvacModule,
     MqttModule,
     CommandsModule,
     MachineDesignerModule,

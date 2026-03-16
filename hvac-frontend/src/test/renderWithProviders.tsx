@@ -1,41 +1,42 @@
 import type { ReactNode } from "react";
 import { render } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { SettingsProvider } from "@/context/SettingsContext";
+import { GlobalSettingsProvider } from "@/context/GlobalSettingsContext";
 import { AckProvider } from "@/context/AckContext";
 import { TelemetryContext } from "@/providers/WebSocketProvider";
-import type { HvacTelemetry } from "@/types/telemetry";
-import type { HvacEvent } from "@/types/event";
-import type { HistoryPoint } from "@/types/history";
 import type { Socket } from "socket.io-client";
-
-interface AhuConnectionStatus {
-  isConnected: boolean;
-  lastSeen: number;
-}
+import type { DeviceConnectionStatus } from "@/hooks/useDeviceConnectivity";
+import type { MachineTelemetry } from "@/types/machine-type";
+import type { DeviceEvent } from "@/types/device-event";
+import type { DeviceHistoryData } from "@/hooks/useDeviceHistoryManagement";
+import type { HistoryPoint } from "@/types/history";
 
 interface TelemetryContextValue {
-  telemetry: HvacTelemetry[];
-  events: HvacEvent[];
-  history: Record<string, { temperature: HistoryPoint[]; humidity: HistoryPoint[] }>;
-  activeCounts: Record<string, { alarms: number; warnings: number }>;
   connected: boolean;
-  ahuConnectionStatus: Record<string, AhuConnectionStatus>;
-  isAhuConnected: (plantId: string, stationId: string) => boolean;
-  setEvents: React.Dispatch<React.SetStateAction<HvacEvent[]>>;
   socket: Socket | null;
+  machineTelemetry: Record<string, MachineTelemetry[]>;
+  machineConnectionStatus: Record<string, DeviceConnectionStatus>;
+  isMachineConnected: (machineKey: string) => boolean;
+  deviceEvents: DeviceEvent[];
+  deviceActiveCounts: Record<string, { alarms: number; warnings: number }>;
+  totalAlarms: number;
+  totalWarnings: number;
+  machineHistory: DeviceHistoryData;
+  getInstanceHistory: (machineType: string, plantId: string, stationId: string) => Record<string, HistoryPoint[]>;
 }
 
 const defaultTelemetryContext: TelemetryContextValue = {
-  telemetry: [],
-  events: [],
-  history: {},
-  activeCounts: {},
   connected: true,
-  ahuConnectionStatus: {},
-  isAhuConnected: () => true,
-  setEvents: () => {},
   socket: null,
+  machineTelemetry: {},
+  machineConnectionStatus: {},
+  isMachineConnected: () => true,
+  deviceEvents: [],
+  deviceActiveCounts: {},
+  totalAlarms: 0,
+  totalWarnings: 0,
+  machineHistory: {},
+  getInstanceHistory: () => ({}),
 };
 
 interface RenderOptions {
@@ -59,14 +60,14 @@ export function renderWithProviders(
 
   return render(
     <MemoryRouter initialEntries={[initialRoute]}>
-      <SettingsProvider>
+      <GlobalSettingsProvider>
         <AckProvider>
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           <TelemetryContext.Provider value={contextValue as any}>
             {ui}
           </TelemetryContext.Provider>
         </AckProvider>
-      </SettingsProvider>
+      </GlobalSettingsProvider>
     </MemoryRouter>,
   );
 }

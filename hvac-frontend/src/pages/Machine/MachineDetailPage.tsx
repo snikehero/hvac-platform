@@ -144,12 +144,11 @@ export default function MachineDetailPage() {
   );
 
   const hasCommands = sortedCommands.length > 0;
-  const tabCount = 2 + (hasCommands ? 1 : 0);
 
   if (!machineType) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Machine type not found.</p>
+        <p className="text-muted-foreground">{t.machinePages.machineTypeNotFound}</p>
       </div>
     );
   }
@@ -208,21 +207,20 @@ export default function MachineDetailPage() {
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <p className="text-muted-foreground">
-              {t.machineDashboard?.waitingForData ??
-                "Waiting for data from this instance..."}
+              {t.machineDashboard.waitingForData}
             </p>
           </CardContent>
         </Card>
       ) : (
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className={`grid w-full max-w-lg grid-cols-${tabCount}`}>
+          <TabsList className={`grid w-full max-w-lg ${hasCommands ? "grid-cols-3" : "grid-cols-2"}`}>
             <TabsTrigger value="overview">
               <Activity className="w-4 h-4 mr-2" />
-              Overview
+              {t.machinePages.overview}
             </TabsTrigger>
             <TabsTrigger value="events" className="relative">
               <AlertTriangle className="w-4 h-4 mr-2" />
-              Events
+              {t.machinePages.events}
               {filteredEvents.length > 0 && (
                 <Badge
                   className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs"
@@ -235,7 +233,7 @@ export default function MachineDetailPage() {
             {hasCommands && (
               <TabsTrigger value="commands">
                 <Send className="w-4 h-4 mr-2" />
-                Commands
+                {t.machinePages.commands}
               </TabsTrigger>
             )}
           </TabsList>

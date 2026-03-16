@@ -648,6 +648,108 @@ eventMessages: {
     waitingForData: "Esperando datos de esta instancia...",
   },
 
+  // ===== Generic Machine Pages =====
+  machinePages: {
+    // MachineHomePage
+    machineTypeNotFound: "Tipo de máquina no encontrado.",
+    systemHealth: "Salud del Sistema",
+    avgMetric: "Métrica Promedio",
+    connectedCount: "Conectados",
+    activeAlerts: "Alertas Activas",
+    systemOverview: "Vista General del Sistema",
+    operational: "Operativos",
+    warnings: "Advertencias",
+    critical: "Críticos",
+    offline: "Desconectados",
+    serverOnline: "Servidor Online",
+    serverOffline: "Servidor Offline",
+    viewInstances: "Ver todas las instancias y su estado",
+    viewAlarms: "Ver alarmas y advertencias activas",
+    configureSettings: "Configurar umbrales y notificaciones",
+    healthCritical: "CRÍTICO",
+    healthDegraded: "DEGRADADO",
+    healthHealthy: "SALUDABLE",
+    healthNoData: "SIN DATOS",
+
+    // MachineDetailPage
+    overview: "Vista General",
+    events: "Eventos",
+    commands: "Comandos",
+
+    // MachineDashboardPage
+    liveMonitoring: "Monitoreo en Vivo",
+    total: "Total",
+    ok: "OK",
+    warning: "Warning",
+    alarm: "Alarma",
+    noInstancesMatch: "No hay instancias que coincidan con el filtro seleccionado.",
+    showAll: "Mostrar todo",
+    plant: "Planta",
+    alarmSingular: "alarma",
+    alarmPlural: "alarmas",
+    warningSingular: "advertencia",
+    warningPlural: "advertencias",
+    on: "ON",
+    off: "OFF",
+
+    // MachineAlarmsPage
+    back: "Volver",
+    alarms: "Alarmas",
+    activeAlertCount: "{count} alerta(s) activa(s)",
+    noActiveAlarms: "Sin alarmas activas",
+    allNormal: "Todas las instancias de {name} están operando normalmente.",
+    acknowledge: "Reconocer",
+    acknowledged: "Reconocida",
+    alarmAcknowledged: "Alarma reconocida: {id}",
+    viewDetails: "Ver Detalles",
+    badPointSingular: "punto malo",
+    badPointPlural: "puntos malos",
+
+    // MachineSettingsPage
+    settings: "Configuración",
+    configureThresholds: "Configurar umbrales y notificaciones",
+    thresholds: "Umbrales",
+    notificationsTab: "Notificaciones",
+    noThresholdVars: "No hay variables con configuración de umbrales.",
+    warningThreshold: "Umbral de Advertencia",
+    alarmThreshold: "Umbral de Alarma",
+    defaultValue: "Por defecto: {value}",
+    notSet: "No configurado",
+    resetDefaults: "Restablecer valores predeterminados",
+    soundNotifications: "Notificaciones de Sonido",
+    enableSound: "Habilitar alertas sonoras",
+    volume: "Volumen",
+  },
+
+  // ===== Device Event Timeline =====
+  deviceTimeline: {
+    title: "Línea de Eventos",
+    count: "{count} eventos",
+    noEvents: "Sin eventos registrados",
+    noEventsDesc: "Este dispositivo no tiene eventos recientes.",
+  },
+
+  // ===== Generic Commands Panel =====
+  commandsPanel: {
+    title: "Comandos",
+    noCommands: "No hay comandos configurados para este tipo de máquina.",
+    sending: "Enviando...",
+    success: "Enviado",
+    error: "Error",
+    timeout: "Timeout",
+    on: "ON",
+    off: "OFF",
+    current: "Actual: {value}",
+    setTo: "Establecer {label} en {value}",
+    send: "Enviar",
+  },
+
+  // ===== Device History Chart =====
+  historyChart: {
+    noData: "Sin datos disponibles",
+    avg: "prom",
+  },
+
 } as const;
 
 export type TranslationKeys = typeof es;

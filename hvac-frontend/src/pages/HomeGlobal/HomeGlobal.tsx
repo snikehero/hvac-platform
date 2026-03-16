@@ -14,8 +14,6 @@ import {
 } from "lucide-react";
 
 import { routes } from "@/router/routes";
-import { useTelemetry } from "@/hooks/useTelemetry";
-import { useAhuHealth } from "@/hooks/useAhuHealth";
 import { getDeviceHealth, type DeviceHealthThresholds } from "@/domain/device/getDeviceHealth";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useMachineTypes } from "@/context/MachineTypeContext";
@@ -33,17 +31,14 @@ import { Badge } from "@/components/ui/badge";
 
 export default function HomeGlobal() {
   const navigate = useNavigate();
-  const { telemetry, ahuConnectionStatus, connected } = useTelemetry();
   const [mounted, setMounted] = useState(false);
   const { t, tf } = useTranslation();
   const { machineTypes } = useMachineTypes();
-  const { allMachineTelemetry, isMachineConnected } = useMachineTelemetry();
+  const { allMachineTelemetry, isMachineConnected, connected } = useMachineTelemetry();
 
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  const getHealth = useAhuHealth();
 
   // Build thresholds per machine type for generic health evaluation
   const thresholdsMap = useMemo(() => {
@@ -63,30 +58,17 @@ export default function HomeGlobal() {
   }, [machineTypes]);
 
   const metrics = useMemo(() => {
-    const activeAhus = telemetry.filter((ahu) => {
-      const key = `${ahu.plantId}-${ahu.stationId}`;
-      return ahuConnectionStatus[key]?.isConnected;
-    });
-
     const activeMachines = Object.values(allMachineTelemetry).flat().filter((inst) => {
       const key = `${inst.plantId}-${inst.stationId}`;
       return isMachineConnected(key);
     });
 
-    const totalDevices = activeAhus.length + activeMachines.length;
+    const totalDevices = activeMachines.length;
 
-    // HVAC alarms/warnings
-    let activeAlarms = activeAhus.reduce((acc, ahu) => {
-      const health = getHealth(ahu);
-      return acc + (health.status === "ALARM" ? 1 : 0);
-    }, 0);
+    let activeAlarms = 0;
+    let warnings = 0;
 
-    let warnings = activeAhus.reduce((acc, ahu) => {
-      const health = getHealth(ahu);
-      return acc + (health.status === "WARNING" ? 1 : 0);
-    }, 0);
-
-    // Generic machine alarms/warnings
+    // Generic machine alarms/warnings for ALL types
     for (const [slug, instances] of Object.entries(allMachineTelemetry)) {
       for (const inst of instances) {
         const key = `${inst.plantId}-${inst.stationId}`;
@@ -106,17 +88,19 @@ export default function HomeGlobal() {
       }
     }
 
-    const machinePlants = new Set(activeMachines.map(m => m.plantId));
-    const ahuPlants = new Set(activeAhus.map((t) => t.plantId));
-    const plants = new Set([...machinePlants, ...ahuPlants]).size;
+    const plants = new Set(activeMachines.map(m => m.plantId)).size;
 
-    const avgTemp =
-      activeAhus.length > 0
-        ? activeAhus.reduce((acc, ahu) => {
-          const temp = ahu.points.temperature?.value;
-          return acc + (typeof temp === "number" ? temp : 0);
-        }, 0) / activeAhus.length
-        : 0;
+    // Compute avgTemp from instances that have a "temperature" point
+    let tempSum = 0;
+    let tempCount = 0;
+    for (const inst of activeMachines) {
+      const temp = inst.points.temperature?.value;
+      if (typeof temp === "number") {
+        tempSum += temp;
+        tempCount++;
+      }
+    }
+    const avgTemp = tempCount > 0 ? tempSum / tempCount : 0;
 
     return {
       totalDevices,
@@ -126,7 +110,7 @@ export default function HomeGlobal() {
       avgTemp,
       healthy: totalDevices - activeAlarms - warnings,
     };
-  }, [telemetry, ahuConnectionStatus, getHealth, allMachineTelemetry, isMachineConnected, thresholdsMap]);
+  }, [allMachineTelemetry, isMachineConnected, thresholdsMap]);
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
@@ -197,7 +181,7 @@ export default function HomeGlobal() {
 
             <div className="flex flex-wrap gap-4">
               <Button
-                onClick={() => navigate(routes.hvac.home)}
+                onClick={() => navigate(routes.machine.home('hvac'))}
                 className="group bg-linear-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground border-0 shadow-lg shadow-primary/25 px-8 py-6 text-lg font-semibold transition-all hover:shadow-xl hover:shadow-primary/40 hover:scale-105"
               >
                 <AirVent className="w-5 h-5 mr-2" />
@@ -207,7 +191,7 @@ export default function HomeGlobal() {
 
               <Button
                 variant="outline"
-                onClick={() => navigate(routes.hvac.dashboard)}
+                onClick={() => navigate(routes.machine.dashboard('hvac'))}
                 className="border-border hover:border-primary/50 bg-card/50 hover:bg-card backdrop-blur-sm px-8 py-6 text-lg transition-all group"
               >
                 <Eye className="w-5 h-5 mr-2" />
@@ -306,19 +290,6 @@ export default function HomeGlobal() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <ModuleCard
-                icon={AirVent}
-                title={t.homeGlobal.hvacControl}
-                description={t.homeGlobal.hvacControlDesc}
-                status={t.homeGlobal.statusActive}
-                metrics={{
-                  devices: metrics.totalDevices,
-                  uptime: "99.8%",
-                }}
-                onClick={() => navigate(routes.hvac.home)}
-                t={t}
-              />
-
               {machineTypes.map((mt) => {
                 const instanceCount = (allMachineTelemetry[mt.slug] ?? []).length;
                 return (

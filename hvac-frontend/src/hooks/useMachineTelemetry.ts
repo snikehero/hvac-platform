@@ -42,7 +42,6 @@ export function useMachineTelemetry(machineType?: string) {
     connected: ctx.connected,
     machineConnectionStatus: ctx.machineConnectionStatus,
     isMachineConnected: ctx.isMachineConnected,
-    machineEvents: ctx.machineEvents,
     deviceEvents: ctx.deviceEvents,
     deviceActiveCounts: ctx.deviceActiveCounts,
     totalAlarms: ctx.totalAlarms,

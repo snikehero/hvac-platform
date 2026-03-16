@@ -1,28 +1,9 @@
-const HVAC_BASE = "/hvac";
-
 export const routes = {
   home: "/",
 
   general: {
     overview: "/",
     alarms: "/alarms",
-  },
-
-  hvac: {
-    home: HVAC_BASE,
-    dashboard: `${HVAC_BASE}/dashboard`,
-    ejecutivo: `${HVAC_BASE}/ejecutivo`,
-    alarms: `${HVAC_BASE}/alarms`,
-    settings: `${HVAC_BASE}/settings`,
-
-    ahuDetailPattern: `${HVAC_BASE}/plants/:plantId/ahus/:ahuId`,
-    ahuDetail3DPattern: `${HVAC_BASE}/plants/:plantId/ahus/:ahuId/detail`,
-
-    ahuDetail: (plantId: string, ahuId: string) =>
-      `${HVAC_BASE}/plants/${plantId}/ahus/${ahuId}`,
-
-    ahuDetail3D: (plantId: string, ahuId: string) =>
-      `${HVAC_BASE}/plants/${plantId}/ahus/${ahuId}/detail`,
   },
 
   machineDesigner: {

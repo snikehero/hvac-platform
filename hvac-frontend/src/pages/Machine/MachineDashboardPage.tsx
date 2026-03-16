@@ -100,7 +100,7 @@ export default function MachineDashboardPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-muted-foreground">
-          Machine type &quot;{machineTypeSlug}&quot; not found.
+          {t.machinePages?.machineTypeNotFound ?? "Machine type not found"}
         </p>
       </div>
     );
@@ -135,7 +135,7 @@ export default function MachineDashboardPage() {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
               </span>
               <span className="text-xs font-mono text-primary uppercase tracking-wider">
-                Live
+                {t.machinePages?.liveMonitoring ?? "Live"}
               </span>
             </div>
           )}
@@ -162,7 +162,7 @@ export default function MachineDashboardPage() {
       {/* Stat Badges / Filters */}
       <div className="flex flex-wrap gap-2">
         <StatBadge
-          label="Total"
+          label={t.machinePages?.total ?? "Total"}
           count={stats.total}
           active={filter === "ALL"}
           onClick={() => setFilter("ALL")}
@@ -170,7 +170,7 @@ export default function MachineDashboardPage() {
           className="border-primary/30 text-primary"
         />
         <StatBadge
-          label="OK"
+          label={t.machinePages?.ok ?? "OK"}
           count={stats.ok}
           active={filter === "OK"}
           onClick={() => setFilter(filter === "OK" ? "ALL" : "OK")}
@@ -178,7 +178,7 @@ export default function MachineDashboardPage() {
           className="border-green-500/30 text-green-500"
         />
         <StatBadge
-          label="Warning"
+          label={t.machinePages?.warning ?? "Warning"}
           count={stats.warning}
           active={filter === "WARNING"}
           onClick={() =>
@@ -188,7 +188,7 @@ export default function MachineDashboardPage() {
           className="border-yellow-500/30 text-yellow-500"
         />
         <StatBadge
-          label="Alarm"
+          label={t.machinePages?.alarm ?? "Alarm"}
           count={stats.alarm}
           active={filter === "ALARM"}
           onClick={() => setFilter(filter === "ALARM" ? "ALL" : "ALARM")}
@@ -217,14 +217,14 @@ export default function MachineDashboardPage() {
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
             <CheckCircle2 className="h-10 w-10 text-muted-foreground mb-3" />
             <p className="text-muted-foreground">
-              No instances match the selected filter.
+              {t.machinePages?.noInstancesMatch ?? "No instances match the selected filter."}
             </p>
             <Button
               variant="link"
               size="sm"
               onClick={() => setFilter("ALL")}
             >
-              Show all
+              {t.machinePages?.showAll ?? "Show all"}
             </Button>
           </CardContent>
         </Card>
@@ -240,17 +240,17 @@ export default function MachineDashboardPage() {
               <div key={plantId} className="space-y-4">
                 <div className="flex items-center gap-3">
                   <h2 className="text-lg font-semibold text-muted-foreground">
-                    {t.machineDashboard?.plant ?? "Plant"}: {plantId}
+                    {t.machinePages?.plant ?? "Plant"}: {plantId}
                   </h2>
                   <div className="flex gap-1.5">
                     {plantStats.alarm > 0 && (
                       <Badge variant="destructive" className="text-xs">
-                        {plantStats.alarm} alarm{plantStats.alarm > 1 ? "s" : ""}
+                        {plantStats.alarm} {plantStats.alarm > 1 ? (t.machinePages?.alarmPlural ?? "alarms") : (t.machinePages?.alarmSingular ?? "alarm")}
                       </Badge>
                     )}
                     {plantStats.warning > 0 && (
                       <Badge variant="secondary" className="text-xs">
-                        {plantStats.warning} warning{plantStats.warning > 1 ? "s" : ""}
+                        {plantStats.warning} {plantStats.warning > 1 ? (t.machinePages?.warningPlural ?? "warnings") : (t.machinePages?.warningSingular ?? "warning")}
                       </Badge>
                     )}
                   </div>
@@ -317,8 +317,8 @@ export default function MachineDashboardPage() {
                                   {point
                                     ? typeof point.value === "boolean"
                                       ? point.value
-                                        ? "ON"
-                                        : "OFF"
+                                        ? (t.machinePages?.on ?? "ON")
+                                        : (t.machinePages?.off ?? "OFF")
                                       : String(point.value)
                                     : "--"}
                                   {point?.unit && (

@@ -1,4 +1,10 @@
-import type { HvacPoint } from "./telemetry";
+export type Quality = "GOOD" | "BAD" | "UNCERTAIN";
+
+export interface MachinePoint {
+  value: number | string | boolean;
+  unit?: string;
+  quality?: Quality;
+}
 
 export interface MachineVariable {
   id: string;
@@ -30,6 +36,7 @@ export interface MachineType {
   icon?: string;
   variables: MachineVariable[];
   commands: MachineCommand[];
+  isSystem?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -39,7 +46,7 @@ export interface MachineTelemetry {
   plantId: string;
   stationId: string;
   timestamp: string;
-  points: Record<string, HvacPoint>;
+  points: Record<string, MachinePoint>;
 }
 
 export interface CreateMachineVariablePayload {

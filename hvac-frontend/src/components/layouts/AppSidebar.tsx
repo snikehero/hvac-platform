@@ -17,10 +17,8 @@ import {
   Activity,
   type LucideIcon,
 } from "lucide-react";
-import { useTelemetry } from "@/hooks/useTelemetry";
 import { useMachineTelemetry } from "@/hooks/useMachineTelemetry";
-import { useEffect, useState, useMemo } from "react";
-import { useAhuHealth } from "@/hooks/useAhuHealth";
+import { useState, useMemo } from "react";
 import { routes } from "@/router/routes";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "@/i18n/useTranslation";
@@ -47,14 +45,19 @@ function getIconComponent(iconName?: string): LucideIcon {
 }
 
 export default function AppSidebar() {
-  const { telemetry, ahuConnectionStatus, totalAlarms, totalWarnings } = useTelemetry();
   const { deviceActiveCounts } = useMachineTelemetry();
   const navigate = useNavigate();
-  const getHealth = useAhuHealth();
   const { t } = useTranslation();
   const { machineTypes } = useMachineTypes();
 
-  const totalUnifiedAlerts = totalAlarms + totalWarnings;
+  // Total unified alerts across all machine types
+  const totalUnifiedAlerts = useMemo(() => {
+    let total = 0;
+    for (const val of Object.values(deviceActiveCounts)) {
+      total += val.alarms + val.warnings;
+    }
+    return total;
+  }, [deviceActiveCounts]);
 
   // Build dynamic categories from machine types
   const categories = useMemo(() => {
@@ -66,33 +69,6 @@ export default function AppSidebar() {
           to: routes.general.alarms,
           label: t.nav.unifiedAlarms ?? "Alarms",
           icon: Bell,
-        },
-      ],
-    };
-
-    const hvacCategory = {
-      name: "HVAC",
-      items: [
-        { to: routes.hvac.home, label: t.nav.homeHvac, icon: Home },
-        {
-          to: routes.hvac.ejecutivo,
-          label: t.nav.generalDashboard,
-          icon: LayoutDashboard,
-        },
-        {
-          to: routes.hvac.dashboard,
-          label: t.nav.activeHvac,
-          icon: AirVent,
-        },
-        {
-          to: routes.hvac.alarms,
-          label: t.nav.alarms,
-          icon: Bell,
-        },
-        {
-          to: routes.hvac.settings,
-          label: t.nav.settings,
-          icon: Settings,
         },
       ],
     };
@@ -122,7 +98,7 @@ export default function AppSidebar() {
       ],
     };
 
-    return [generalCategory, hvacCategory, ...dynamicCategories, designerCategory];
+    return [generalCategory, ...dynamicCategories, designerCategory];
   }, [t, machineTypes]);
 
   // Per-machine-type alarm counts
@@ -140,30 +116,8 @@ export default function AppSidebar() {
     return counts;
   }, [machineTypes, deviceActiveCounts]);
 
-  const activeAlarms = useMemo(() => {
-    return telemetry.reduce((acc, ahu) => {
-      const key = `${ahu.plantId}-${ahu.stationId}`;
-      const isConnected = ahuConnectionStatus[key]?.isConnected ?? false;
-
-      // Don't count alarms from disconnected AHUs
-      if (!isConnected) return acc;
-
-      const health = getHealth(ahu);
-      return acc + (health.status === "ALARM" ? 1 : 0);
-    }, 0);
-  }, [telemetry, ahuConnectionStatus, getHealth]);
-
-  const [prevCount, setPrevCount] = useState(activeAlarms);
-
-  useEffect(() => {
-    if (activeAlarms !== prevCount) {
-      setPrevCount(activeAlarms);
-    }
-  }, [activeAlarms, prevCount]);
-
   const [openCategories, setOpenCategories] = useState<string[]>([
     t.nav.generalSection ?? "General",
-    "HVAC",
   ]);
 
   const toggleCategory = (name: string) => {
@@ -216,7 +170,7 @@ export default function AppSidebar() {
                       <NavLink
                         key={to}
                         to={to}
-                        end={to === routes.hvac.home || to === routes.general.overview}
+                        end={to === routes.general.overview}
                         className={({ isActive }) =>
                           `relative flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all duration-200
      ${
@@ -241,11 +195,6 @@ export default function AppSidebar() {
                             {to === routes.general.alarms && totalUnifiedAlerts > 0 && (
                               <span className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-xs font-semibold text-white">
                                 {totalUnifiedAlerts}
-                              </span>
-                            )}
-                            {to === routes.hvac.alarms && activeAlarms > 0 && (
-                              <span className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-xs font-semibold text-white">
-                                {activeAlarms}
                               </span>
                             )}
                             {machineTypes.map((mt) => {

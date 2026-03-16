@@ -1,22 +1,22 @@
-import type { HvacTelemetry } from "@/types/telemetry";
+import type { MachineTelemetry } from "@/types/machine-type";
 
 /**
- * Creates a minimal valid HvacTelemetry object.
- * Timestamp defaults to NOW so getAhuHealth never returns DISCONNECTED by default.
- * Override timestamp explicitly to test disconnection scenarios.
+ * Creates a minimal valid MachineTelemetry object for HVAC.
+ * Timestamp defaults to NOW so health evaluation never returns DISCONNECTED by default.
  */
-export function makeAhu(overrides: Partial<HvacTelemetry> = {}): HvacTelemetry {
+export function makeMachineInstance(overrides: Partial<MachineTelemetry> = {}): MachineTelemetry {
   return {
+    machineType: "hvac",
     plantId: "PLANT-A",
     stationId: "AHU-01",
     timestamp: new Date().toISOString(),
     points: {
       temperature: { value: 22, unit: "°C", quality: "GOOD" },
       humidity: { value: 50, unit: "%", quality: "GOOD" },
-      fan_status: { value: "ON" },
+      fan_status: { value: true },
       airflow: { value: 500, unit: "m³/h", quality: "GOOD" },
       damper_position: { value: 75, unit: "%", quality: "GOOD" },
-      power_status: { value: "ON" },
+      power_status: { value: true },
       filter_dp: { value: 100, unit: "Pa", quality: "GOOD" },
       status: { value: "OK" },
     },
@@ -25,13 +25,13 @@ export function makeAhu(overrides: Partial<HvacTelemetry> = {}): HvacTelemetry {
 }
 
 /**
- * Creates an AHU with status point set to ALARM.
+ * Creates a machine instance with status point set to ALARM.
  */
-export function makeAlarmAhu(overrides: Partial<HvacTelemetry> = {}): HvacTelemetry {
-  return makeAhu({
+export function makeAlarmInstance(overrides: Partial<MachineTelemetry> = {}): MachineTelemetry {
+  return makeMachineInstance({
     ...overrides,
     points: {
-      ...makeAhu().points,
+      ...makeMachineInstance().points,
       status: { value: "ALARM" },
       ...(overrides.points ?? {}),
     },
@@ -39,38 +39,14 @@ export function makeAlarmAhu(overrides: Partial<HvacTelemetry> = {}): HvacTeleme
 }
 
 /**
- * Creates an AHU with status point set to WARNING.
+ * Creates a machine instance with status point set to WARNING.
  */
-export function makeWarningAhu(overrides: Partial<HvacTelemetry> = {}): HvacTelemetry {
-  return makeAhu({
+export function makeWarningInstance(overrides: Partial<MachineTelemetry> = {}): MachineTelemetry {
+  return makeMachineInstance({
     ...overrides,
     points: {
-      ...makeAhu().points,
+      ...makeMachineInstance().points,
       status: { value: "WARNING" },
-      ...(overrides.points ?? {}),
-    },
-  });
-}
-
-/**
- * Creates an AHU that is DISCONNECTED (stale timestamp, 10 minutes in the past).
- */
-export function makeDisconnectedAhu(overrides: Partial<HvacTelemetry> = {}): HvacTelemetry {
-  return makeAhu({
-    ...overrides,
-    timestamp: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
-  });
-}
-
-/**
- * Creates an AHU with a BAD quality point (triggers WARNING via badPoints).
- */
-export function makeBadQualityAhu(overrides: Partial<HvacTelemetry> = {}): HvacTelemetry {
-  return makeAhu({
-    ...overrides,
-    points: {
-      ...makeAhu().points,
-      temperature: { value: 22, unit: "°C", quality: "BAD" },
       ...(overrides.points ?? {}),
     },
   });

@@ -17,6 +17,7 @@ import { useDeviceHealth } from "@/hooks/useDeviceHealth";
 import { useAcks } from "@/context/AckContext";
 import { routes } from "@/router/routes";
 import { toast } from "sonner";
+import { useTranslation } from "@/i18n/useTranslation";
 
 export default function MachineAlarmsPage() {
   const { machineType: slug } = useParams<{ machineType: string }>();
@@ -25,6 +26,7 @@ export default function MachineAlarmsPage() {
   const { instances, isMachineConnected } = useMachineTelemetry(slug);
   const getHealth = useDeviceHealth(slug);
   const { isAcknowledged, addAck } = useAcks();
+  const { t, tf } = useTranslation();
 
   const machineType = useMemo(
     () => machineTypes.find((mt) => mt.slug === slug),
@@ -53,7 +55,7 @@ export default function MachineAlarmsPage() {
   if (!machineType) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Machine type not found.</p>
+        <p className="text-muted-foreground">{t.machinePages.machineTypeNotFound}</p>
       </div>
     );
   }
@@ -68,16 +70,16 @@ export default function MachineAlarmsPage() {
           onClick={() => navigate(routes.machine.home(slug!))}
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back
+          {t.machinePages.back}
         </Button>
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-destructive/10 text-destructive">
             <Bell className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">{machineType.name} Alarms</h1>
+            <h1 className="text-xl font-bold">{machineType.name} {t.machinePages.alarms}</h1>
             <p className="text-sm text-muted-foreground">
-              {alarmItems.length} active alert{alarmItems.length !== 1 ? "s" : ""}
+              {tf(t.machinePages.activeAlertCount, { count: alarmItems.length })}
             </p>
           </div>
         </div>
@@ -88,9 +90,9 @@ export default function MachineAlarmsPage() {
         <Card className="border-dashed">
           <CardContent className="p-12 text-center">
             <CheckCircle2 className="w-12 h-12 mx-auto text-green-500 mb-4" />
-            <p className="text-lg font-semibold">No active alarms</p>
+            <p className="text-lg font-semibold">{t.machinePages.noActiveAlarms}</p>
             <p className="text-sm text-muted-foreground">
-              All {machineType.name} instances are operating normally.
+              {tf(t.machinePages.allNormal, { name: machineType.name })}
             </p>
           </CardContent>
         </Card>
@@ -123,7 +125,7 @@ export default function MachineAlarmsPage() {
                       <div>
                         <p className="font-semibold">{inst.stationId}</p>
                         <p className="text-xs text-muted-foreground">
-                          Plant: {inst.plantId}
+                          {t.machinePages.plant}: {inst.plantId}
                         </p>
                       </div>
                       <Badge
@@ -137,7 +139,7 @@ export default function MachineAlarmsPage() {
                       </Badge>
                       {health.badPoints > 0 && (
                         <Badge variant="outline" className="text-xs">
-                          {health.badPoints} bad point{health.badPoints > 1 ? "s" : ""}
+                          {health.badPoints} {health.badPoints > 1 ? t.machinePages.badPointPlural : t.machinePages.badPointSingular}
                         </Badge>
                       )}
                     </div>
@@ -152,7 +154,7 @@ export default function MachineAlarmsPage() {
                           className="text-xs text-green-500 border-green-500/30"
                         >
                           <CheckCircle2 className="w-3 h-3 mr-1" />
-                          Acknowledged
+                          {t.machinePages.acknowledged}
                         </Badge>
                       ) : (
                         <Button
@@ -162,11 +164,11 @@ export default function MachineAlarmsPage() {
                             e.stopPropagation();
                             addAck(inst.plantId, inst.stationId, health.status as "ALARM" | "WARNING", "operator", slug);
                             toast.success(
-                              `Alarm acknowledged: ${inst.stationId}`,
+                              tf(t.machinePages.alarmAcknowledged, { id: inst.stationId }),
                             );
                           }}
                         >
-                          Acknowledge
+                          {t.machinePages.acknowledge}
                         </Button>
                       )}
                       <Button
@@ -182,7 +184,7 @@ export default function MachineAlarmsPage() {
                           )
                         }
                       >
-                        View Details
+                        {t.machinePages.viewDetails}
                       </Button>
                     </div>
                   </div>

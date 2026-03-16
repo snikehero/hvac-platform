@@ -93,11 +93,6 @@ export class CommandsService implements OnModuleInit {
     plantId: string,
     stationId: string,
   ): Promise<string> {
-    // For HVAC, maintain backward compatibility with existing topic structure
-    if (machineType === 'hvac') {
-      return `hvac/${plantId}/${stationId}/commands/set`;
-    }
-
     try {
       const mt = await this.designerService.findBySlug(machineType);
       const topicBase = mt.mqttTopic.replace(/\/[#\+].*$/, '');

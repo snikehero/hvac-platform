@@ -1,12 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo } from "react";
-import { useTelemetry } from "@/hooks/useTelemetry";
 import { useMachineTelemetry } from "@/hooks/useMachineTelemetry";
-import { useAhuHealth } from "@/hooks/useAhuHealth";
 import { getDeviceHealth, type DeviceHealthThresholds } from "@/domain/device/getDeviceHealth";
 import { useTranslation } from "@/i18n/useTranslation";
-import { useSettings } from "@/context/SettingsContext";
+import { useGlobalSettings } from "@/context/GlobalSettingsContext";
 import { useAcks } from "@/context/AckContext";
 import { useMachineTypes } from "@/context/MachineTypeContext";
 import { renderMetricCard } from "@/components/MetricCards/renderMetricCard";
@@ -34,8 +32,6 @@ import {
   Bell,
   AlertTriangle,
   Search,
-  Thermometer,
-  Droplets,
   Clock,
   CheckCheck,
 } from "lucide-react";
@@ -58,12 +54,10 @@ interface AlarmItem {
 }
 
 export default function UnifiedAlarmsPage() {
-  const { telemetry, ahuConnectionStatus } = useTelemetry();
   const { allMachineTelemetry, machineConnectionStatus } = useMachineTelemetry();
   const { machineTypes } = useMachineTypes();
-  const getAhuHealth = useAhuHealth();
   const { t, tf } = useTranslation();
-  const { settings } = useSettings();
+  const { settings } = useGlobalSettings();
   const { acks, addAck, isAcknowledged } = useAcks();
 
   const [selectedItem, setSelectedItem] = useState<AlarmItem | null>(null);
@@ -71,7 +65,7 @@ export default function UnifiedAlarmsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [machineTypeFilter, setMachineTypeFilter] = useState<string>("all");
 
-  const operatorName = settings.general.operatorName || "Operator";
+  const operatorName = settings.operatorName || "Operator";
 
   const ut = (t as any).unifiedAlarms as Record<string, string> ?? {};
 
@@ -100,29 +94,7 @@ export default function UnifiedAlarmsPage() {
   const allAlarmItems = useMemo<AlarmItem[]>(() => {
     const items: AlarmItem[] = [];
 
-    // 1. HVAC units
-    telemetry.forEach((ahu) => {
-      const key = `${ahu.plantId}-${ahu.stationId}`;
-      const connected = ahuConnectionStatus[key]?.isConnected ?? false;
-      if (!connected) return;
-
-      const health = getAhuHealth(ahu);
-      if (health.status !== "ALARM" && health.status !== "WARNING") return;
-
-      items.push({
-        machineType: "hvac",
-        machineTypeName: "HVAC",
-        plantId: ahu.plantId,
-        instanceId: ahu.stationId,
-        status: health.status as "ALARM" | "WARNING",
-        badPoints: health.badPoints,
-        timestamp: ahu.timestamp,
-        points: ahu.points as any,
-        isConnected: connected,
-      });
-    });
-
-    // 2. Generic machine types
+    // Machine types
     for (const [slug, instances] of Object.entries(allMachineTelemetry)) {
       const mt = machineTypes.find((m) => m.slug === slug);
       if (!mt) continue;
@@ -163,7 +135,7 @@ export default function UnifiedAlarmsPage() {
     }
 
     return items;
-  }, [telemetry, ahuConnectionStatus, allMachineTelemetry, machineConnectionStatus, machineTypes, getAhuHealth, thresholdsMap]);
+  }, [allMachineTelemetry, machineConnectionStatus, machineTypes, thresholdsMap]);
 
   /* -------------------------------- */
   /* Counters                         */
@@ -218,7 +190,7 @@ export default function UnifiedAlarmsPage() {
     allAlarmItems.forEach((i) => types.add(i.machineType));
     return Array.from(types).map((slug) => ({
       slug,
-      name: slug === "hvac" ? "HVAC" : machineTypes.find((m) => m.slug === slug)?.name ?? slug,
+      name: machineTypes.find((m) => m.slug === slug)?.name ?? slug,
     }));
   }, [allAlarmItems, machineTypes]);
 
@@ -234,7 +206,6 @@ export default function UnifiedAlarmsPage() {
   /* Get variables for machine type   */
   /* -------------------------------- */
   function getVariablesForType(machineType: string) {
-    if (machineType === "hvac") return null; // HVAC has hardcoded display
     const mt = machineTypes.find((m) => m.slug === machineType);
     return mt?.variables.sort((a, b) => a.displayOrder - b.displayOrder) ?? [];
   }
@@ -243,12 +214,12 @@ export default function UnifiedAlarmsPage() {
   /* Total devices for percentage     */
   /* -------------------------------- */
   const totalDevices = useMemo(() => {
-    let count = telemetry.length;
+    let count = 0;
     for (const instances of Object.values(allMachineTelemetry)) {
       count += instances.length;
     }
     return count;
-  }, [telemetry, allMachineTelemetry]);
+  }, [allMachineTelemetry]);
 
   return (
     <div className="p-4 md:p-6 space-y-6">
@@ -522,38 +493,8 @@ export default function UnifiedAlarmsPage() {
               </CardHeader>
 
               <CardContent className="relative z-10 space-y-3">
-                {/* HVAC: show temp/humidity inline */}
-                {item.machineType === "hvac" && (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1.5">
-                        <Thermometer className="w-3 h-3 text-primary" />
-                        <span className="text-xs text-muted-foreground">{t.alarmsPage.temp}</span>
-                      </div>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-lg font-black tabular-nums">
-                          {formatPointValue(item.points.temperature?.value)}
-                        </span>
-                        <span className="text-xs text-muted-foreground">°C</span>
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1.5">
-                        <Droplets className="w-3 h-3 text-accent" />
-                        <span className="text-xs text-muted-foreground">{t.alarmsPage.humidity}</span>
-                      </div>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-lg font-black tabular-nums">
-                          {formatPointValue(item.points.humidity?.value)}
-                        </span>
-                        <span className="text-xs text-muted-foreground">%</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Generic machines: show top 2 variables */}
-                {item.machineType !== "hvac" && (() => {
+                {/* Show top 2 variables */}
+                {(() => {
                   const vars = getVariablesForType(item.machineType);
                   if (!vars || vars.length === 0) return null;
                   const topVars = vars.slice(0, 2);
@@ -752,36 +693,7 @@ function DetailMetrics({
   item: AlarmItem;
   machineTypes: import("@/types/machine-type").MachineType[];
 }) {
-  if (item.machineType === "hvac") {
-    // HVAC: show key points in a simple grid
-    const points = Object.entries(item.points);
-    return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {points.map(([key, point]) => (
-          <Card key={key} className="border-muted">
-            <CardContent className="p-4">
-              <div className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                {key}
-              </div>
-              <div className="text-2xl font-black tabular-nums">
-                {formatPointValue(point.value)}
-              </div>
-              {point.unit && (
-                <div className="text-xs text-muted-foreground">{point.unit}</div>
-              )}
-              {point.quality === "BAD" && (
-                <Badge variant="destructive" className="mt-1 text-[10px]">
-                  BAD
-                </Badge>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-
-  // Generic machine: use renderMetricCard with variables from MachineType
+  // Use renderMetricCard with variables from MachineType
   const mt = machineTypes.find((m) => m.slug === item.machineType);
   if (!mt) return null;
 

@@ -119,16 +119,16 @@ export default function MachineHomePage() {
   if (!machineType) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Machine type not found.</p>
+        <p className="text-muted-foreground">{t.machinePages.machineTypeNotFound}</p>
       </div>
     );
   }
 
   const healthConfig: Record<SystemHealth, { color: string; bg: string; border: string; label: string }> = {
-    CRITICAL: { color: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/30", label: "Critical" },
-    DEGRADED: { color: "text-yellow-500", bg: "bg-yellow-500/10", border: "border-yellow-500/30", label: "Degraded" },
-    HEALTHY: { color: "text-green-500", bg: "bg-green-500/10", border: "border-green-500/30", label: "Healthy" },
-    NO_DATA: { color: "text-muted-foreground", bg: "bg-muted/10", border: "border-muted/30", label: "No Data" },
+    CRITICAL: { color: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/30", label: t.machinePages.healthCritical },
+    DEGRADED: { color: "text-yellow-500", bg: "bg-yellow-500/10", border: "border-yellow-500/30", label: t.machinePages.healthDegraded },
+    HEALTHY: { color: "text-green-500", bg: "bg-green-500/10", border: "border-green-500/30", label: t.machinePages.healthHealthy },
+    NO_DATA: { color: "text-muted-foreground", bg: "bg-muted/10", border: "border-muted/30", label: t.machinePages.healthNoData },
   };
 
   const hc = healthConfig[systemHealth];
@@ -165,7 +165,7 @@ export default function MachineHomePage() {
           }`}
         >
           {connected ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
-          {connected ? "Server Online" : "Server Offline"}
+          {connected ? t.machinePages.serverOnline : t.machinePages.serverOffline}
         </Badge>
       </div>
 
@@ -176,7 +176,7 @@ export default function MachineHomePage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <Heart className="w-4 h-4" />
-              System Health
+              {t.machinePages.systemHealth}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -189,7 +189,7 @@ export default function MachineHomePage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <Gauge className="w-4 h-4" />
-              {avgMetric ? `Avg ${avgMetric.label}` : "Avg Metric"}
+              {avgMetric ? `Avg ${avgMetric.label}` : t.machinePages.avgMetric}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -204,7 +204,7 @@ export default function MachineHomePage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <Activity className="w-4 h-4" />
-              Connected
+              {t.machinePages.connectedCount}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -230,7 +230,7 @@ export default function MachineHomePage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <AlertTriangle className="w-4 h-4" />
-              Active Alerts
+              {t.machinePages.activeAlerts}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -253,15 +253,15 @@ export default function MachineHomePage() {
         <CardHeader>
           <CardTitle className="text-sm font-medium flex items-center gap-2">
             <Activity className="w-4 h-4 text-primary" />
-            System Overview
+            {t.machinePages.systemOverview}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <StatusBox label="Operational" count={stats.ok} color="text-green-500" bg="bg-green-500/10" />
-            <StatusBox label="Warnings" count={stats.warning} color="text-yellow-500" bg="bg-yellow-500/10" />
-            <StatusBox label="Critical" count={stats.alarm} color="text-destructive" bg="bg-destructive/10" />
-            <StatusBox label="Offline" count={stats.disconnected} color="text-muted-foreground" bg="bg-muted/10" />
+            <StatusBox label={t.machinePages.operational} count={stats.ok} color="text-green-500" bg="bg-green-500/10" />
+            <StatusBox label={t.machinePages.warnings} count={stats.warning} color="text-yellow-500" bg="bg-yellow-500/10" />
+            <StatusBox label={t.machinePages.critical} count={stats.alarm} color="text-destructive" bg="bg-destructive/10" />
+            <StatusBox label={t.machinePages.offline} count={stats.disconnected} color="text-muted-foreground" bg="bg-muted/10" />
           </div>
         </CardContent>
       </Card>
@@ -270,20 +270,20 @@ export default function MachineHomePage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <QuickActionCard
           title={t.machineDashboard?.dashboard ?? "Dashboard"}
-          description="View all instances and their status"
+          description={t.machinePages.viewInstances}
           icon={LayoutDashboard}
           onClick={() => navigate(routes.machine.dashboard(slug!))}
         />
         <QuickActionCard
           title={t.nav?.alarms ?? "Alarms"}
-          description="View active alarms and warnings"
+          description={t.machinePages.viewAlarms}
           icon={Bell}
           onClick={() => navigate(routes.machine.alarms(slug!))}
           badge={typeAlarmCount.alarms > 0 ? typeAlarmCount.alarms : undefined}
         />
         <QuickActionCard
           title={t.nav?.settings ?? "Settings"}
-          description="Configure thresholds and notifications"
+          description={t.machinePages.configureSettings}
           icon={Settings}
           onClick={() => navigate(routes.machine.settings(slug!))}
         />

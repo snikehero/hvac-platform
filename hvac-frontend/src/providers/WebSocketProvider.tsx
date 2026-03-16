@@ -2,73 +2,29 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useCallback, useEffect, useMemo, useState } from "react";
 import type { Socket } from "socket.io-client";
-import type { HvacTelemetry } from "@/types/telemetry";
-import type { HvacEvent } from "@/types/event";
-import type { HistoryPoint } from "@/types/history";
 import type { MachineTelemetry } from "@/types/machine-type";
 import { useWebSocketConnection } from "@/hooks/useWebSocketConnection";
-import {
-  useAhuConnectivity,
-  type AhuConnectionStatus,
-} from "@/hooks/useAhuConnectivity";
 import { useDeviceConnectivity, type DeviceConnectionStatus } from "@/hooks/useDeviceConnectivity";
-import type { MachineEvent } from "@/types/machine-event";
 import type { DeviceEvent } from "@/types/device-event";
-import { useEventManagement } from "@/hooks/useEventManagement";
 import { useDeviceEventManagement } from "@/hooks/useDeviceEventManagement";
-import { useHistoryManagement } from "@/hooks/useHistoryManagement";
 import { useDeviceHistoryManagement, type DeviceHistoryData } from "@/hooks/useDeviceHistoryManagement";
-import { useTelemetryState } from "@/hooks/useTelemetryState";
-import { NotificationService } from "@/services/NotificationService";
-import { useSettings } from "@/context/SettingsContext";
+import { useGlobalSettings } from "@/context/GlobalSettingsContext";
 import { useAcks } from "@/context/AckContext";
 import { useMachineTypes } from "@/context/MachineTypeContext";
 
 /* ---------------- CONTEXT ---------------- */
 
 interface TelemetryContextValue {
-  telemetry: HvacTelemetry[];
-  events: HvacEvent[];
-  history: Record<
-    string,
-    {
-      temperature: HistoryPoint[];
-      humidity: HistoryPoint[];
-    }
-  >;
-  activeCounts: Record<
-    string,
-    {
-      alarms: number;
-      warnings: number;
-    }
-  >;
-  /** WebSocket connection status (browser <-> backend) */
   connected: boolean;
-  /** Per-AHU connection status (tracks if AHU is sending data) */
-  ahuConnectionStatus: Record<string, AhuConnectionStatus>;
-  /** Check if a specific AHU is connected */
-  isAhuConnected: (plantId: string, stationId: string) => boolean;
-  setEvents: React.Dispatch<React.SetStateAction<HvacEvent[]>>;
-  /** Raw Socket.IO socket — used by command hooks to emit events */
   socket: Socket | null;
-  /** Machine telemetry keyed by machine type slug */
   machineTelemetry: Record<string, MachineTelemetry[]>;
-  /** Generic machine connectivity */
   machineConnectionStatus: Record<string, DeviceConnectionStatus>;
   isMachineConnected: (machineKey: string) => boolean;
-  machineEvents: MachineEvent[];
-  /** Unified device events from ALL machine types (including HVAC) */
   deviceEvents: DeviceEvent[];
-  /** Active alarm/warning counts for ALL device types */
   deviceActiveCounts: Record<string, { alarms: number; warnings: number }>;
-  /** Total active alarms across ALL machine types */
   totalAlarms: number;
-  /** Total active warnings across ALL machine types */
   totalWarnings: number;
-  /** History data for generic machine variables (keyed by instance) */
   machineHistory: DeviceHistoryData;
-  /** Get history for a specific machine instance */
   getInstanceHistory: (machineType: string, plantId: string, stationId: string) => Record<string, import("@/types/history").HistoryPoint[]>;
 }
 
@@ -82,8 +38,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   // Connection management
   const { socket, connected } = useWebSocketConnection();
 
-  // Settings
-  const { settings } = useSettings();
+  // Global settings (language, timeout, notifications)
+  const { settings: globalSettings } = useGlobalSettings();
 
   // Acknowledgment context — clear acks when a machine recovers to OK
   const { clearAck } = useAcks();
@@ -91,16 +47,10 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   // Machine type definitions (for determining tracked variables)
   const { machineTypes } = useMachineTypes();
 
-  // Telemetry state
-  const { telemetry, setTelemetry, updateTelemetry } = useTelemetryState();
-
   // Machine telemetry state (generic machines)
   const [machineTelemetry, setMachineTelemetry] = useState<
     Record<string, MachineTelemetry[]>
   >({});
-
-  // Machine events
-  const [machineEvents, setMachineEvents] = useState<MachineEvent[]>([]);
 
   // Unified device event management (all machine types including HVAC)
   const deviceEventManager = useDeviceEventManagement();
@@ -109,164 +59,12 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const machineConnectivity = useDeviceConnectivity(
     connected,
     undefined, // We don't notify from client anymore, the backend emits `machine_event`
-    settings.thresholds.disconnectTimeoutSeconds * 1000,
-    settings.general.refreshIntervalSeconds * 1000
+    globalSettings.disconnectTimeoutSeconds * 1000,
+    globalSettings.refreshIntervalSeconds * 1000
   );
-
-  // Event management (declare early)
-  const eventManager = useEventManagement();
-
-  // History management (declare early)
-  const historyManager = useHistoryManagement();
 
   // Device history management (generic machines)
   const deviceHistoryManager = useDeviceHistoryManagement();
-
-  // Connectivity tracking - pass a ref callback to avoid circular dependency
-  const connectivity = useAhuConnectivity(
-    telemetry,
-    useCallback(
-      (ahu: { plantId: string; stationId: string }) => {
-        eventManager.handleDisconnection(ahu);
-        const timeoutMinutes = Math.round(settings.thresholds.disconnectTimeoutSeconds / 60);
-        NotificationService.notifyDisconnection(
-          ahu.stationId,
-          ahu.plantId,
-          timeoutMinutes,
-          settings.general.language,
-        );
-      },
-      [eventManager, settings.thresholds.disconnectTimeoutSeconds, settings.general.language],
-    ),
-    connected, // Pass WebSocket connection status
-    settings.thresholds.disconnectTimeoutSeconds * 1000, // Pass configured timeout in milliseconds
-    settings.general.refreshIntervalSeconds * 1000, // Pass configured check interval in milliseconds
-  );
-
-  // Event handler for reconnection
-  const handleAhuReconnected = useCallback(
-    (ahu: { plantId: string; stationId: string }) => {
-      NotificationService.notifyReconnection(
-        ahu.stationId,
-        ahu.plantId,
-        settings.general.language,
-      );
-    },
-    [settings.general.language],
-  );
-
-  // Handle hvac_update events
-  const handleHvacUpdate = useCallback(
-    (ahu: HvacTelemetry) => {
-      // Update last seen timestamp
-      connectivity.updateLastSeen(ahu.plantId, ahu.stationId);
-
-      // Process status changes and notifications
-      const previousStatus = eventManager.events.find(
-        (e) => e.ahuId === ahu.stationId && e.plantId === ahu.plantId,
-      )?.type;
-
-      eventManager.processStatusChange(ahu, handleAhuReconnected);
-
-      // When a machine recovers to OK after an alarm/warning episode,
-      // clear its ack so the next failure must be acknowledged fresh.
-      const currentStatus = ahu.points.status?.value;
-      if (
-        currentStatus === "OK" &&
-        (previousStatus === "ALARM" || previousStatus === "WARNING")
-      ) {
-        clearAck(ahu.plantId, ahu.stationId);
-      }
-      if (
-        currentStatus &&
-        (currentStatus === "ALARM" ||
-          currentStatus === "WARNING" ||
-          currentStatus === "OK")
-      ) {
-        NotificationService.notifyStatusChange(
-          ahu.stationId,
-          ahu.plantId,
-          currentStatus,
-          previousStatus,
-          settings.general.language,
-        );
-      }
-
-      // Update history
-      historyManager.updateHistory(ahu);
-
-      // Update telemetry state
-      updateTelemetry(ahu);
-    },
-    [
-      connectivity.updateLastSeen,
-      eventManager.events,
-      eventManager.processStatusChange,
-      historyManager.updateHistory,
-      updateTelemetry,
-      handleAhuReconnected,
-      settings.general.language,
-    ],
-  );
-
-  // Handle hvac_snapshot events
-  const handleHvacSnapshot = useCallback(
-    (data: HvacTelemetry[]) => {
-      const now = Date.now();
-
-      // Only fully initialize if we don't have existing data (first load)
-      const isFirstLoad = telemetry.length === 0;
-
-      if (isFirstLoad) {
-        // Initialize event management
-        eventManager.initializeFromSnapshot(data);
-
-        // Initialize history
-        historyManager.initializeFromSnapshot(data);
-      } else {
-        // On reconnection, merge new data with existing state
-        // Update active counts but preserve event history
-        eventManager.updateActiveCountsFromSnapshot(data);
-
-        data.forEach((ahu) => {
-          // Update telemetry
-          updateTelemetry(ahu);
-
-          // Update history (append new points, don't replace)
-          historyManager.updateHistory(ahu);
-        });
-      }
-
-      // Always update connectivity status (even on reconnection)
-      const newConnectionStatus: Record<string, AhuConnectionStatus> = {};
-      data.forEach((ahu) => {
-        const key = `${ahu.plantId}-${ahu.stationId}`;
-        newConnectionStatus[key] = {
-          isConnected: true,
-          lastSeen: now,
-        };
-        connectivity.updateLastSeen(ahu.plantId, ahu.stationId);
-      });
-
-      connectivity.setConnectionStatus(newConnectionStatus);
-
-      // Only set telemetry on first load, otherwise updateTelemetry handles it
-      if (isFirstLoad) {
-        setTelemetry(data);
-      }
-    },
-    [
-      telemetry.length,
-      eventManager.initializeFromSnapshot,
-      eventManager.updateActiveCountsFromSnapshot,
-      historyManager.initializeFromSnapshot,
-      historyManager.updateHistory,
-      connectivity.updateLastSeen,
-      connectivity.setConnectionStatus,
-      setTelemetry,
-      updateTelemetry,
-    ],
-  );
 
   // Helper: get tracked variable keys for a machine type
   const getTrackedVarKeys = useCallback(
@@ -345,33 +143,6 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     [machineConnectivity.updateLastSeen, getTrackedVarKeys, deviceHistoryManager.updateHistory],
   );
 
-  // Handle machine_event from backend
-  const handleMachineEvent = useCallback((event: MachineEvent) => {
-    setMachineEvents((prev) => [event, ...prev].slice(0, 100)); // Keep last 100
-
-    // Optionally show a toast based on event type
-    import("sonner").then(({ toast }) => {
-      if (event.type === 'DISCONNECTED') {
-        toast.error(`🔴 ${event.message}`, {
-          description: `Plant: ${event.plantId}`,
-        });
-
-        // Force local connection status to false when server says strictly disconnected
-        machineConnectivity.setConnectionStatus((prev) => ({
-          ...prev,
-          [`${event.plantId}-${event.instanceId}`]: {
-            ...(prev[`${event.plantId}-${event.instanceId}`] || { lastSeen: Date.now() }),
-            isConnected: false
-          }
-        }));
-      } else if (event.type === 'RECONNECTED') {
-        toast.success(`🟢 ${event.message}`, {
-          description: `Plant: ${event.plantId}`,
-        });
-      }
-    });
-  }, [machineConnectivity.setConnectionStatus]);
-
   // Handle unified device_event from backend (all machine types including HVAC)
   const handleDeviceEvent = useCallback((event: DeviceEvent) => {
     deviceEventManager.addEvent(event);
@@ -390,47 +161,32 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("hvac_snapshot", handleHvacSnapshot);
-    socket.on("hvac_update", handleHvacUpdate);
     socket.on("machine_snapshot", handleMachineSnapshot);
     socket.on("machine_update", handleMachineUpdate);
-    socket.on("machine_event", handleMachineEvent);
     socket.on("device_event", handleDeviceEvent);
 
     return () => {
-      socket.off("hvac_snapshot", handleHvacSnapshot);
-      socket.off("hvac_update", handleHvacUpdate);
       socket.off("machine_snapshot", handleMachineSnapshot);
       socket.off("machine_update", handleMachineUpdate);
-      socket.off("machine_event", handleMachineEvent);
       socket.off("device_event", handleDeviceEvent);
     };
-  }, [socket, handleHvacSnapshot, handleHvacUpdate, handleMachineSnapshot, handleMachineUpdate, handleMachineEvent, handleDeviceEvent]);
+  }, [socket, handleMachineSnapshot, handleMachineUpdate, handleDeviceEvent]);
 
   // Mark all devices as disconnected when WebSocket disconnects
   useEffect(() => {
     if (!connected) {
-      connectivity.markAllAsDisconnected();
       machineConnectivity.markAllAsDisconnected();
     }
-  }, [connected, connectivity.markAllAsDisconnected, machineConnectivity.markAllAsDisconnected]);
+  }, [connected, machineConnectivity.markAllAsDisconnected]);
 
   // Memoize context value
   const contextValue = useMemo<TelemetryContextValue>(
     () => ({
-      telemetry,
-      events: eventManager.events,
-      history: historyManager.history,
-      activeCounts: eventManager.activeCounts,
       connected,
-      ahuConnectionStatus: connectivity.ahuConnectionStatus,
-      isAhuConnected: connectivity.isAhuConnected,
-      setEvents: eventManager.setEvents,
       socket,
       machineTelemetry,
       machineConnectionStatus: machineConnectivity.connectionStatus,
       isMachineConnected: machineConnectivity.isConnected,
-      machineEvents,
       deviceEvents: deviceEventManager.allEvents,
       deviceActiveCounts: deviceEventManager.activeCounts,
       totalAlarms: deviceEventManager.totalAlarms,
@@ -439,19 +195,11 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       getInstanceHistory: deviceHistoryManager.getInstanceHistory,
     }),
     [
-      telemetry,
-      eventManager.events,
-      eventManager.activeCounts,
-      eventManager.setEvents,
-      historyManager.history,
       connected,
-      connectivity.ahuConnectionStatus,
-      connectivity.isAhuConnected,
       socket,
       machineTelemetry,
       machineConnectivity.connectionStatus,
       machineConnectivity.isConnected,
-      machineEvents,
       deviceEventManager.allEvents,
       deviceEventManager.activeCounts,
       deviceEventManager.totalAlarms,

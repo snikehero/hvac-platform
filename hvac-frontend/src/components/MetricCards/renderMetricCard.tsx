@@ -32,11 +32,16 @@ export function renderMetricCard({
     color,
     cardConfig = {},
 }: RenderMetricCardProps): React.ReactElement {
-    // Map standard chart colors to "chart" if they are chart-1 to chart-5
-    const mappedColor: MetricColor =
-        color && color.toString().startsWith("chart-")
-            ? "chart"
-            : color || "primary";
+    // Map color strings to valid MetricColor values
+    const validColors = new Set<string>(["primary", "accent", "success", "warning", "destructive", "chart"]);
+    let mappedColor: MetricColor;
+    if (color && color.toString().startsWith("chart-")) {
+        mappedColor = "chart";
+    } else if (color && validColors.has(color.toString())) {
+        mappedColor = color as MetricColor;
+    } else {
+        mappedColor = "primary";
+    }
 
     // Shared props for all cards
     const baseProps = {

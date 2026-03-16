@@ -3,6 +3,8 @@ import {
   Logger,
   NotFoundException,
   ConflictException,
+  ForbiddenException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -13,7 +15,7 @@ import { CreateMachineTypeDto } from './dto/create-machine-type.dto';
 import { UpdateMachineTypeDto } from './dto/update-machine-type.dto';
 
 @Injectable()
-export class MachineDesignerService {
+export class MachineDesignerService implements OnModuleInit {
   private readonly logger = new Logger(MachineDesignerService.name);
 
   constructor(
@@ -24,6 +26,49 @@ export class MachineDesignerService {
     @InjectRepository(MachineCommandEntity)
     private readonly machineCommandRepo: Repository<MachineCommandEntity>,
   ) {}
+
+  async onModuleInit() {
+    await this.ensureSystemTypes();
+  }
+
+  /**
+   * Ensure system machine types (e.g. HVAC) exist in the database.
+   * Idempotent — safe to call multiple times.
+   * Called from onModuleInit AND from MachineService to handle init ordering.
+   */
+  async ensureSystemTypes() {
+    const existing = await this.machineTypeRepo.findOne({ where: { slug: 'hvac' } });
+    if (existing) {
+      this.logger.log('System type "hvac" already exists, skipping seed');
+      return;
+    }
+
+    const hvacType = this.machineTypeRepo.create({
+      name: 'HVAC',
+      slug: 'hvac',
+      mqttTopic: 'hvac/#',
+      description: 'Air Handling Unit monitoring and control',
+      icon: 'AirVent',
+      isSystem: true,
+      variables: [
+        this.machineVariableRepo.create({ key: 'temperature', label: 'Temperature', dataType: 'number', unit: '°C', cardType: 'temperature', color: '#3b82f6', displayOrder: 0, cardConfig: { warning: 28, alarm: 35, trackHistory: true } }),
+        this.machineVariableRepo.create({ key: 'humidity', label: 'Humidity', dataType: 'number', unit: '%', cardType: 'humidity', color: '#06b6d4', displayOrder: 1, cardConfig: { warning: 70, alarm: 85, trackHistory: true } }),
+        this.machineVariableRepo.create({ key: 'fan_status', label: 'Fan Status', dataType: 'boolean', cardType: 'fan', color: '#22c55e', displayOrder: 2, cardConfig: {} }),
+        this.machineVariableRepo.create({ key: 'airflow', label: 'Airflow', dataType: 'number', unit: 'm³/h', cardType: 'airflow', color: '#8b5cf6', displayOrder: 3, cardConfig: {} }),
+        this.machineVariableRepo.create({ key: 'damper_position', label: 'Damper Position', dataType: 'number', unit: '%', cardType: 'damper', color: '#f59e0b', displayOrder: 4, cardConfig: {} }),
+        this.machineVariableRepo.create({ key: 'power_status', label: 'Power Status', dataType: 'boolean', cardType: 'power', color: '#ef4444', displayOrder: 5, cardConfig: {} }),
+        this.machineVariableRepo.create({ key: 'filter_dp', label: 'Filter ΔP', dataType: 'number', unit: 'Pa', cardType: 'filter', color: '#64748b', displayOrder: 6, cardConfig: {} }),
+        this.machineVariableRepo.create({ key: 'status', label: 'Status', dataType: 'string', cardType: 'generic', color: '#6b7280', displayOrder: 7, cardConfig: {} }),
+      ],
+      commands: [
+        this.machineCommandRepo.create({ key: 'fan_status', label: 'Fan Control', commandType: 'toggle', config: { onLabel: 'ON', offLabel: 'OFF' }, displayOrder: 0 }),
+        this.machineCommandRepo.create({ key: 'damper_position', label: 'Damper Position', commandType: 'range', config: { min: 0, max: 100, step: 5, unit: '%' }, displayOrder: 1 }),
+      ],
+    });
+
+    await this.machineTypeRepo.save(hvacType);
+    this.logger.log('Seeded system type "HVAC" with 8 variables and 2 commands');
+  }
 
   async findAll(): Promise<MachineTypeEntity[]> {
     return this.machineTypeRepo.find({
@@ -146,6 +191,9 @@ export class MachineDesignerService {
 
   async remove(id: string): Promise<MachineTypeEntity> {
     const existing = await this.findById(id);
+    if (existing.isSystem) {
+      throw new ForbiddenException('Cannot delete system machine type');
+    }
     await this.machineTypeRepo.remove(existing);
     this.logger.log(
       `Deleted machine type "${existing.name}" (${existing.slug})`,
