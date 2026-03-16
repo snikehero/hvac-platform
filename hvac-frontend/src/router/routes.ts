@@ -22,6 +22,8 @@ export const routes = {
     alarmsPattern: "/machines/:machineType/alarms",
     settings: (machineType: string) => `/machines/${machineType}/settings`,
     settingsPattern: "/machines/:machineType/settings",
+    executive: (machineType: string) => `/machines/${machineType}/executive`,
+    executivePattern: "/machines/:machineType/executive",
     detail: (
       machineType: string,
       plantId: string,

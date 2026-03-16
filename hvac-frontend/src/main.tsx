@@ -20,6 +20,7 @@ import MachineDetailPage from "./pages/Machine/MachineDetailPage";
 import MachineSettingsPage from "./pages/Machine/MachineSettingsPage";
 import MachineAlarmsPage from "./pages/Machine/MachineAlarmsPage";
 import UnifiedAlarmsPage from "./pages/Alarms/UnifiedAlarmsPage";
+import ExecutiveDashboardPage from "./pages/Machine/Executive/ExecutiveDashboardPage";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
@@ -46,7 +47,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                 <Route path="/hvac/dashboard" element={<Navigate to="/machines/hvac/dashboard" replace />} />
                 <Route path="/hvac/alarms" element={<Navigate to="/machines/hvac/alarms" replace />} />
                 <Route path="/hvac/settings" element={<Navigate to="/machines/hvac/settings" replace />} />
-                <Route path="/hvac/ejecutivo" element={<Navigate to="/machines/hvac" replace />} />
+                <Route path="/hvac/ejecutivo" element={<Navigate to="/machines/hvac/executive" replace />} />
                 <Route path="/hvac/plants/:plantId/ahus/:ahuId" element={<Navigate to="/machines/hvac" replace />} />
                 <Route path="/hvac/plants/:plantId/ahus/:ahuId/detail" element={<Navigate to="/machines/hvac" replace />} />
 
@@ -76,6 +77,10 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                 <Route
                   path={routes.machine.dashboardPattern}
                   element={<MachineDashboardPage />}
+                />
+                <Route
+                  path={routes.machine.executivePattern}
+                  element={<ExecutiveDashboardPage />}
                 />
                 <Route
                   path={routes.machine.alarmsPattern}

@@ -458,6 +458,38 @@ export const es = {
     avg: "prom",
   },
 
+  // ===== Executive Dashboard =====
+  executiveDashboard: {
+    title: "Dashboard Ejecutivo",
+    systemStatus: "Estado del Sistema",
+    totalUnits: "Unidades Totales",
+    operationalCapacity: "Capacidad Operativa",
+    affectedUnits: "Unidades Afectadas",
+    noCommunication: "Sin Comunicación",
+    plantOverview: "Vista por Planta",
+    heatMap: "Mapa de Calor",
+    systemActivity: "Actividad del Sistema",
+    stabilityScore: "Índice de Estabilidad",
+    recentEvents: "Eventos Recientes",
+    operational: "Operativo",
+    clickToFilter: "Click para filtrar",
+    allPlants: "Todas las Plantas",
+    noEvents: "Sin eventos recientes",
+    stable: "ESTABLE",
+    degraded: "DEGRADADO",
+    unstable: "INESTABLE",
+    legend: "Leyenda",
+    instances: "instancias",
+    alarms: "alarmas",
+    warnings: "advertencias",
+    disconnected: "desconectados",
+    impact: "Impacto",
+    noInstances: "No hay instancias conectadas",
+    noInstancesDesc: "Esperando datos de telemetría para este tipo de máquina.",
+    trend: "Tendencia",
+    badPoints: "puntos en error",
+  },
+
 } as const;
 
 export type TranslationKeys = typeof es;

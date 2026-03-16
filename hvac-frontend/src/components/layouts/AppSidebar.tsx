@@ -15,6 +15,7 @@ import {
   Thermometer,
   Fan,
   Activity,
+  BarChart3,
   type LucideIcon,
 } from "lucide-react";
 import { useMachineTelemetry } from "@/hooks/useMachineTelemetry";
@@ -81,6 +82,11 @@ export default function AppSidebar() {
           to: routes.machine.dashboard(mt.slug),
           label: t.machineDashboard?.dashboard ?? "Dashboard",
           icon: getIconComponent(mt.icon),
+        },
+        {
+          to: routes.machine.executive(mt.slug),
+          label: t.nav.executive ?? "Executive Dashboard",
+          icon: BarChart3,
         },
         { to: routes.machine.alarms(mt.slug), label: t.nav.alarms ?? "Alarms", icon: Bell },
         { to: routes.machine.settings(mt.slug), label: t.nav.settings ?? "Settings", icon: Settings },
