@@ -76,7 +76,7 @@ export default function AppSidebar() {
     const dynamicCategories = machineTypes.map((mt) => ({
       name: mt.name,
       items: [
-        { to: routes.machine.home(mt.slug), label: t.nav.homeHvac ?? "Home", icon: Home },
+        { to: routes.machine.home(mt.slug), label: t.nav.home ?? "Home", icon: Home },
         {
           to: routes.machine.dashboard(mt.slug),
           label: t.machineDashboard?.dashboard ?? "Dashboard",
@@ -170,7 +170,7 @@ export default function AppSidebar() {
                       <NavLink
                         key={to}
                         to={to}
-                        end={to === routes.general.overview}
+                        end
                         className={({ isActive }) =>
                           `relative flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all duration-200
      ${

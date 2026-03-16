@@ -1,4 +1,4 @@
-import { Wifi, Palette, User } from "lucide-react";
+import { Wifi, Palette, User, Globe } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,11 +10,13 @@ import {
 import { useTheme } from "@/components/theme-provider";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { useGlobalSettings } from "@/context/GlobalSettingsContext";
 
 export default function AppHeader() {
   const connected = useWebSocket();
   const { setTheme } = useTheme();
   const { t } = useTranslation();
+  const { settings, updateLanguage } = useGlobalSettings();
 
   return (
     <header className="h-15 border-b border-border bg-background flex items-center justify-between px-6 shrink-0">
@@ -54,6 +56,24 @@ export default function AppHeader() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* 🌐 Language Switcher */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon">
+              <Globe className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => updateLanguage("es")}>
+              {settings.language === "es" ? "✓ " : ""}Español
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => updateLanguage("en")}>
+              {settings.language === "en" ? "✓ " : ""}English
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         {/* 📡 Estado Global */}
         <div className="flex items-center gap-2">
           <Wifi

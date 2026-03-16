@@ -8,6 +8,8 @@ export const en = {
     close: "Close",
     loading: "Loading...",
     error: "Error",
+    errorSingular: "error",
+    errorPlural: "errors",
     success: "Success",
     noData: "No Data",
     search: "Search",
@@ -39,119 +41,20 @@ export const en = {
     executive: "Executive Dashboard",
     alarms: "Alarms",
     settings: "Settings",
-    ahuDetail: "AHU Detail",
-    homeHvac: "HVAC Home",
     generalDashboard: "General Dashboard",
-    activeHvac: "Active HVAC",
     comingSoon: "Coming Soon",
     generalSection: "General",
     overview: "Overview",
     unifiedAlarms: "Alarms",
   },
 
-  // ===== Hero System Status =====
-  heroSystem: {
-    systemOptimal: "System Optimal",
-    systemDegraded: "System Degraded",
-    systemCritical: "System Critical",
-    noData: "No Data",
-    allUnitsOperating: "All units operating normally",
-    someUnitsAttention: "Some units require attention",
-    immediateAction: "Immediate action required",
-    waitingTelemetry: "Waiting for telemetry",
-    totalUnits: "Total Units",
-    alarms: "Alarms",
-    warnings: "Warnings",
-    operational: "Operational",
-    systemHealthDistribution: "System Health Distribution",
-  },
 
-  // ===== Dashboard Widgets =====
-  widgets: {
-    alarmsActive: "Active Alarms",
-    warningsActive: "Active Warnings",
-    disconnectedUnits: "Disconnected Units",
-    operationalCapacity: "Operational Capacity",
-    avgTemperature: "Average Temperature",
-    avgHumidity: "Average Humidity",
-    clickToFilter: "Click to filter",
-    unitsWithAlarms: "units with alarms",
-    unitsWithWarnings: "units with warnings",
-    unitsDisconnected: "units disconnected",
-    unitsOperational: "units operational",
-    overallAvg: "Overall average",
-    systemWide: "system-wide",
-    unitsAffected: "Units Affected",
-    noCommunication: "No Communication",
-    offlineUnits: "Offline Units",
-    impact: "Impact",
-  },
-
-  // ===== Plant Panel =====
-  plantPanel: {
-    plantOverview: "Plant Overview",
-    statusByPlant: "Status and distribution by plant",
-    plant: "Plant",
-    units: "units",
-    operational: "Operational",
-    viewDetails: "View Details",
-  },
-
-  // ===== System Activity =====
+  // ===== Time Ago (used by alarms) =====
   activity: {
-    recentActivity: "Recent System Activity",
-    systemActivity: "System Activity",
-    last10Events: "Last 10 recorded events",
-    statusChange: "Status change",
-    now: "now",
-    minuteAgo: "1 minute ago",
-    minutesAgo: "{minutes} minutes ago",
-    hourAgo: "1 hour ago",
-    hoursAgo: "{hours} hours ago",
-    noRecentActivity: "No recent activity",
-    stable: "Stable",
-    degraded: "Degraded",
-    unstable: "Unstable",
-    critical5min: "Critical (5min)",
-    disconnects5min: "Disconnects (5min)",
-    lastEvent: "Last Event",
-    stabilityScore: "Stability Score",
-    ago: "ago",
     secondsAgo: "{seconds}s ago",
     minutesAgoShort: "{minutes}m ago",
     hoursAgoShort: "{hours}h ago",
     daysAgoShort: "{days}d ago",
-    noEvents: "No events",
-    recentEvents: "Recent Events",
-    moreEvents: "more events",
-    noRecentEvents: "No recent events",
-  },
-
-  // ===== Dashboard Page =====
-  dashboardPage: {
-    title: "Dashboard Overview",
-    subtitle: "Executive overview of the global HVAC system status",
-    filterByPlant: "Plant",
-    filterByStatus: "Status",
-    allPlants: "All plants",
-    allStatuses: "All statuses",
-    noAhusMatch: "No AHUs match the current filters",
-  },
-
-  // ===== AHU Card =====
-  ahuCard: {
-    temperature: "Temperature",
-    humidity: "Humidity",
-    speed: "Speed",
-    lastUpdate: "Last update",
-    clickForDetails: "Click for details",
-    plant: "Plant",
-    errors: "errors",
-    error: "error",
-    fan: "Fan",
-    avg60s: "Avg (60s)",
-    additionalData: "Additional Data",
-    moreData: "more data",
   },
 
   // ===== Alarms Page =====
@@ -294,181 +197,6 @@ export const en = {
     },
   },
 
-  // ===== AHU Detail Content =====
-  ahuDetail: {
-    ahuNotFound: "AHU not found",
-    unitNotExist: "The requested unit does not exist or is disconnected",
-    goBack: "Go Back",
-  },
-
-  // ====== AHU Detail View =====
-  ahuDetailView: {
-    ahuNotFound: "AHU not found",
-    goBack: "Go Back",
-
-    notAvailableMessage: "Unit {ahuId} in plant {plantId} is unavailable.",
-
-    plantLabel: "Plant {plantId}",
-    updatedAgo: "{value} ago",
-    badPointsShort: "{count} BAD",
-
-    valueWithUnit: "{value}{unit}",
-
-    quickStats: {
-      status: "Status",
-      temperature: "Temperature",
-      humidity: "Humidity",
-      fan: "Fan",
-    },
-
-    fan: {
-      onLabel: "On",
-      offLabel: "Off",
-      on: "ON",
-      off: "OFF",
-    },
-
-    viewer3d: {
-      title: "3D Visualization",
-      fanActive: "Fan active",
-      fanInactive: "Fan inactive",
-    },
-
-    technical: {
-      title: "Technical Information",
-      operationalStatus: "Operational status",
-      badPoints: "BAD points",
-      extraSensors: "Additional sensors",
-    },
-  },
-
-  ahuDetailPage: {
-  backToDashboard: "Back to Dashboard",
-  plantLabel: "Plant {plantId}",
-
-  badPointsOutOfRange: "{count} point{suffix} out of range",
-  lastUpdate: "Last update: {value}",
-  eventsLogged: "{count} event{suffix} logged",
-
-  tabs: {
-    overview: "Overview",
-    events: "Events",
-  },
-
-  sections: {
-    environmental: "Environmental Conditions",
-    airMovement: "Air Movement",
-    energyFiltration: "Energy & Filtration",
-    additionalData: "Additional Data",
-  },
-
-  metrics: {
-    temperature: "Temperature",
-    humidity: "Humidity",
-    fanStatus: "Fan Status",
-    airflow: "Airflow",
-    damperPosition: "Damper Position",
-    powerStatus: "Power Status",
-    filterDp: "Filter ΔP",
-  },
-
-  charts: {
-    temperatureHistory: "Temperature History",
-    humidityHistory: "Humidity History",
-  },
-
-  events: {
-    noEventsTitle: "No Events Logged",
-    noEventsDesc: "This unit has no recent events or alarms",
-    timelineTitle: "Event Timeline",
-    eventTypeLabel: "{type}",
-  },
-
-  statusLabels: {
-    alarm: "Critical Alarm Active",
-    warning: "Warnings Detected",
-    ok: "Normal Operation",
-    disconnected: "No Communication",
-  },
-
-  units: {
-    airflowFallback: "m³/h",
-    filterDpFallback: "Pa",
-  },
-},
-
-
-eventMessages: {
-  enteredAlarm: "Unit entered ALARM",
-  warningCondition: "Unit in WARNING condition",
-  communicationRestored: "Unit communication restored",
-  backToNormal: "Unit returned to NORMAL",
-  communicationLost: "Unit lost communication",
-  statusChange: "Status change: {previous} → {current}",
-},
-
-
-  // ===== Home Page HVAC =====
-  homePageHvac: {
-    hvacModule: "HVAC Module",
-    airHandling: "Air Handling",
-    control: "Control",
-    subtitle: "Real-time monitoring and diagnostics for air handling units across your facility",
-    serverOnline: "SERVER ONLINE",
-    serverOffline: "SERVER OFFLINE",
-    telemetryActive: "Real-time telemetry active",
-    reconnecting: "Attempting to reconnect...",
-    connected: "Connected",
-    disconnected: "Disconnected",
-    critical: "Critical",
-    degraded: "Degraded",
-    healthy: "Healthy",
-    noData: "No Data",
-    systemHealth: "System Health",
-    connectedAhus: "Connected AHUs",
-    units: "units",
-    avgTemperature: "Avg Temperature",
-    criticalAlarms: "Critical Alarms",
-    active: "active",
-    systemOverview: "System Overview",
-    operational: "Operational",
-    warnings: "Warnings",
-    criticalLabel: "Critical",
-    ofUnits: "{value} of {total} units",
-    quick: "Quick",
-    actions: "Actions",
-    dashboard: "Dashboard",
-    viewAllAhus: "View all AHUs",
-    alarms: "Alarms",
-    activeAlerts: "Active alerts",
-    temperature: "Temperature",
-    thermalMonitoring: "Thermal monitoring",
-    analytics: "Analytics",
-    systemInsights: "System insights",
-    open: "Open",
-  },
-
-  // ===== Dashboard HVAC =====
-  dashboardHvac: {
-    liveMonitoring: "Live Monitoring",
-    hvac: "HVAC",
-    dashboard: "Dashboard",
-    subtitle: "Real-time status of air handling units across all facilities",
-    totalUnits: "Total Units",
-    operational: "Operational",
-    warnings: "Warnings",
-    critical: "Critical",
-    filteringBy: "Filtering by:",
-    clear: "Clear",
-    noConnectedAhus: "No connected AHUs found",
-    noAhusWithStatus: "No AHUs with status \"{status}\"",
-    plant: "Plant",
-    unitActive: "unit active",
-    unitsActive: "units active",
-    ok: "OK",
-    warn: "WARN",
-    alarm: "ALARM",
-  },
 
   // ===== Home Global =====
   homeGlobal: {
@@ -566,20 +294,6 @@ eventMessages: {
     avgSuffix: "avg",
   },
 
-  // ===== Plant Heat Map =====
-  plantHeatMap: {
-    title: "Plant Heat Map",
-    legend: "Legend",
-  },
-
-  // ===== Plant Health Panel =====
-  plantHealth: {
-    plant: "Plant",
-    ahus: "AHUs",
-    alarms: "Alarms",
-    warnings: "Warnings",
-    disconnected: "Disconnected",
-  },
 
   // ===== Units =====
   units: {

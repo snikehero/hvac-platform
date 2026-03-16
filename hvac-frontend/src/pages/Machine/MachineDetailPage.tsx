@@ -85,7 +85,7 @@ export default function MachineDetailPage() {
   const sortedVariables = useMemo(
     () =>
       machineType
-        ? [...machineType.variables].sort(
+        ? [...(machineType.variables ?? [])].sort(
             (a, b) => a.displayOrder - b.displayOrder,
           )
         : [],
@@ -103,7 +103,7 @@ export default function MachineDetailPage() {
   const sortedCommands = useMemo(
     () =>
       machineType
-        ? [...machineType.commands].sort(
+        ? [...(machineType.commands ?? [])].sort(
             (a, b) => a.displayOrder - b.displayOrder,
           )
         : [],
@@ -240,6 +240,15 @@ export default function MachineDetailPage() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
+            {/* Disconnected Banner */}
+            {!isConnected && (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-muted border border-border">
+                <WifiOff className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground font-medium">
+                  {t.status?.disconnected ?? "DISCONNECTED"}
+                </span>
+              </div>
+            )}
             {/* Variables Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {sortedVariables.map((varDef) => {
@@ -249,9 +258,9 @@ export default function MachineDetailPage() {
                     {renderMetricCard({
                       cardType: varDef.cardType,
                       label: varDef.label,
-                      value: point?.value ?? 0,
+                      value: isConnected ? (point?.value ?? 0) : undefined,
                       unit: point?.unit ?? "",
-                      quality: point?.quality,
+                      quality: isConnected ? point?.quality : undefined,
                       color: varDef.color as "primary" | "accent" | "chart" | "destructive" | "warning" | "success",
                       cardConfig: varDef.cardConfig as Record<string, unknown>,
                     })}

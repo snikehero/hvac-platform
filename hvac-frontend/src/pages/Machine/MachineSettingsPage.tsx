@@ -38,7 +38,7 @@ export default function MachineSettingsPage() {
   const numericVariables = useMemo(
     () =>
       machineType
-        ? machineType.variables
+        ? (machineType.variables ?? [])
             .filter((v) => v.dataType === "number")
             .filter((v) => {
               const cfg = v.cardConfig as Record<string, unknown> | null;

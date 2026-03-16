@@ -89,7 +89,7 @@ export default function MachineDashboardPage() {
   const sortedVariables = useMemo(
     () =>
       machineType
-        ? [...machineType.variables]
+        ? [...(machineType.variables ?? [])]
             .sort((a, b) => a.displayOrder - b.displayOrder)
             .slice(0, 3)
         : [],
@@ -314,7 +314,7 @@ export default function MachineDashboardPage() {
                                   {varDef.label}
                                 </span>
                                 <span className="font-semibold tabular-nums">
-                                  {point
+                                  {isConn && point
                                     ? typeof point.value === "boolean"
                                       ? point.value
                                         ? (t.machinePages?.on ?? "ON")

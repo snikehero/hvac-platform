@@ -1,4 +1,4 @@
-import type { MachineTelemetry } from "@/types/machine-type";
+import type { MachineTelemetry, MachineType } from "@/types/machine-type";
 
 /**
  * Creates a minimal valid MachineTelemetry object for HVAC.
@@ -50,4 +50,49 @@ export function makeWarningInstance(overrides: Partial<MachineTelemetry> = {}): 
       ...(overrides.points ?? {}),
     },
   });
+}
+
+/**
+ * Creates a minimal MachineType definition for testing.
+ */
+export function makeMachineType(overrides: Partial<MachineType> = {}): MachineType {
+  return {
+    id: "mt-1",
+    name: "HVAC",
+    slug: "hvac",
+    mqttTopic: "hvac/#",
+    variables: [
+      {
+        id: "v1",
+        key: "temperature",
+        label: "Temperature",
+        dataType: "number",
+        unit: "°C",
+        cardType: "temperature",
+        color: "primary",
+        displayOrder: 1,
+      },
+      {
+        id: "v2",
+        key: "humidity",
+        label: "Humidity",
+        dataType: "number",
+        unit: "%",
+        cardType: "humidity",
+        color: "accent",
+        displayOrder: 2,
+      },
+    ],
+    commands: [
+      {
+        id: "c1",
+        key: "fan_status",
+        label: "Fan Control",
+        commandType: "toggle",
+        displayOrder: 1,
+      },
+    ],
+    isSystem: true,
+    ...overrides,
+  };
 }

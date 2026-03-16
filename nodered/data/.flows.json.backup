@@ -588,7 +588,8 @@
         "y": 280,
         "wires": [
             [
-                "1174be9e9055bc0c"
+                "1174be9e9055bc0c",
+                "56f38ed1c6c5a824"
             ]
         ]
     },
@@ -990,6 +991,22 @@
         ]
     },
     {
+        "id": "56f38ed1c6c5a824",
+        "type": "debug",
+        "z": "351e5b2e390a463c",
+        "name": "debug 5",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 700,
+        "y": 220,
+        "wires": []
+    },
+    {
         "id": "bb329fbdfa16533b",
         "type": "mqtt in",
         "z": "92ede25a0d8f218c",
@@ -1109,12 +1126,12 @@
         "z": "auto_sim_tab",
         "name": "Tick — 3s",
         "props": [],
-        "repeat": "",
+        "repeat": "1",
         "crontab": "",
         "once": true,
         "onceDelay": "1",
         "topic": "",
-        "x": 150,
+        "x": 160,
         "y": 200,
         "wires": [
             [

@@ -25,7 +25,6 @@ import { useTranslation } from "@/i18n/useTranslation";
 import type {
   CreateMachineVariablePayload,
   CreateMachineCommandPayload,
-  MachineType,
 } from "@/types/machine-type";
 import {
   Card,
@@ -103,19 +102,15 @@ export default function MachineDesignerFormPage() {
   const [commands, setCommands] = useState<CommandRow[]>([]);
   const [saving, setSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [machineTypeId, setMachineTypeId] = useState<string | null>(null);
 
   // Load existing machine type when editing
   useEffect(() => {
     if (!id) return;
 
     MachineDesignerApi.getBySlug(id)
-      .catch(() =>
-        // Try by id if slug fails
-        fetch(
-          `${import.meta.env.VITE_API_URL ?? "http://localhost:3000"}/api/machine-types/${id}`,
-        ).then((r) => r.json() as Promise<MachineType>),
-      )
       .then((mt) => {
+        setMachineTypeId(mt.id);
         setName(mt.name);
         setSlug(mt.slug);
         setSlugManual(true);
@@ -123,7 +118,7 @@ export default function MachineDesignerFormPage() {
         setDescription(mt.description ?? "");
         setIcon(mt.icon ?? "");
         setVariables(
-          mt.variables
+          (mt.variables ?? [])
             .sort((a, b) => a.displayOrder - b.displayOrder)
             .map((v) => ({
               _id: v.id,
@@ -351,8 +346,8 @@ export default function MachineDesignerFormPage() {
           })),
       };
 
-      if (isEdit && id) {
-        await MachineDesignerApi.update(id, payload);
+      if (isEdit && machineTypeId) {
+        await MachineDesignerApi.update(machineTypeId, payload);
         toast.success(t.machineDesigner?.saved ?? "Machine type saved");
       } else {
         await MachineDesignerApi.create(payload);
@@ -366,7 +361,7 @@ export default function MachineDesignerFormPage() {
     } finally {
       setSaving(false);
     }
-  }, [name, slug, mqttTopic, description, icon, variables, commands, isEdit, id, refetch, navigate, t]);
+  }, [name, slug, mqttTopic, description, icon, variables, commands, isEdit, machineTypeId, refetch, navigate, t]);
 
   // Preview data
   const previewPoints = useMemo(() => {

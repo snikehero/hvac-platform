@@ -17,7 +17,7 @@ export default defineConfig({
         "src/hooks/**",
         "src/context/**",
         "src/components/MetricCards/**",
-        "src/components/CommandsPanel/**",
+        "src/components/GenericCommandsPanel/**",
       ],
     },
   },

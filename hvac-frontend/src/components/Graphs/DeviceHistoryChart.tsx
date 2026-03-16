@@ -188,13 +188,32 @@ function formatTime(ts: number): string {
   return `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
 }
 
-function getTrend(data: HistoryPoint[]): "up" | "down" | "stable" {
-  if (data.length < 2) return "stable";
-  const last5 = data.slice(-5);
-  const avg = last5.reduce((acc, p) => acc + p.value, 0) / last5.length;
-  const lastValue = data[data.length - 1].value;
-  const diff = lastValue - avg;
-  if (diff > 1) return "up";
-  if (diff < -1) return "down";
+export function getTrend(data: HistoryPoint[]): "up" | "down" | "stable" {
+  const WINDOW = 5;
+  if (data.length < 3) return "stable";
+
+  const window = data.slice(-WINDOW);
+  const n = window.length;
+
+  // Linear regression: slope indicates trend direction
+  let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+  for (let i = 0; i < n; i++) {
+    sumX += i;
+    sumY += window[i].value;
+    sumXY += i * window[i].value;
+    sumX2 += i * i;
+  }
+
+  const denominator = n * sumX2 - sumX * sumX;
+  if (denominator === 0) return "stable";
+
+  const slope = (n * sumXY - sumX * sumY) / denominator;
+  const avg = sumY / n;
+
+  // Percentage-based threshold with absolute minimum floor
+  const threshold = Math.max(Math.abs(avg) * 0.02, 0.1);
+
+  if (slope > threshold) return "up";
+  if (slope < -threshold) return "down";
   return "stable";
 }

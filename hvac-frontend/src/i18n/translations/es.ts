@@ -8,6 +8,8 @@ export const es = {
     close: "Cerrar",
     loading: "Cargando...",
     error: "Error",
+    errorSingular: "error",
+    errorPlural: "errores",
     success: "Éxito",
     noData: "Sin datos",
     search: "Buscar",
@@ -39,119 +41,20 @@ export const es = {
     executive: "Dashboard Ejecutivo",
     alarms: "Alarmas",
     settings: "Configuración",
-    ahuDetail: "Detalle AHU",
-    homeHvac: "Home HVAC",
     generalDashboard: "Dashboard General",
-    activeHvac: "HVAC Activos",
     comingSoon: "Próximamente",
     generalSection: "General",
     overview: "Vista General",
     unifiedAlarms: "Alarmas",
   },
 
-  // ===== Hero System Status =====
-  heroSystem: {
-    systemOptimal: "Sistema Óptimo",
-    systemDegraded: "Sistema Degradado",
-    systemCritical: "Sistema Crítico",
-    noData: "Sin Datos",
-    allUnitsOperating: "Todas las unidades operando normalmente",
-    someUnitsAttention: "Algunas unidades requieren atención",
-    immediateAction: "Acción inmediata requerida",
-    waitingTelemetry: "Esperando telemetría",
-    totalUnits: "Unidades Totales",
-    alarms: "Alarmas",
-    warnings: "Advertencias",
-    operational: "Operacionales",
-    systemHealthDistribution: "Distribución de Salud del Sistema",
-  },
 
-  // ===== Dashboard Widgets =====
-  widgets: {
-    alarmsActive: "Alarmas Activas",
-    warningsActive: "Advertencias Activas",
-    disconnectedUnits: "Unidades Desconectadas",
-    operationalCapacity: "Capacidad Operacional",
-    avgTemperature: "Temperatura Promedio",
-    avgHumidity: "Humedad Promedia",
-    clickToFilter: "Click para filtrar",
-    unitsWithAlarms: "unidades con alarmas",
-    unitsWithWarnings: "unidades con advertencias",
-    unitsDisconnected: "unidades desconectadas",
-    unitsOperational: "unidades operacionales",
-    overallAvg: "Promedio general",
-    systemWide: "del sistema",
-    unitsAffected: "Unidades Afectadas",
-    noCommunication: "Sin Comunicación",
-    offlineUnits: "Unidades fuera de línea",
-    impact: "Impacto",
-  },
-
-  // ===== Plant Panel =====
-  plantPanel: {
-    plantOverview: "Vista por Planta",
-    statusByPlant: "Estado y distribución por planta",
-    plant: "Planta",
-    units: "unidades",
-    operational: "Operacional",
-    viewDetails: "Ver Detalles",
-  },
-
-  // ===== System Activity =====
+  // ===== Time Ago (used by alarms) =====
   activity: {
-    recentActivity: "Actividad Reciente del Sistema",
-    systemActivity: "Actividad del Sistema",
-    last10Events: "Últimos 10 eventos registrados",
-    statusChange: "Cambio de estado",
-    now: "ahora",
-    minuteAgo: "hace 1 minuto",
-    minutesAgo: "hace {minutes} minutos",
-    hourAgo: "hace 1 hora",
-    hoursAgo: "hace {hours} horas",
-    noRecentActivity: "Sin actividad reciente",
-    stable: "Estable",
-    degraded: "Degradado",
-    unstable: "Inestable",
-    critical5min: "Críticos (5min)",
-    disconnects5min: "Desconexiones (5min)",
-    lastEvent: "Último Evento",
-    stabilityScore: "Score de Estabilidad",
-    ago: "hace",
     secondsAgo: "{seconds}s hace",
     minutesAgoShort: "{minutes}m hace",
     hoursAgoShort: "{hours}h hace",
     daysAgoShort: "{days}d hace",
-    noEvents: "Sin eventos",
-    recentEvents: "Eventos Recientes",
-    moreEvents: "más eventos",
-    noRecentEvents: "Sin eventos recientes",
-  },
-
-  // ===== Dashboard Page =====
-  dashboardPage: {
-    title: "Dashboard Overview",
-    subtitle: "Vista ejecutiva del estado global del sistema HVAC",
-    filterByPlant: "Planta",
-    filterByStatus: "Estado",
-    allPlants: "Todas las plantas",
-    allStatuses: "Todos los estados",
-    noAhusMatch: "No hay AHUs que coincidan con los filtros",
-  },
-
-  // ===== AHU Card =====
-  ahuCard: {
-    temperature: "Temperatura",
-    humidity: "Humedad",
-    speed: "Velocidad",
-    lastUpdate: "Última actualización",
-    clickForDetails: "Click para ver detalles",
-    plant: "Planta",
-    errors: "errores",
-    error: "error",
-    fan: "Ventilador",
-    avg60s: "Promedio (60s)",
-    additionalData: "Datos Adicionales",
-    moreData: "más datos",
   },
 
   // ===== Alarms Page =====
@@ -294,187 +197,6 @@ export const es = {
     },
   },
 
-  // ===== AHU Detail Content =====
-  ahuDetail: {
-    ahuNotFound: "AHU no encontrado",
-    unitNotExist: "La unidad solicitada no existe o está desconectada",
-    goBack: "Volver",
-  },
-
-// ====== AHU Detail View =====
-ahuDetailView: {
-  ahuNotFound: "AHU no encontrado",
-  goBack: "Volver",
-
-  // Mensaje not found (placeholders)
-  notAvailableMessage: "El equipo {ahuId} en planta {plantId} no está disponible.",
-
-  // Header
-  plantLabel: "Planta {plantId}",
-  updatedAgo: "hace {value}",
-  badPointsShort: "{count} BAD",
-
-  // General formatting
-  valueWithUnit: "{value}{unit}",
-
-  // Quick stats
-  quickStats: {
-    status: "Estado",
-    temperature: "Temperatura",
-    humidity: "Humedad",
-    fan: "Ventilador",
-  },
-
-  // Fan labels
-  fan: {
-    onLabel: "Encendido",
-    offLabel: "Apagado",
-    on: "ON",
-    off: "OFF",
-  },
-
-  // 3D viewer
-  viewer3d: {
-    title: "Visualización 3D",
-    fanActive: "Fan activo",
-    fanInactive: "Fan inactivo",
-  },
-
-  // Technical panel
-  technical: {
-    title: "Información Técnica",
-    operationalStatus: "Estado operativo",
-    badPoints: "Puntos BAD",
-    extraSensors: "Sensores adicionales",
-  },
-},
-ahuDetailPage: {
-  backToDashboard: "Volver al Dashboard",
-  plantLabel: "Planta {plantId}",
-
-  badPointsOutOfRange: "{count} punto{suffix} fuera de rango",
-  lastUpdate: "Última actualización: {value}",
-  eventsLogged: "{count} evento{suffix} registrado{suffix2}",
-
-  tabs: {
-    overview: "Resumen",
-    events: "Eventos",
-  },
-
-  sections: {
-    environmental: "Condiciones Ambientales",
-    airMovement: "Movimiento de Aire",
-    energyFiltration: "Energía y Filtración",
-    additionalData: "Datos Adicionales",
-  },
-
-  metrics: {
-    temperature: "Temperatura",
-    humidity: "Humedad",
-    fanStatus: "Estado del Ventilador",
-    airflow: "Flujo de Aire",
-    damperPosition: "Posición del Damper",
-    powerStatus: "Estado de Energía",
-    filterDp: "ΔP del Filtro",
-  },
-
-  charts: {
-    temperatureHistory: "Histórico de Temperatura",
-    humidityHistory: "Histórico de Humedad",
-  },
-
-  events: {
-    noEventsTitle: "Sin eventos registrados",
-    noEventsDesc: "Esta unidad no tiene eventos recientes o alarmas",
-    timelineTitle: "Línea de tiempo de eventos",
-    eventTypeLabel: "{type}",
-  },
-
-  statusLabels: {
-    alarm: "Alarma crítica activa",
-    warning: "Advertencias detectadas",
-    ok: "Operación normal",
-    disconnected: "Sin comunicación",
-  },
-
-  units: {
-    airflowFallback: "m³/h",
-    filterDpFallback: "Pa",
-  },
-},
-
-eventMessages: {
-  enteredAlarm: "Unidad entró en ALARMA",
-  warningCondition: "Unidad en condición de ADVERTENCIA",
-  communicationRestored: "Unidad restableció comunicación",
-  backToNormal: "Unidad volvió a estado NORMAL",
-  communicationLost: "Unidad perdió comunicación",
-  statusChange: "Cambio de estado: {previous} → {current}",
-},
-
-
-
-  // ===== Home Page HVAC =====
-  homePageHvac: {
-    hvacModule: "Módulo HVAC",
-    airHandling: "Manejo de Aire",
-    control: "Control",
-    subtitle: "Monitoreo y diagnósticos en tiempo real para unidades de manejo de aire en su instalación",
-    serverOnline: "SERVIDOR EN LÍNEA",
-    serverOffline: "SERVIDOR FUERA DE LÍNEA",
-    telemetryActive: "Telemetría en tiempo real activa",
-    reconnecting: "Intentando reconectar...",
-    connected: "Conectado",
-    disconnected: "Desconectado",
-    critical: "Crítico",
-    degraded: "Degradado",
-    healthy: "Saludable",
-    noData: "Sin Datos",
-    systemHealth: "Salud del Sistema",
-    connectedAhus: "AHUs Conectados",
-    units: "unidades",
-    avgTemperature: "Temp Promedio",
-    criticalAlarms: "Alarmas Críticas",
-    active: "activas",
-    systemOverview: "Vista General del Sistema",
-    operational: "Operacionales",
-    warnings: "Advertencias",
-    criticalLabel: "Críticos",
-    ofUnits: "{value} de {total} unidades",
-    quick: "Acciones",
-    actions: "Rápidas",
-    dashboard: "Dashboard",
-    viewAllAhus: "Ver todos los AHUs",
-    alarms: "Alarmas",
-    activeAlerts: "Alertas activas",
-    temperature: "Temperatura",
-    thermalMonitoring: "Monitoreo térmico",
-    analytics: "Análisis",
-    systemInsights: "Conocimientos del sistema",
-    open: "Abrir",
-  },
-
-  // ===== Dashboard HVAC =====
-  dashboardHvac: {
-    liveMonitoring: "Monitoreo en Vivo",
-    hvac: "HVAC",
-    dashboard: "Dashboard",
-    subtitle: "Estado en tiempo real de unidades de manejo de aire en todas las instalaciones",
-    totalUnits: "Unidades Totales",
-    operational: "Operacionales",
-    warnings: "Advertencias",
-    critical: "Críticos",
-    filteringBy: "Filtrando por:",
-    clear: "Limpiar",
-    noConnectedAhus: "No se encontraron AHUs conectados",
-    noAhusWithStatus: "No hay AHUs con estado \"{status}\"",
-    plant: "Planta",
-    unitActive: "unidad activa",
-    unitsActive: "unidades activas",
-    ok: "OK",
-    warn: "ADVERT",
-    alarm: "ALARMA",
-  },
 
   // ===== Home Global =====
   homeGlobal: {
@@ -572,20 +294,6 @@ eventMessages: {
     avgSuffix: "avg",
   },
 
-  // ===== Plant Heat Map =====
-  plantHeatMap: {
-    title: "Mapa de Calor por Planta",
-    legend: "Leyenda",
-  },
-
-  // ===== Plant Health Panel =====
-  plantHealth: {
-    plant: "Planta",
-    ahus: "AHUs",
-    alarms: "Alarmas",
-    warnings: "Advertencias",
-    disconnected: "Desconectados",
-  },
 
   // ===== Units =====
   units: {

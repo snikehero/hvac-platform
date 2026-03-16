@@ -207,7 +207,7 @@ export default function UnifiedAlarmsPage() {
   /* -------------------------------- */
   function getVariablesForType(machineType: string) {
     const mt = machineTypes.find((m) => m.slug === machineType);
-    return mt?.variables.sort((a, b) => a.displayOrder - b.displayOrder) ?? [];
+    return [...(mt?.variables ?? [])].sort((a, b) => a.displayOrder - b.displayOrder);
   }
 
   /* -------------------------------- */
@@ -485,7 +485,7 @@ export default function UnifiedAlarmsPage() {
                     </Badge>
                     {item.badPoints > 0 && (
                       <span className="text-xs text-destructive font-medium">
-                        {item.badPoints} {item.badPoints === 1 ? t.ahuCard.error : t.ahuCard.errors}
+                        {item.badPoints} {item.badPoints === 1 ? t.common.errorSingular : t.common.errorPlural}
                       </span>
                     )}
                   </div>

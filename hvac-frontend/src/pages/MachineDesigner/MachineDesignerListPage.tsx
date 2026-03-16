@@ -142,15 +142,15 @@ export default function MachineDesignerListPage() {
                 )}
 
                 <div className="flex flex-wrap gap-1.5">
-                  {mt.variables.slice(0, 5).map((v) => (
+                  {(mt.variables ?? []).slice(0, 5).map((v) => (
                     <Badge key={v.id} variant="secondary" className="text-xs">
                       {v.label}
                       {v.unit ? ` (${v.unit})` : ""}
                     </Badge>
                   ))}
-                  {mt.variables.length > 5 && (
+                  {(mt.variables ?? []).length > 5 && (
                     <Badge variant="secondary" className="text-xs">
-                      +{mt.variables.length - 5}
+                      +{(mt.variables ?? []).length - 5}
                     </Badge>
                   )}
                 </div>
@@ -166,7 +166,7 @@ export default function MachineDesignerListPage() {
                       size="sm"
                       className="h-8 w-8 p-0"
                       onClick={() =>
-                        navigate(routes.machineDesigner.edit(mt.id))
+                        navigate(routes.machineDesigner.edit(mt.slug))
                       }
                     >
                       <Pencil className="h-3.5 w-3.5" />
