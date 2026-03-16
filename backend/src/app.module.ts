@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { appConfig } from './config/app.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MqttModule } from './mqtt/mqtt.module';
 import { CommandsModule } from './commands/commands.module';
@@ -11,7 +12,7 @@ import { MachineCommandEntity } from './machine-designer/entities/machine-comman
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ isGlobal: true, load: [appConfig] }),
     TypeOrmModule.forRoot({
       type: 'better-sqlite3',
       database: 'data/machine-designer.sqlite',

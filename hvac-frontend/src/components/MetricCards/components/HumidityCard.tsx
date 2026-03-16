@@ -1,6 +1,7 @@
 import { Droplets } from "lucide-react";
 import { MetricCardBase } from "./MetricCardBase";
 import type { HumidityCardProps } from "../types";
+import { parseNumValue, calcHealthPercent } from "../hooks/useMetricCardLogic";
 
 export function HumidityCard({
   label,
@@ -8,9 +9,11 @@ export function HumidityCard({
   unit,
   quality,
   color,
+  historyData,
+  trend,
 }: HumidityCardProps) {
-  const numValue = typeof value === "number" ? value : parseFloat(value) || 0;
-  const percentage = Math.min(Math.max(numValue, 0), 100);
+  const numValue = parseNumValue(value);
+  const percentage = calcHealthPercent(numValue, 0, 100);
   const isLow = percentage < 30;
   const isHigh = percentage > 70;
   const isGood = !isLow && !isHigh && quality !== "BAD";
@@ -23,6 +26,8 @@ export function HumidityCard({
       unit={unit}
       quality={quality}
       color={color}
+      historyData={historyData}
+      trend={trend}
     >
       <svg viewBox="0 0 100 120" className="w-full h-32">
         {/* Water Drop Shape */}

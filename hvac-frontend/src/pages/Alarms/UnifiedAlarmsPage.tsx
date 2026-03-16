@@ -1,7 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo } from "react";
+import { AlarmsPageSkeleton } from "@/components/skeletons/AlarmsPageSkeleton";
 import { useMachineTelemetry } from "@/hooks/useMachineTelemetry";
+import { AlarmTimeline } from "@/components/AlarmTimeline";
 import { getDeviceHealth, type DeviceHealthThresholds } from "@/domain/device/getDeviceHealth";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useGlobalSettings } from "@/context/GlobalSettingsContext";
@@ -34,6 +36,8 @@ import {
   Search,
   Clock,
   CheckCheck,
+  LayoutGrid,
+  Activity,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -54,7 +58,7 @@ interface AlarmItem {
 }
 
 export default function UnifiedAlarmsPage() {
-  const { allMachineTelemetry, machineConnectionStatus } = useMachineTelemetry();
+  const { allMachineTelemetry, machineConnectionStatus, connected, deviceEvents } = useMachineTelemetry();
   const { machineTypes } = useMachineTypes();
   const { t, tf } = useTranslation();
   const { settings } = useGlobalSettings();
@@ -62,6 +66,7 @@ export default function UnifiedAlarmsPage() {
 
   const [selectedItem, setSelectedItem] = useState<AlarmItem | null>(null);
   const [filterType, setFilterType] = useState<FilterType>("ALL");
+  const [alarmView, setAlarmView] = useState<"cards" | "timeline">("cards");
   const [searchQuery, setSearchQuery] = useState("");
   const [machineTypeFilter, setMachineTypeFilter] = useState<string>("all");
 
@@ -221,6 +226,10 @@ export default function UnifiedAlarmsPage() {
     return count;
   }, [allMachineTelemetry]);
 
+  if (machineTypes.length === 0 && connected) {
+    return <AlarmsPageSkeleton />;
+  }
+
   return (
     <div className="p-4 md:p-6 space-y-6">
       {/* Header */}
@@ -345,6 +354,36 @@ export default function UnifiedAlarmsPage() {
       {/* Filters */}
       <Card className="border backdrop-blur-sm">
         <CardContent className="p-4">
+          <div className="flex flex-col gap-3">
+          {/* View toggle */}
+          <div className="flex items-center justify-end">
+            <div className="inline-flex rounded-md border border-border overflow-hidden">
+              <button
+                title="Cards"
+                onClick={() => setAlarmView("cards")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${
+                  alarmView === "cards"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                <LayoutGrid className="h-3.5 w-3.5" />
+                Cards
+              </button>
+              <button
+                title="Timeline"
+                onClick={() => setAlarmView("timeline")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${
+                  alarmView === "timeline"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                <Activity className="h-3.5 w-3.5" />
+                Timeline
+              </button>
+            </div>
+          </div>
           <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
             <Tabs
               value={filterType}
@@ -408,11 +447,28 @@ export default function UnifiedAlarmsPage() {
               </div>
             </div>
           </div>
+          </div>
         </CardContent>
       </Card>
 
+      {/* Timeline section */}
+      {alarmView === "timeline" && (
+        <Card className="border backdrop-blur-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold">Event Timeline</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <AlarmTimeline
+              events={deviceEvents.filter(
+                (e) => e.type === "ALARM" || e.type === "WARNING" || e.type === "DISCONNECTED" || e.type === "RECONNECTED",
+              )}
+            />
+          </CardContent>
+        </Card>
+      )}
+
       {/* Alarm Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {alarmView === "cards" && <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {displayedItems.map((item) => {
           const timeSince = getTimeSince(item.timestamp, t, tf);
           const ackRecord =
@@ -603,7 +659,7 @@ export default function UnifiedAlarmsPage() {
             </Card>
           </div>
         )}
-      </div>
+      </div>}
 
       {/* Detail Modal */}
       <Dialog open={!!selectedItem} onOpenChange={() => setSelectedItem(null)}>

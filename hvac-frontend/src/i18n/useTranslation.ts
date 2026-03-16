@@ -1,5 +1,6 @@
 import { useGlobalSettings } from "@/context/GlobalSettingsContext";
 import { translations, type Language } from "./translations";
+import type { TranslationKeys } from "./translations";
 
 /**
  * Hook to access translations based on the user's language preference
@@ -8,7 +9,7 @@ import { translations, type Language } from "./translations";
 export function useTranslation() {
   const { settings } = useGlobalSettings();
   const language = settings.language as Language;
-  const t = translations[language];
+  const t = translations[language] as unknown as TranslationKeys;
 
   /**
    * Format a translation string with dynamic values

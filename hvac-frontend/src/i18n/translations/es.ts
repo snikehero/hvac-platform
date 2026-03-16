@@ -39,6 +39,8 @@ export const es = {
     home: "Inicio",
     dashboard: "Dashboard",
     executive: "Dashboard Ejecutivo",
+    analytics: "Analítica",
+    kiosk: "Kiosk",
     alarms: "Alarmas",
     settings: "Configuración",
     generalDashboard: "Dashboard General",

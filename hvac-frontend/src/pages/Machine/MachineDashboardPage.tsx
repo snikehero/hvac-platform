@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { DashboardSkeleton } from "@/components/skeletons/DashboardSkeleton";
 import {
   Cpu,
   Wifi,
@@ -9,7 +10,11 @@ import {
   CheckCircle2,
   AlertTriangle,
   XCircle,
+  LayoutGrid,
+  List,
+  Maximize2,
 } from "lucide-react";
+import { STATUS_DOT } from "@/constants/status";
 import { useMachineTypes } from "@/context/MachineTypeContext";
 import { useMachineTelemetry } from "@/hooks/useMachineTelemetry";
 import { useDeviceHealth } from "@/hooks/useDeviceHealth";
@@ -24,8 +29,21 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { InstanceCardCompact } from "./components/InstanceCardCompact";
+import { InstanceCardExpanded } from "./components/InstanceCardExpanded";
+import { InstanceDrawer } from "@/components/InstanceDrawer";
+
 
 type FilterStatus = "ALL" | "OK" | "WARNING" | "ALARM";
+type ViewMode = "grid" | "compact" | "expanded";
+
+function loadViewMode(): ViewMode {
+  try {
+    const v = localStorage.getItem("dashboard-view-mode");
+    if (v === "compact" || v === "expanded") return v;
+  } catch {}
+  return "grid";
+}
 
 export default function MachineDashboardPage() {
   const { machineType: machineTypeSlug } = useParams<{
@@ -33,11 +51,24 @@ export default function MachineDashboardPage() {
   }>();
   const navigate = useNavigate();
   const { machineTypes } = useMachineTypes();
-  const { instances, connected, isMachineConnected } =
+  const { instances, connected, isMachineConnected, getInstanceHistory, deviceEvents } =
     useMachineTelemetry(machineTypeSlug);
   const getHealth = useDeviceHealth(machineTypeSlug);
   const { t } = useTranslation();
   const [filter, setFilter] = useState<FilterStatus>("ALL");
+  const [viewMode, setViewMode] = useState<ViewMode>(loadViewMode);
+  const [drawerKey, setDrawerKey] = useState<{ plantId: string; stationId: string } | null>(null);
+
+  // Derive live drawer instance from current telemetry so it always reflects latest data
+  const drawerInstance = useMemo(
+    () => drawerKey ? instances.find(i => i.plantId === drawerKey.plantId && i.stationId === drawerKey.stationId) ?? null : null,
+    [drawerKey, instances],
+  );
+
+  const changeViewMode = useCallback((mode: ViewMode) => {
+    setViewMode(mode);
+    try { localStorage.setItem("dashboard-view-mode", mode); } catch {}
+  }, []);
 
   const machineType = useMemo(
     () => machineTypes.find((mt) => mt.slug === machineTypeSlug),
@@ -106,6 +137,11 @@ export default function MachineDashboardPage() {
     );
   }
 
+  // Connected but no data yet — show skeleton while waiting for first snapshot
+  if (instances.length === 0 && connected) {
+    return <DashboardSkeleton />;
+  }
+
   return (
     <div className="space-y-6 p-6 md:p-8 max-w-[1400px] mx-auto">
       {/* Header */}
@@ -159,42 +195,68 @@ export default function MachineDashboardPage() {
         </div>
       </div>
 
-      {/* Stat Badges / Filters */}
-      <div className="flex flex-wrap gap-2">
-        <StatBadge
-          label={t.machinePages?.total ?? "Total"}
-          count={stats.total}
-          active={filter === "ALL"}
-          onClick={() => setFilter("ALL")}
-          icon={<Activity className="w-3.5 h-3.5" />}
-          className="border-primary/30 text-primary"
-        />
-        <StatBadge
-          label={t.machinePages?.ok ?? "OK"}
-          count={stats.ok}
-          active={filter === "OK"}
-          onClick={() => setFilter(filter === "OK" ? "ALL" : "OK")}
-          icon={<CheckCircle2 className="w-3.5 h-3.5" />}
-          className="border-green-500/30 text-green-500"
-        />
-        <StatBadge
-          label={t.machinePages?.warning ?? "Warning"}
-          count={stats.warning}
-          active={filter === "WARNING"}
-          onClick={() =>
-            setFilter(filter === "WARNING" ? "ALL" : "WARNING")
-          }
-          icon={<AlertTriangle className="w-3.5 h-3.5" />}
-          className="border-yellow-500/30 text-yellow-500"
-        />
-        <StatBadge
-          label={t.machinePages?.alarm ?? "Alarm"}
-          count={stats.alarm}
-          active={filter === "ALARM"}
-          onClick={() => setFilter(filter === "ALARM" ? "ALL" : "ALARM")}
-          icon={<XCircle className="w-3.5 h-3.5" />}
-          className="border-destructive/30 text-destructive"
-        />
+      {/* Stat Badges / Filters + View Toggle */}
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2">
+          <StatBadge
+            label={t.machinePages?.total ?? "Total"}
+            count={stats.total}
+            active={filter === "ALL"}
+            onClick={() => setFilter("ALL")}
+            icon={<Activity className="w-3.5 h-3.5" />}
+            className="border-primary/30 text-primary"
+          />
+          <StatBadge
+            label={t.machinePages?.ok ?? "OK"}
+            count={stats.ok}
+            active={filter === "OK"}
+            onClick={() => setFilter(filter === "OK" ? "ALL" : "OK")}
+            icon={<CheckCircle2 className="w-3.5 h-3.5" />}
+            className="border-green-500/30 text-green-500"
+          />
+          <StatBadge
+            label={t.machinePages?.warning ?? "Warning"}
+            count={stats.warning}
+            active={filter === "WARNING"}
+            onClick={() =>
+              setFilter(filter === "WARNING" ? "ALL" : "WARNING")
+            }
+            icon={<AlertTriangle className="w-3.5 h-3.5" />}
+            className="border-yellow-500/30 text-yellow-500"
+          />
+          <StatBadge
+            label={t.machinePages?.alarm ?? "Alarm"}
+            count={stats.alarm}
+            active={filter === "ALARM"}
+            onClick={() => setFilter(filter === "ALARM" ? "ALL" : "ALARM")}
+            icon={<XCircle className="w-3.5 h-3.5" />}
+            className="border-destructive/30 text-destructive"
+          />
+        </div>
+
+        {/* View mode toggle */}
+        <div className="inline-flex rounded-md border border-border overflow-hidden">
+          {(
+            [
+              { mode: "grid" as ViewMode, icon: <LayoutGrid className="h-3.5 w-3.5" />, title: "Grid" },
+              { mode: "compact" as ViewMode, icon: <List className="h-3.5 w-3.5" />, title: "Compact" },
+              { mode: "expanded" as ViewMode, icon: <Maximize2 className="h-3.5 w-3.5" />, title: "Expanded" },
+            ] as const
+          ).map(({ mode, icon, title }) => (
+            <button
+              key={mode}
+              title={title}
+              onClick={() => changeViewMode(mode)}
+              className={`px-2.5 py-1.5 transition-colors ${
+                viewMode === mode
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              {icon}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Content */}
@@ -255,96 +317,177 @@ export default function MachineDashboardPage() {
                     )}
                   </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {plantInstances.map((inst) => {
-                    const isConn =
-                      connected &&
-                      isMachineConnected(
-                        `${inst.plantId}-${inst.stationId}`,
-                      );
-                    const health = getHealth(inst.points, isConn);
-                    const dotColor = getDotColor(health.status);
 
-                    return (
-                      <Card
-                        key={`${inst.plantId}-${inst.stationId}`}
-                        className="hover:shadow-md transition-shadow cursor-pointer group"
-                        onClick={() =>
-                          navigate(
-                            routes.machine.detail(
-                              machineTypeSlug!,
-                              inst.plantId,
-                              inst.stationId,
-                            ),
-                          )
-                        }
-                      >
-                        <CardHeader className="pb-2">
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="text-base flex items-center gap-2">
-                              <span
-                                className={`relative flex h-2.5 w-2.5`}
-                              >
-                                {health.status === "ALARM" && (
-                                  <span
-                                    className={`animate-ping absolute inline-flex h-full w-full rounded-full ${dotColor} opacity-75`}
-                                  />
-                                )}
-                                <span
-                                  className={`relative inline-flex rounded-full h-2.5 w-2.5 ${dotColor}`}
-                                />
-                              </span>
-                              {inst.stationId}
-                            </CardTitle>
-                            <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                          </div>
-                          <CardDescription className="text-xs font-mono">
-                            {inst.plantId}
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                          {sortedVariables.map((varDef) => {
-                            const point = inst.points[varDef.key];
-                            return (
-                              <div
-                                key={varDef.key}
-                                className="flex items-center justify-between text-sm"
-                              >
-                                <span className="text-muted-foreground">
-                                  {varDef.label}
-                                </span>
-                                <span className="font-semibold tabular-nums">
-                                  {isConn && point
-                                    ? typeof point.value === "boolean"
-                                      ? point.value
-                                        ? (t.machinePages?.on ?? "ON")
-                                        : (t.machinePages?.off ?? "OFF")
-                                      : String(point.value)
-                                    : "--"}
-                                  {point?.unit && (
-                                    <span className="text-xs text-muted-foreground ml-1">
-                                      {point.unit}
-                                    </span>
+                {/* Compact: dense table */}
+                {viewMode === "compact" ? (
+                  <div className="rounded-md border border-border overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-muted/50 border-b border-border">
+                          <th className="py-2 pl-3 pr-2 w-8" />
+                          <th className="py-2 pr-3 text-left font-medium text-muted-foreground">Station</th>
+                          <th className="py-2 pr-4 text-left font-medium text-muted-foreground hidden sm:table-cell">Plant</th>
+                          {sortedVariables.map((v) => (
+                            <th key={v.key} className="py-2 pr-4 text-left font-medium text-muted-foreground">{v.label}</th>
+                          ))}
+                          <th className="py-2 pr-3 text-left font-medium text-muted-foreground hidden lg:table-cell">Updated</th>
+                          <th className="w-6" />
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {plantInstances.map((inst) => {
+                          const isConn = connected && isMachineConnected(`${inst.plantId}-${inst.stationId}`);
+                          const health = getHealth(inst.points, isConn);
+                          return (
+                            <InstanceCardCompact
+                              key={`${inst.plantId}-${inst.stationId}`}
+                              instance={inst}
+                              health={health}
+                              isConnected={isConn}
+                              sortedVariables={sortedVariables}
+                              onClick={() => setDrawerKey({ plantId: inst.plantId, stationId: inst.stationId })}
+                            />
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : viewMode === "expanded" ? (
+                  /* Expanded: full-width cards with sparklines */
+                  <div className="space-y-3">
+                    {plantInstances.map((inst) => {
+                      const isConn = connected && isMachineConnected(`${inst.plantId}-${inst.stationId}`);
+                      const health = getHealth(inst.points, isConn);
+                      const allVariables = machineType?.variables
+                        ? [...machineType.variables].sort((a, b) => a.displayOrder - b.displayOrder)
+                        : sortedVariables;
+                      const historyData = getInstanceHistory(machineTypeSlug!, inst.plantId, inst.stationId);
+                      return (
+                        <InstanceCardExpanded
+                          key={`${inst.plantId}-${inst.stationId}`}
+                          instance={inst}
+                          health={health}
+                          isConnected={isConn}
+                          sortedVariables={allVariables}
+                          historyData={historyData}
+                          onClick={() => setDrawerKey({ plantId: inst.plantId, stationId: inst.stationId })}
+                        />
+                      );
+                    })}
+                  </div>
+                ) : (
+                  /* Grid: default 4-col cards */
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {plantInstances.map((inst) => {
+                      const isConn =
+                        connected &&
+                        isMachineConnected(
+                          `${inst.plantId}-${inst.stationId}`,
+                        );
+                      const health = getHealth(inst.points, isConn);
+                      const dotColor = getDotColor(health.status);
+
+                      return (
+                        <Card
+                          key={`${inst.plantId}-${inst.stationId}`}
+                          className="hover:shadow-md transition-shadow cursor-pointer group transition-status"
+                          onClick={() => setDrawerKey({ plantId: inst.plantId, stationId: inst.stationId })}
+                        >
+                          <CardHeader className="pb-2">
+                            <div className="flex items-center justify-between">
+                              <CardTitle className="text-base flex items-center gap-2">
+                                <span className={`relative flex h-2.5 w-2.5`}>
+                                  {health.status === "ALARM" && (
+                                    <span
+                                      className={`animate-ping absolute inline-flex h-full w-full rounded-full ${dotColor} opacity-75`}
+                                    />
                                   )}
+                                  <span
+                                    className={`relative inline-flex rounded-full h-2.5 w-2.5 transition-status ${dotColor}`}
+                                  />
                                 </span>
-                              </div>
-                            );
-                          })}
-                          <div className="pt-2 border-t border-border">
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(inst.timestamp).toLocaleString()}
-                            </span>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
+                                {inst.stationId}
+                              </CardTitle>
+                              <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </div>
+                            <CardDescription className="text-xs font-mono">
+                              {inst.plantId}
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent className="space-y-2">
+                            {sortedVariables.map((varDef) => {
+                              const point = inst.points[varDef.key];
+                              return (
+                                <div
+                                  key={varDef.key}
+                                  className="flex items-center justify-between text-sm"
+                                >
+                                  <span className="text-muted-foreground">
+                                    {varDef.label}
+                                  </span>
+                                  <span className="font-semibold tabular-nums">
+                                    {isConn && point
+                                      ? typeof point.value === "boolean"
+                                        ? point.value
+                                          ? (t.machinePages?.on ?? "ON")
+                                          : (t.machinePages?.off ?? "OFF")
+                                        : String(point.value)
+                                      : "--"}
+                                    {point?.unit && (
+                                      <span className="text-xs text-muted-foreground ml-1">
+                                        {point.unit}
+                                      </span>
+                                    )}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                            <div className="pt-2 border-t border-border">
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(inst.timestamp).toLocaleString()}
+                              </span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
       )}
+      {/* Instance quick-detail drawer */}
+      {drawerInstance && (() => {
+        const isConn = connected && isMachineConnected(`${drawerInstance.plantId}-${drawerInstance.stationId}`);
+        const health = getHealth(drawerInstance.points, isConn);
+        const allVars = machineType
+          ? [...machineType.variables].sort((a, b) => a.displayOrder - b.displayOrder)
+          : sortedVariables;
+        const historyData = getInstanceHistory(machineTypeSlug!, drawerInstance.plantId, drawerInstance.stationId);
+        const instanceKey = `${drawerInstance.plantId}-${drawerInstance.stationId}`;
+        const recentEvents = deviceEvents
+          .filter((e) => e.instanceId === instanceKey)
+          .slice(-5)
+          .reverse();
+        return (
+          <InstanceDrawer
+            open
+            onClose={() => setDrawerKey(null)}
+            onNavigate={() => {
+              setDrawerKey(null);
+              navigate(routes.machine.detail(machineTypeSlug!, drawerInstance.plantId, drawerInstance.stationId));
+            }}
+            instance={drawerInstance}
+            health={health}
+            isConnected={isConn}
+            displayVariables={allVars}
+            historyData={historyData}
+            recentEvents={recentEvents}
+          />
+        );
+      })()}
     </div>
   );
 }
@@ -385,16 +528,7 @@ function StatBadge({
 function getDotColor(
   status: "OK" | "WARNING" | "ALARM" | "DISCONNECTED",
 ): string {
-  switch (status) {
-    case "OK":
-      return "bg-green-500";
-    case "WARNING":
-      return "bg-yellow-500";
-    case "ALARM":
-      return "bg-destructive";
-    case "DISCONNECTED":
-      return "bg-muted-foreground";
-  }
+  return STATUS_DOT[status] ?? STATUS_DOT.DISCONNECTED;
 }
 
 function getPlantStats(

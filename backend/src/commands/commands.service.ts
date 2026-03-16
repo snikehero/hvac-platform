@@ -1,4 +1,5 @@
 import { Injectable, Logger, OnModuleInit, Inject, forwardRef } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Socket } from 'socket.io';
 import { MqttService } from '../mqtt/mqtt.service';
 import { MachineDesignerService } from '../machine-designer/machine-designer.service';
@@ -13,12 +14,16 @@ interface PendingCommand {
 export class CommandsService implements OnModuleInit {
   private readonly logger = new Logger(CommandsService.name);
   private readonly pending = new Map<string, PendingCommand>();
+  private readonly commandTimeoutMs: number;
 
   constructor(
     private readonly mqttService: MqttService,
     @Inject(forwardRef(() => MachineDesignerService))
     private readonly designerService: MachineDesignerService,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    this.commandTimeoutMs = this.configService.get<number>('app.commandTimeoutMs') ?? 10_000;
+  }
 
   onModuleInit() {
     this.mqttService.registerResponseHandler((_topic, payload) => {
@@ -50,12 +55,12 @@ export class CommandsService implements OnModuleInit {
         socket.emit('command:result', {
           commandId,
           status: 'TIMEOUT',
-          message: 'No response from device within 10 seconds',
+          message: `No response from device within ${this.commandTimeoutMs / 1000} seconds`,
           timestamp: new Date().toISOString(),
         });
         this.logger.warn(`Command [${commandId}] timed out`);
       }
-    }, 10_000);
+    }, this.commandTimeoutMs);
 
     this.pending.set(commandId, { socket, timer });
     return commandId;

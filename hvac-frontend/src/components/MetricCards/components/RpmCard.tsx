@@ -1,6 +1,7 @@
 import { Gauge } from "lucide-react";
 import { MetricCardBase } from "./MetricCardBase";
 import type { RpmCardProps } from "../types";
+import { parseNumValue, calcHealthPercent } from "../hooks/useMetricCardLogic";
 
 export function RpmCard({
     label,
@@ -8,16 +9,15 @@ export function RpmCard({
     unit,
     quality,
     color,
+    historyData,
+    trend,
     min = 0,
     max = 3600,
     target = 1800,
 }: RpmCardProps) {
-    const numValue = typeof value === "number" ? value : parseFloat(value) || 0;
-
-    // Calculate percentage (0 to 1)
-    const range = max - min;
-    const clampedValue = Math.max(min, Math.min(max, numValue));
-    const percent = range > 0 ? (clampedValue - min) / range : 0;
+    const numValue = parseNumValue(value);
+    const percent = calcHealthPercent(numValue, min, max) / 100;
+    const range = max - min || 1;
 
     // Angle for gauge (-90 is left/min, 90 is right/max)
     const gaugeAngle = -90 + percent * 180;
@@ -46,6 +46,8 @@ export function RpmCard({
             unit={unit}
             quality={quality}
             color={color}
+            historyData={historyData}
+            trend={trend}
         >
             <svg viewBox="0 0 120 120" className="w-full h-32">
                 {/* Outer Frame with depth */}

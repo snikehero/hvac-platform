@@ -36,10 +36,10 @@ const STATUS_STYLES: Record<string, { border: string; glow: string; badge: strin
     badgeText: "text-red-400",
   },
   DISCONNECTED: {
-    border: "border-slate-600/40",
+    border: "border-muted-foreground/30",
     glow: "",
-    badge: "bg-slate-500/20",
-    badgeText: "text-slate-400",
+    badge: "bg-muted/50",
+    badgeText: "text-muted-foreground",
   },
 };
 
@@ -116,8 +116,8 @@ export default function MachineInstanceCard({
       }
       className={`
         group relative text-left w-full rounded-xl overflow-hidden
-        bg-white/5 backdrop-blur-md border transition-all duration-300
-        hover:scale-[1.02] hover:bg-white/8
+        bg-muted/50 backdrop-blur-md border transition-all duration-300
+        hover:scale-[1.02] hover:bg-muted/60
         ${style.border} ${style.glow}
         ${health.status === "ALARM" ? "animate-pulse" : ""}
         ${!isConnected ? "opacity-60" : ""}
@@ -125,14 +125,14 @@ export default function MachineInstanceCard({
     >
       {/* Top accent */}
       <div
-        className={`h-[2px] ${
+        className={`h-[2px] transition-colors duration-300 ${
           health.status === "OK"
             ? "bg-emerald-500"
             : health.status === "WARNING"
               ? "bg-amber-500"
               : health.status === "ALARM"
                 ? "bg-red-500"
-                : "bg-slate-600"
+                : "bg-muted-foreground"
         }`}
       />
 
@@ -140,10 +140,10 @@ export default function MachineInstanceCard({
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <div className="min-w-0">
-            <h4 className="text-sm font-semibold text-white truncate">
+            <h4 className="text-sm font-semibold text-foreground truncate">
               {instance.stationId}
             </h4>
-            <p className="text-[10px] text-slate-500">{instance.plantId}</p>
+            <p className="text-[10px] text-muted-foreground">{instance.plantId}</p>
           </div>
 
           <div className="flex items-center gap-2">
@@ -172,7 +172,7 @@ export default function MachineInstanceCard({
             const TrendIcon =
               trend === "up" ? TrendingUp : trend === "down" ? TrendingDown : Minus;
             const trendColor =
-              trend === "up" ? "text-red-400" : trend === "down" ? "text-cyan-400" : "text-slate-600";
+              trend === "up" ? "text-red-400" : trend === "down" ? "text-cyan-400" : "text-muted-foreground/50";
 
             return (
               <div key={variable.key} className="flex items-center justify-between gap-2">
@@ -181,7 +181,7 @@ export default function MachineInstanceCard({
                     className="w-1.5 h-1.5 rounded-full flex-shrink-0"
                     style={{ backgroundColor: variable.color || "#94a3b8" }}
                   />
-                  <span className="text-xs text-slate-400 truncate">
+                  <span className="text-xs text-muted-foreground truncate">
                     {variable.label}
                   </span>
                 </div>
@@ -191,7 +191,7 @@ export default function MachineInstanceCard({
                     data={history}
                     color={variable.color || "#94a3b8"}
                   />
-                  <span className="text-xs font-medium text-white w-14 text-right">
+                  <span className="text-xs font-medium text-foreground w-14 text-right">
                     {displayValue}
                   </span>
                   <TrendIcon className={`h-3 w-3 ${trendColor}`} />
@@ -211,7 +211,7 @@ export default function MachineInstanceCard({
                   ? "bg-amber-500"
                   : health.status === "ALARM"
                     ? "bg-red-500 animate-ping"
-                    : "bg-slate-600"
+                    : "bg-muted-foreground"
             }`}
           />
         </div>

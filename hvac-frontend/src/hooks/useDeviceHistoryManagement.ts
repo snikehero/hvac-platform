@@ -3,6 +3,7 @@ import type { HistoryPoint } from "@/types/history";
 import type { MachineTelemetry } from "@/types/machine-type";
 
 const MAX_POINTS = 30;
+const MAX_TRACKED_INSTANCES = 500;
 
 /**
  * History data keyed by "machineType-plantId-stationId",
@@ -61,7 +62,16 @@ export function useDeviceHistoryManagement(): UseDeviceHistoryManagementReturn {
           }
         }
 
-        return { ...prev, [instanceKey]: updated };
+        const next = { ...prev, [instanceKey]: updated };
+
+        // LRU eviction: if we exceed the limit, remove oldest entries
+        const keys = Object.keys(next);
+        if (keys.length > MAX_TRACKED_INSTANCES) {
+          const toRemove = keys.slice(0, keys.length - MAX_TRACKED_INSTANCES);
+          for (const k of toRemove) delete next[k];
+        }
+
+        return next;
       });
     },
     [],

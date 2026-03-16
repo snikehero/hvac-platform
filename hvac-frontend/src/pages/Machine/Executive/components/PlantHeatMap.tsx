@@ -5,6 +5,7 @@ import { routes } from "@/router/routes";
 import type { PlantGroup, InstanceHealthEntry } from "../hooks/useExecutiveDashboardData";
 import type { MachineVariable } from "@/types/machine-type";
 import type { DeviceHealthStatus } from "@/domain/device/getDeviceHealth";
+import { STATUS_CELL } from "@/constants/status";
 
 interface Props {
   plantGroups: PlantGroup[];
@@ -15,12 +16,6 @@ interface Props {
   plantFilter: string | null;
 }
 
-const CELL_COLORS: Record<string, string> = {
-  OK: "bg-emerald-500 hover:bg-emerald-400",
-  WARNING: "bg-amber-500 hover:bg-amber-400",
-  ALARM: "bg-red-500 hover:bg-red-400 animate-pulse",
-  DISCONNECTED: "bg-slate-600 hover:bg-slate-500",
-};
 
 interface TooltipData {
   stationId: string;
@@ -50,15 +45,15 @@ export default function PlantHeatMap({
   if (filteredGroups.length === 0) return null;
 
   return (
-    <div className="relative rounded-xl border border-white/10 bg-white/5 backdrop-blur-md p-5">
-      <h3 className="text-lg font-semibold text-white mb-4">
+    <div className="relative rounded-xl border border-border bg-muted/50 backdrop-blur-md p-5">
+      <h3 className="text-lg font-semibold text-foreground mb-4">
         {t.executiveDashboard.heatMap}
       </h3>
 
       <div className="space-y-3">
         {filteredGroups.map((group) => (
           <div key={group.plantId} className="flex items-center gap-3">
-            <span className="text-xs text-slate-400 w-24 truncate flex-shrink-0 text-right">
+            <span className="text-xs text-muted-foreground w-24 truncate flex-shrink-0 text-right">
               {group.plantId}
             </span>
             <div className="flex flex-wrap gap-1">
@@ -102,8 +97,8 @@ export default function PlantHeatMap({
                     }}
                     onMouseLeave={() => setTooltip(null)}
                     className={`
-                      w-6 h-6 rounded-sm transition-all duration-200 cursor-pointer
-                      ${CELL_COLORS[status]}
+                      w-6 h-6 rounded-sm transition-all duration-500 cursor-pointer
+                      ${STATUS_CELL[status]}
                       ${isDimmed ? "opacity-20" : "opacity-100"}
                       ${status === "ALARM" ? "ring-1 ring-red-400/50" : ""}
                     `}
@@ -116,11 +111,11 @@ export default function PlantHeatMap({
       </div>
 
       {/* Legend */}
-      <div className="flex gap-4 mt-4 pt-3 border-t border-white/5">
-        <span className="text-xs text-slate-500">{t.executiveDashboard.legend}:</span>
+      <div className="flex gap-4 mt-4 pt-3 border-t border-border">
+        <span className="text-xs text-muted-foreground">{t.executiveDashboard.legend}:</span>
         {(["OK", "WARNING", "ALARM", "DISCONNECTED"] as const).map((s) => (
-          <span key={s} className="flex items-center gap-1 text-xs text-slate-500">
-            <span className={`w-3 h-3 rounded-sm ${CELL_COLORS[s].split(" ")[0]}`} />
+          <span key={s} className="flex items-center gap-1 text-xs text-muted-foreground">
+            <span className={`w-3 h-3 rounded-sm ${STATUS_CELL[s].split(" ")[0]}`} />
             {t.status[s === "OK" ? "ok" : s === "WARNING" ? "warning" : s === "ALARM" ? "alarm" : "disconnected"]}
           </span>
         ))}
@@ -129,17 +124,17 @@ export default function PlantHeatMap({
       {/* Tooltip */}
       {tooltip && (
         <div
-          className="fixed z-50 bg-slate-900 border border-white/20 rounded-lg px-3 py-2 shadow-xl pointer-events-none"
+          className="fixed z-50 bg-popover border border-border rounded-lg px-3 py-2 shadow-xl pointer-events-none"
           style={{
             left: tooltip.x,
             top: tooltip.y - 8,
             transform: "translate(-50%, -100%)",
           }}
         >
-          <p className="text-xs font-semibold text-white">
+          <p className="text-xs font-semibold text-foreground">
             {tooltip.stationId}
           </p>
-          <p className="text-[10px] text-slate-400">{tooltip.plantId}</p>
+          <p className="text-[10px] text-muted-foreground">{tooltip.plantId}</p>
           <p
             className={`text-[10px] font-medium mt-1 ${
               tooltip.status === "OK"
@@ -148,13 +143,13 @@ export default function PlantHeatMap({
                   ? "text-amber-400"
                   : tooltip.status === "ALARM"
                     ? "text-red-400"
-                    : "text-slate-400"
+                    : "text-muted-foreground"
             }`}
           >
             {tooltip.status}
           </p>
           {tooltip.variables.map((v) => (
-            <p key={v.label} className="text-[10px] text-slate-300">
+            <p key={v.label} className="text-[10px] text-foreground/80">
               {v.label}: {v.value}
             </p>
           ))}

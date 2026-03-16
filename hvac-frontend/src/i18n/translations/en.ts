@@ -39,6 +39,8 @@ export const en = {
     home: "Home",
     dashboard: "Dashboard",
     executive: "Executive Dashboard",
+    analytics: "Analytics",
+    kiosk: "Kiosk",
     alarms: "Alarms",
     settings: "Settings",
     generalDashboard: "General Dashboard",
@@ -489,4 +491,4 @@ export const en = {
     trend: "Trend",
     badPoints: "bad points",
   },
-};
+} as const;

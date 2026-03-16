@@ -2,6 +2,7 @@ import { Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { MetricCardBase } from "./MetricCardBase";
 import type { PowerCardProps } from "../types";
+import { isActiveStatus } from "../hooks/useMetricCardLogic";
 
 export function PowerCard({
   label,
@@ -9,9 +10,11 @@ export function PowerCard({
   unit,
   quality,
   color,
+  historyData,
+  trend,
   status,
 }: PowerCardProps) {
-  const isOn = status === "ON" || String(status) === "1" || String(status) === "true";
+  const isOn = isActiveStatus(status);
 
   return (
     <MetricCardBase
@@ -21,6 +24,8 @@ export function PowerCard({
       unit={unit}
       quality={quality}
       color={color}
+      historyData={historyData}
+      trend={trend}
       badge={
         <Badge
           className={

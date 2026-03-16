@@ -1,5 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMemo, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -11,7 +9,9 @@ import {
   Zap,
   Eye,
   Cpu,
+  type LucideIcon,
 } from "lucide-react";
+import type { TranslationKeys } from "@/i18n/translations";
 
 import { routes } from "@/router/routes";
 import { getDeviceHealth, type DeviceHealthThresholds } from "@/domain/device/getDeviceHealth";
@@ -361,7 +361,7 @@ function MetricCard({
   pulse,
   decimal,
 }: {
-  icon?: any;
+  icon?: LucideIcon;
   label: string;
   value: number;
   suffix?: string;
@@ -466,6 +466,15 @@ function MetricCard({
   );
 }
 
+interface SystemMetrics {
+  totalDevices: number;
+  activeAlarms: number;
+  warnings: number;
+  plants: number;
+  avgTemp: number;
+  healthy: number;
+}
+
 function SystemStatus({
   connected,
   metrics,
@@ -473,8 +482,8 @@ function SystemStatus({
   tf,
 }: {
   connected: boolean;
-  metrics: any;
-  t: any;
+  metrics: SystemMetrics;
+  t: TranslationKeys;
   tf: (text: string, values: Record<string, string | number>) => string;
 }) {
   return (
@@ -582,14 +591,14 @@ function ModuleCard({
   onClick,
   t,
 }: {
-  icon?: any;
+  icon?: LucideIcon;
   title: string;
   description: string;
   status: string;
   metrics?: { devices: number; uptime: string };
   eta?: string;
   onClick?: () => void;
-  t: any;
+  t: TranslationKeys;
 }) {
   const isActive = status === t.homeGlobal.statusActive;
 

@@ -6,6 +6,7 @@ import {
   OnModuleInit,
   OnModuleDestroy,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { plainToInstance } from 'class-transformer';
 import { validateSync, type ValidationError } from 'class-validator';
 import { MqttService } from '../mqtt/mqtt.service';
@@ -39,14 +40,27 @@ export class MachineService implements OnModuleInit, OnModuleDestroy {
   /** Map<machineTypeSlug, Map<instanceKey, MachineInstanceState>> */
   private readonly state = new Map<string, Map<string, MachineInstanceState>>();
 
+  private readonly connectivityCheckMs: number;
+  private readonly disconnectTimeoutMs: number;
+
   constructor(
     private readonly mqttService: MqttService,
     @Inject(forwardRef(() => MachineDesignerService))
     private readonly designerService: MachineDesignerService,
     private readonly gateway: MachineGateway,
-  ) { }
+    private readonly configService: ConfigService,
+  ) {
+    this.connectivityCheckMs = this.configService.get<number>('app.connectivityCheckMs') ?? 5_000;
+    this.disconnectTimeoutMs = this.configService.get<number>('app.disconnectTimeoutMs') ?? 60_000;
+  }
 
   private timer: NodeJS.Timeout;
+  private cleanupTimer: NodeJS.Timeout;
+
+  /** TTL for stale instances: 24 hours */
+  private static readonly INSTANCE_TTL_MS = 24 * 60 * 60 * 1000;
+  /** Cleanup interval: every 60 minutes */
+  private static readonly CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
 
   async onModuleInit() {
     // Provide snapshot function to gateway
@@ -67,18 +81,51 @@ export class MachineService implements OnModuleInit, OnModuleDestroy {
       `Initialized ${machineTypes.length} machine type(s): ${machineTypes.map((mt) => mt.slug).join(', ') || 'none'}`,
     );
 
-    this.timer = setInterval(() => this.checkConnectivity(), 5000);
+    this.timer = setInterval(() => this.checkConnectivity(), this.connectivityCheckMs);
+    this.cleanupTimer = setInterval(() => this.cleanupStaleInstances(), MachineService.CLEANUP_INTERVAL_MS);
   }
 
   onModuleDestroy() {
     if (this.timer) {
       clearInterval(this.timer);
     }
+    if (this.cleanupTimer) {
+      clearInterval(this.cleanupTimer);
+    }
+  }
+
+  /** Remove instances that haven't sent data in 24 hours */
+  private cleanupStaleInstances() {
+    const now = Date.now();
+    let totalCleaned = 0;
+
+    for (const [slug, typeState] of this.state) {
+      for (const [key, instance] of typeState) {
+        if (now - instance.lastUpdate.getTime() > MachineService.INSTANCE_TTL_MS) {
+          if (instance.isConnected) {
+            this.gateway.emitEvent({
+              type: 'DISCONNECTED',
+              timestamp: new Date().toISOString(),
+              machineType: slug,
+              instanceId: instance.stationId,
+              plantId: instance.plantId,
+              message: `Machine ${slug} (${instance.plantId}/${instance.stationId}) removed after 24h inactivity`,
+            });
+          }
+          typeState.delete(key);
+          totalCleaned++;
+        }
+      }
+    }
+
+    if (totalCleaned > 0) {
+      this.logger.log(`Stale instance cleanup: removed ${totalCleaned} instance(s)`);
+    }
   }
 
   private checkConnectivity() {
     const now = Date.now();
-    const TIMEOUT = 60000;
+    const TIMEOUT = this.disconnectTimeoutMs;
 
     for (const [slug, typeState] of this.state) {
       for (const [key, instance] of typeState) {

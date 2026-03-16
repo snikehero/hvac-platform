@@ -1,6 +1,7 @@
 import { Zap } from "lucide-react";
 import { MetricCardBase } from "./MetricCardBase";
 import type { CurrentCardProps } from "../types";
+import { parseNumValue, calcHealthPercent } from "../hooks/useMetricCardLogic";
 
 export function CurrentCard({
     label,
@@ -8,15 +9,15 @@ export function CurrentCard({
     unit,
     quality,
     color,
+    historyData,
+    trend,
     min = 0,
     max = 100,
     critical = 80,
 }: CurrentCardProps) {
-    const numValue = typeof value === "number" ? value : parseFloat(value) || 0;
-
-    const range = max - min;
-    const clampedValue = Math.max(min, Math.min(max, numValue));
-    const percentage = range > 0 ? ((clampedValue - min) / range) * 100 : 0;
+    const numValue = parseNumValue(value);
+    const percentage = calcHealthPercent(numValue, min, max);
+    const range = max - min || 1;
 
     const isCritical = numValue >= critical;
     const isWarning = numValue >= critical * 0.8 && !isCritical;
@@ -35,6 +36,8 @@ export function CurrentCard({
             unit={unit}
             quality={quality}
             color={color}
+            historyData={historyData}
+            trend={trend}
         >
             <svg viewBox="0 0 100 120" className="w-full h-32">
                 {/* Background Bar */}

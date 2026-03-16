@@ -74,10 +74,10 @@ export default function ExecutiveKpiWidgets({ stats, onFilterByStatus, activeFil
             onClick={() => onFilterByStatus(card.filterStatus)}
             className={`
               group relative text-left w-full rounded-xl overflow-hidden
-              bg-white/5 backdrop-blur-md border transition-all duration-300
-              hover:scale-[1.02] hover:bg-white/8
+              bg-muted/50 backdrop-blur-md border transition-all duration-300
+              hover:scale-[1.02] hover:bg-muted/60
               ${card.borderColor}
-              ${isActive ? "ring-2 ring-cyan-500/50 bg-white/10" : ""}
+              ${isActive ? "ring-2 ring-cyan-500/50 bg-muted" : ""}
             `}
           >
             {/* Top gradient bar */}
@@ -86,7 +86,7 @@ export default function ExecutiveKpiWidgets({ stats, onFilterByStatus, activeFil
             <div className="p-5">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-xs text-slate-400 uppercase tracking-wider font-medium">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
                     {card.label}
                   </p>
                   <p className={`text-4xl font-bold mt-1 ${card.color}`}>
@@ -101,10 +101,10 @@ export default function ExecutiveKpiWidgets({ stats, onFilterByStatus, activeFil
               {/* Impact bar */}
               <div className="mt-4">
                 <div className="flex items-center justify-between text-xs mb-1">
-                  <span className="text-slate-500">
+                  <span className="text-muted-foreground">
                     {t.executiveDashboard.impact}
                   </span>
-                  <span className="text-slate-400">{card.percent}%</span>
+                  <span className="text-muted-foreground">{card.percent}%</span>
                 </div>
                 <div className={`h-1.5 rounded-full ${card.percentColor} overflow-hidden`}>
                   <div
@@ -115,7 +115,7 @@ export default function ExecutiveKpiWidgets({ stats, onFilterByStatus, activeFil
               </div>
 
               {/* Hover hint */}
-              <p className="text-[10px] text-slate-600 mt-3 text-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <p className="text-[10px] text-muted-foreground/60 mt-3 text-center opacity-0 group-hover:opacity-100 transition-opacity">
                 {t.executiveDashboard.clickToFilter}
               </p>
             </div>

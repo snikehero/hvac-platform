@@ -1,5 +1,5 @@
 import { useCallback, useContext, useMemo } from "react";
-import { TelemetryContext } from "@/providers/WebSocketProvider";
+import { TelemetryContext } from "@/providers/TelemetryProvider";
 import type { MachineTelemetry } from "@/types/machine-type";
 import type { HistoryPoint } from "@/types/history";
 

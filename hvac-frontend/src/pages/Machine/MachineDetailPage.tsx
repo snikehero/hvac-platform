@@ -7,12 +7,12 @@ import {
   Activity,
   AlertTriangle,
   Send,
-  CheckCircle2,
-  XCircle,
   WifiOff,
 } from "lucide-react";
+import { STATUS_ICON, STATUS_DOT, STATUS_BADGE_VARIANT } from "@/constants/status";
 import { useMachineTypes } from "@/context/MachineTypeContext";
 import { useMachineTelemetry } from "@/hooks/useMachineTelemetry";
+import { DetailPageSkeleton } from "@/components/skeletons/DetailPageSkeleton";
 import { useDeviceHealth } from "@/hooks/useDeviceHealth";
 import { routes } from "@/router/routes";
 import { useTranslation } from "@/i18n/useTranslation";
@@ -21,36 +21,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { renderMetricCard } from "@/components/MetricCards/renderMetricCard";
+import { calcTrend } from "@/components/MetricCards/hooks/useTrend";
 import { DeviceHistoryChart } from "@/components/Graphs/DeviceHistoryChart";
 import { DeviceEventTimeline } from "@/components/DeviceEventTimeline/DeviceEventTimeline";
 import { GenericCommandsPanel } from "@/components/GenericCommandsPanel/GenericCommandsPanel";
 
-const statusConfig = {
-  OK: {
-    icon: CheckCircle2,
-    color: "text-green-500",
-    dot: "bg-green-500",
-    badgeVariant: "default" as const,
-  },
-  WARNING: {
-    icon: AlertTriangle,
-    color: "text-yellow-500",
-    dot: "bg-yellow-500",
-    badgeVariant: "secondary" as const,
-  },
-  ALARM: {
-    icon: XCircle,
-    color: "text-destructive",
-    dot: "bg-destructive",
-    badgeVariant: "destructive" as const,
-  },
-  DISCONNECTED: {
-    icon: WifiOff,
-    color: "text-muted-foreground",
-    dot: "bg-muted-foreground",
-    badgeVariant: "outline" as const,
-  },
-};
 
 export default function MachineDetailPage() {
   const { machineType: machineTypeSlug, plantId, stationId } = useParams<{
@@ -62,6 +37,7 @@ export default function MachineDetailPage() {
   const { machineTypes } = useMachineTypes();
   const {
     instances,
+    connected,
     deviceEvents,
     isMachineConnected,
     getInstanceHistory,
@@ -153,9 +129,12 @@ export default function MachineDetailPage() {
     );
   }
 
-  const healthStatus = health?.status ?? "DISCONNECTED";
-  const cfg = statusConfig[healthStatus];
-  const StatusIcon = cfg.icon;
+  if (!instance && connected) {
+    return <DetailPageSkeleton />;
+  }
+
+  const healthStatus = (health?.status ?? "DISCONNECTED") as "OK" | "WARNING" | "ALARM" | "DISCONNECTED";
+  const StatusIcon = STATUS_ICON[healthStatus];
 
   return (
     <div className="space-y-6 p-6 md:p-8 max-w-[1400px] mx-auto">
@@ -179,7 +158,7 @@ export default function MachineDetailPage() {
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold">{stationId}</h1>
               <span
-                className={`w-2.5 h-2.5 rounded-full ${cfg.dot} ${
+                className={`w-2.5 h-2.5 rounded-full ${STATUS_DOT[healthStatus]} ${
                   healthStatus === "ALARM" ? "animate-pulse" : ""
                 }`}
               />
@@ -190,7 +169,7 @@ export default function MachineDetailPage() {
           </div>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <Badge variant={cfg.badgeVariant}>
+          <Badge variant={STATUS_BADGE_VARIANT[healthStatus]}>
             <StatusIcon className="w-3 h-3 mr-1" />
             {healthStatus}
           </Badge>
@@ -253,6 +232,8 @@ export default function MachineDetailPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {sortedVariables.map((varDef) => {
                 const point = instance.points[varDef.key];
+                const varHistory = instanceHistory[varDef.key] ?? [];
+                const trend = varHistory.length >= 2 ? calcTrend(varHistory) : undefined;
                 return (
                   <div key={varDef.key} className="h-full">
                     {renderMetricCard({
@@ -263,6 +244,8 @@ export default function MachineDetailPage() {
                       quality: isConnected ? point?.quality : undefined,
                       color: varDef.color as "primary" | "accent" | "chart" | "destructive" | "warning" | "success",
                       cardConfig: varDef.cardConfig as Record<string, unknown>,
+                      historyData: varHistory.length >= 2 ? varHistory : undefined,
+                      trend,
                     })}
                   </div>
                 );

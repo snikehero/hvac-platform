@@ -12,6 +12,8 @@ import {
   Settings,
   Wifi,
   WifiOff,
+  Maximize2,
+  TrendingUp,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -267,12 +269,18 @@ export default function MachineHomePage() {
       </Card>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <QuickActionCard
           title={t.machineDashboard?.dashboard ?? "Dashboard"}
           description={t.machinePages.viewInstances}
           icon={LayoutDashboard}
           onClick={() => navigate(routes.machine.dashboard(slug!))}
+        />
+        <QuickActionCard
+          title={t.nav?.analytics ?? "Analytics"}
+          description="Trends, comparison and distribution charts"
+          icon={TrendingUp}
+          onClick={() => navigate(routes.machine.analytics(slug!))}
         />
         <QuickActionCard
           title={t.nav?.alarms ?? "Alarms"}
@@ -287,6 +295,17 @@ export default function MachineHomePage() {
           icon={Settings}
           onClick={() => navigate(routes.machine.settings(slug!))}
         />
+      </div>
+
+      {/* Kiosk mode */}
+      <div className="flex justify-end">
+        <button
+          onClick={() => navigate(routes.kiosk.page(slug!))}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+        >
+          <Maximize2 className="h-4 w-4" />
+          Kiosk Mode
+        </button>
       </div>
     </div>
   );

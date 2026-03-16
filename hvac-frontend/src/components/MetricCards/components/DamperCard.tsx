@@ -1,6 +1,7 @@
 import { Gauge } from "lucide-react";
 import { MetricCardBase } from "./MetricCardBase";
 import type { DamperCardProps } from "../types";
+import { parseNumValue } from "../hooks/useMetricCardLogic";
 
 export function DamperCard({
   label,
@@ -8,8 +9,10 @@ export function DamperCard({
   unit,
   quality,
   color,
+  historyData,
+  trend,
 }: DamperCardProps) {
-  const numValue = typeof value === "number" ? value : parseFloat(value) || 0;
+  const numValue = parseNumValue(value);
   const angle = (numValue / 100) * 90; // 0-90 degrees
   const isClosed = numValue < 10;
   const isOpen = numValue > 90;
@@ -23,6 +26,8 @@ export function DamperCard({
       unit={unit}
       quality={quality}
       color={color}
+      historyData={historyData}
+      trend={trend}
     >
       <svg viewBox="0 0 120 120" className="w-full h-32">
         {/* Outer Frame with depth */}

@@ -1,6 +1,7 @@
 import { Wind } from "lucide-react";
 import { MetricCardBase } from "./MetricCardBase";
 import type { AirflowCardProps } from "../types";
+import { parseNumValue, calcHealthPercent } from "../hooks/useMetricCardLogic";
 
 export function AirflowCard({
   label,
@@ -8,14 +9,13 @@ export function AirflowCard({
   unit,
   quality,
   color,
+  historyData,
+  trend,
   min = 0,
   max = 1000,
 }: AirflowCardProps) {
-  const numValue = typeof value === "number" ? value : parseFloat(value) || 0;
-  const percentage = Math.min(
-    Math.max(((numValue - min) / (max - min)) * 100, 0),
-    100,
-  );
+  const numValue = parseNumValue(value);
+  const percentage = calcHealthPercent(numValue, min, max);
   const isLow = percentage < 20;
   const isHigh = percentage > 80;
 
@@ -27,6 +27,8 @@ export function AirflowCard({
       unit={unit}
       quality={quality}
       color={color}
+      historyData={historyData}
+      trend={trend}
     >
       <svg viewBox="0 0 120 100" className="w-full h-32">
         {/* Wind Tunnel */}

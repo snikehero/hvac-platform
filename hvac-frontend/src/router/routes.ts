@@ -24,6 +24,8 @@ export const routes = {
     settingsPattern: "/machines/:machineType/settings",
     executive: (machineType: string) => `/machines/${machineType}/executive`,
     executivePattern: "/machines/:machineType/executive",
+    analytics: (machineType: string) => `/machines/${machineType}/analytics`,
+    analyticsPattern: "/machines/:machineType/analytics",
     detail: (
       machineType: string,
       plantId: string,
@@ -31,5 +33,10 @@ export const routes = {
     ) => `/machines/${machineType}/plants/${plantId}/stations/${stationId}`,
     detailPattern:
       "/machines/:machineType/plants/:plantId/stations/:stationId",
+  },
+
+  kiosk: {
+    page: (machineType: string) => `/kiosk/${machineType}`,
+    pattern: "/kiosk/:machineType",
   },
 };

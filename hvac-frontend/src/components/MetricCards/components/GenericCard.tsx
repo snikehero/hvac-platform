@@ -8,6 +8,8 @@ export function GenericCard({
   unit,
   quality,
   color,
+  historyData,
+  trend,
   icon,
 }: GenericCardProps) {
   return (
@@ -18,6 +20,8 @@ export function GenericCard({
       unit={unit}
       quality={quality}
       color={color}
+      historyData={historyData}
+      trend={trend}
     >
       <svg viewBox="0 0 100 100" className="w-full h-32">
         {/* Simple Bar Chart */}

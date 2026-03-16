@@ -11,7 +11,7 @@ interface Props {
 const EVENT_CONFIG: Record<string, { icon: typeof AlertTriangle; color: string; bg: string }> = {
   ALARM: { icon: AlertTriangle, color: "text-red-400", bg: "bg-red-500/20" },
   WARNING: { icon: AlertCircle, color: "text-amber-400", bg: "bg-amber-500/20" },
-  DISCONNECTED: { icon: WifiOff, color: "text-slate-400", bg: "bg-slate-500/20" },
+  DISCONNECTED: { icon: WifiOff, color: "text-muted-foreground", bg: "bg-muted/50" },
   RECONNECTED: { icon: Wifi, color: "text-emerald-400", bg: "bg-emerald-500/20" },
   OK: { icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-500/20" },
 };
@@ -41,44 +41,44 @@ export default function SystemActivityPanel({ recentEvents, stabilityScore, mach
   const disconnectCount = recentEvents.filter((e) => e.type === "DISCONNECTED").length;
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-md p-5 h-full flex flex-col">
-      <h3 className="text-lg font-semibold text-white">
+    <div className="rounded-xl border border-border bg-muted/50 backdrop-blur-md p-5 h-full flex flex-col">
+      <h3 className="text-lg font-semibold text-foreground">
         {t.executiveDashboard.systemActivity}
       </h3>
-      <p className="text-xs text-slate-500 mb-4">{machineTypeName}</p>
+      <p className="text-xs text-muted-foreground mb-4">{machineTypeName}</p>
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 gap-2 mb-4">
-        <div className="bg-white/5 rounded-lg px-3 py-2">
-          <p className="text-[10px] text-slate-500 uppercase tracking-wider">
+        <div className="bg-muted/50 rounded-lg px-3 py-2">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
             {t.status.alarm}
           </p>
-          <p className={`text-lg font-bold ${criticalCount > 0 ? "text-red-400" : "text-slate-500"}`}>
+          <p className={`text-lg font-bold ${criticalCount > 0 ? "text-red-400" : "text-muted-foreground"}`}>
             {criticalCount}
           </p>
         </div>
-        <div className="bg-white/5 rounded-lg px-3 py-2">
-          <p className="text-[10px] text-slate-500 uppercase tracking-wider">
+        <div className="bg-muted/50 rounded-lg px-3 py-2">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
             {t.executiveDashboard.disconnected}
           </p>
-          <p className={`text-lg font-bold ${disconnectCount > 0 ? "text-amber-400" : "text-slate-500"}`}>
+          <p className={`text-lg font-bold ${disconnectCount > 0 ? "text-amber-400" : "text-muted-foreground"}`}>
             {disconnectCount}
           </p>
         </div>
       </div>
 
       {/* Stability Score */}
-      <div className="bg-white/5 rounded-lg px-3 py-2 mb-4">
+      <div className="bg-muted/50 rounded-lg px-3 py-2 mb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Activity className="h-4 w-4 text-slate-400" />
-            <span className="text-xs text-slate-400">{t.executiveDashboard.stabilityScore}</span>
+            <Activity className="h-4 w-4 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">{t.executiveDashboard.stabilityScore}</span>
           </div>
           <span className={`text-sm font-bold ${stability.color}`}>
             {t.executiveDashboard[stability.key]} · {stabilityScore}%
           </span>
         </div>
-        <div className="h-1 rounded-full bg-slate-800 mt-2 overflow-hidden">
+        <div className="h-1 rounded-full bg-muted mt-2 overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-700 ${
               stabilityScore >= 80
@@ -94,12 +94,12 @@ export default function SystemActivityPanel({ recentEvents, stabilityScore, mach
 
       {/* Event Timeline */}
       <div className="flex-1 overflow-y-auto space-y-1.5 min-h-0">
-        <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">
+        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
           {t.executiveDashboard.recentEvents}
         </p>
 
         {recentEvents.length === 0 ? (
-          <p className="text-sm text-slate-600 text-center py-4">
+          <p className="text-sm text-muted-foreground/60 text-center py-4">
             {t.executiveDashboard.noEvents}
           </p>
         ) : (
@@ -110,20 +110,20 @@ export default function SystemActivityPanel({ recentEvents, stabilityScore, mach
             return (
               <div
                 key={`${event.timestamp}-${event.instanceId}-${idx}`}
-                className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/5 transition-colors"
+                className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-muted/50 transition-colors"
               >
                 <div className={`p-1 rounded ${config.bg} flex-shrink-0`}>
                   <EventIcon className={`h-3 w-3 ${config.color}`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-white truncate">
+                  <p className="text-xs text-foreground truncate">
                     {event.instanceId}
                   </p>
-                  <p className="text-[10px] text-slate-500 truncate">
+                  <p className="text-[10px] text-muted-foreground truncate">
                     {event.message}
                   </p>
                 </div>
-                <span className="text-[10px] text-slate-600 flex-shrink-0">
+                <span className="text-[10px] text-muted-foreground/60 flex-shrink-0">
                   {formatTimeAgo(event.timestamp)}
                 </span>
               </div>

@@ -16,6 +16,8 @@ import {
   Fan,
   Activity,
   BarChart3,
+  TrendingUp,
+  Monitor,
   type LucideIcon,
 } from "lucide-react";
 import { useMachineTelemetry } from "@/hooks/useMachineTelemetry";
@@ -88,6 +90,8 @@ export default function AppSidebar() {
           label: t.nav.executive ?? "Executive Dashboard",
           icon: BarChart3,
         },
+        { to: routes.machine.analytics(mt.slug), label: t.nav.analytics ?? "Analytics", icon: TrendingUp },
+        { to: routes.kiosk.page(mt.slug), label: t.nav.kiosk ?? "Kiosk", icon: Monitor },
         { to: routes.machine.alarms(mt.slug), label: t.nav.alarms ?? "Alarms", icon: Bell },
         { to: routes.machine.settings(mt.slug), label: t.nav.settings ?? "Settings", icon: Settings },
       ],

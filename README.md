@@ -21,7 +21,7 @@
 
 ## About
 
-**FireIIOT Platform** is a full-stack, real-time industrial IoT monitoring and control system. Originally built for HVAC (Heating, Ventilation and Air Conditioning) equipment, the platform has evolved into a **modular architecture** where any type of industrial machine can be defined, monitored, and controlled through a unified system.
+**FireIIOT Platform** is a full-stack, real-time industrial IoT monitoring and control system. Any type of industrial machine can be defined, monitored, and controlled through a unified generic architecture — from HVAC air handling units to motors, compressors, pumps, or any custom equipment.
 
 The platform ingests telemetry from devices through an MQTT broker, processes it in a NestJS backend, persists machine type definitions in SQLite via TypeORM, and pushes live updates to a React dashboard via WebSockets.
 
@@ -29,11 +29,13 @@ The platform ingests telemetry from devices through an MQTT broker, processes it
 
 - **Machine Designer** — Define custom machine types with variables, commands, and thresholds through a visual UI
 - **Real-time telemetry** — Live data visualization with interactive charts for any machine type
+- **Executive dashboard** — Per-type KPI widgets, plant heat maps, and system activity panels
+- **Analytics** — Historical trend charts for tracked variables
+- **Kiosk mode** — Full-screen display for wall-mounted monitors (no navigation chrome)
 - **Dynamic commands** — Send toggle, range, or select commands to any configured device via MQTT
 - **Health monitoring** — Automatic health evaluation based on configurable thresholds per variable
 - **Unified alarm system** — Cross-machine-type alarm aggregation with per-instance acknowledge
-- **Per-type pages** — Each machine type gets its own Home, Dashboard, Alarms, Settings, and Detail pages
-- **HVAC module** — Full-featured HVAC monitoring with 3D views (serves as reference implementation)
+- **Per-type pages** — Each machine type gets its own Home, Dashboard, Executive, Analytics, Alarms, Settings, and Detail pages
 - **Multi-language support** — English / Spanish
 - **Dark / Light theme**
 
@@ -68,21 +70,27 @@ Physical Devices / Node-RED Simulators
     ▼
 Mosquitto Broker (:1883)
     │
-    │  Subscribe: hvac/#, <machineType>/#
+    │  Subscribe: <machineType>/#  (dynamically registered per machine type)
     ▼
 NestJS Backend (:3000)
-    ├── MqttService         ← Routes messages to HvacService or MachineService
-    ├── HvacService         ← HVAC-specific telemetry processing
-    ├── MachineService      ← Generic machine telemetry processing
+    ├── MqttService         ← Dynamic topic handler registry; routes to registered handlers
+    ├── MachineService      ← Generic machine telemetry processing (all machine types)
     ├── MachineDesigner     ← CRUD for machine type definitions (SQLite)
     ├── CommandsService     ← Command dispatch + response tracking
     │
-    │  Socket.IO events (hvac_update, machine_update, device_event, etc.)
+    │  Socket.IO events (machine_update, machine_snapshot, device_event, etc.)
     ▼
 React Frontend (:8080)
-    ├── WebSocketProvider   ← Manages all real-time state
-    ├── HVAC Pages          ← Specialized HVAC monitoring
-    ├── Machine Pages       ← Generic machine monitoring (auto-generated from definitions)
+    ├── TelemetryProvider   ← Manages all real-time state
+    ├── Machine Pages       ← Generic monitoring pages (auto-generated from definitions)
+    │   ├── Home            ← Health overview and quick actions
+    │   ├── Dashboard       ← Instance grid with health dots
+    │   ├── Executive       ← KPI widgets, heat maps, activity panels
+    │   ├── Analytics       ← Historical trend charts
+    │   ├── Alarms          ← Alarm list with acknowledge
+    │   ├── Settings        ← Threshold configuration
+    │   └── Detail          ← Single-instance tabs (Overview, Events, Commands)
+    ├── Kiosk               ← Full-screen display mode
     └── Machine Designer    ← Visual machine type editor
 ```
 
@@ -107,11 +115,11 @@ A **Machine Type** is a definition that describes a category of industrial equip
 - **Commands** — Actions that can be sent to the device (toggle ON/OFF, set a range value, select from options)
 - **MQTT Topic** — The topic pattern used for device communication (e.g., `motor/#`)
 
-Machine types are created and managed through the **Machine Designer** UI and stored in SQLite via TypeORM.
+Machine types are created and managed through the **Machine Designer** UI and stored in SQLite via TypeORM. When a type is created, the backend dynamically subscribes to its MQTT topic at runtime — no restart needed.
 
-### HVAC Module
+### Generic Architecture
 
-The HVAC module is a **specialized, first-class implementation** that predates the generic system. It includes custom features like 3D visualization, executive dashboards, and hardcoded telemetry processing. The generic machine system has been elevated to feature parity with HVAC, enabling future migration of HVAC to the generic system.
+All machine types — including HVAC — run through the same backend pipeline (`MachineService`) and the same frontend pages (`/machines/:machineType/*`). This enables new equipment categories to be onboarded through the UI alone, with no code changes.
 
 ---
 
@@ -161,24 +169,24 @@ The HVAC module is a **specialized, first-class implementation** that predates t
 hvac-platform/
 ├── backend/                  # NestJS API, WebSocket gateway, SQLite persistence
 │   └── src/
-│       ├── hvac/             # HVAC-specific: controller, service, gateway, DTOs
+│       ├── config/           # Typed configuration factory
 │       ├── machine/          # Generic machine telemetry: service, gateway, controller
 │       ├── machine-designer/ # Machine type CRUD: entities, DTOs, service, controller
 │       ├── commands/         # Command dispatch: service, gateway, DTOs
-│       ├── mqtt/             # MQTT broker connection & message routing
+│       ├── mqtt/             # MQTT broker connection & dynamic topic handler registry
 │       └── common/           # Shared utilities (DeviceEventDto)
 ├── hvac-frontend/            # React + Vite web application
 │   └── src/
 │       ├── pages/            # Page views organized by module
-│       │   ├── HVAC/         # HVAC-specific pages (Home, Dashboard, Detail, Alarms, Settings)
-│       │   ├── Machine/      # Generic machine pages (Home, Dashboard, Detail, Alarms, Settings)
+│       │   ├── Machine/      # Generic machine pages (Home, Dashboard, Executive, Analytics, Detail, Alarms, Settings)
+│       │   ├── Kiosk/        # Full-screen kiosk display
 │       │   ├── MachineDesigner/  # Machine type editor
 │       │   ├── Alarms/       # Unified cross-type alarms
 │       │   └── HomeGlobal/   # Platform-wide overview
 │       ├── components/       # Reusable components (Charts, MetricCards, CommandPanels, UI)
 │       ├── hooks/            # Custom hooks (telemetry, health, history, commands, connectivity)
-│       ├── providers/        # WebSocketProvider (real-time state management)
-│       ├── context/          # React contexts (Settings, Acks, MachineTypes)
+│       ├── providers/        # TelemetryProvider (real-time state management)
+│       ├── context/          # React contexts (GlobalSettings, Acks, MachineTypes)
 │       ├── domain/           # Pure business logic (health evaluation)
 │       ├── services/         # API clients & notification service
 │       ├── i18n/             # Translations (en / es)
@@ -237,7 +245,6 @@ Copy `backend/.env.example` to `backend/.env` and configure as needed:
 |--------------------|------------------------------|--------------------------|
 | `PORT`             | Backend server port          | `3000`                   |
 | `MQTT_BROKER_URL`  | MQTT broker connection URL   | `mqtt://mosquitto:1883`  |
-| `MQTT_TOPIC`       | MQTT topic subscription      | `hvac/#`                 |
 | `CORS_ORIGIN`      | Allowed CORS origins         | `*`                      |
 
 Frontend environment (`hvac-frontend/.env`):

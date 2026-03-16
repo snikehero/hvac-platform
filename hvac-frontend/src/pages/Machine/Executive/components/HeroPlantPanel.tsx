@@ -18,14 +18,14 @@ function getPlantStatus(group: PlantGroup): "ALARM" | "WARNING" | "DISCONNECTED"
 const BORDER_COLORS: Record<string, string> = {
   ALARM: "border-red-500/40 hover:border-red-500/60",
   WARNING: "border-amber-500/40 hover:border-amber-500/60",
-  DISCONNECTED: "border-slate-500/40 hover:border-slate-500/60",
+  DISCONNECTED: "border-muted-foreground/30 hover:border-muted-foreground/50",
   OK: "border-emerald-500/40 hover:border-emerald-500/60",
 };
 
 const BAR_COLORS: Record<string, string> = {
   ALARM: "bg-red-500",
   WARNING: "bg-amber-500",
-  DISCONNECTED: "bg-slate-500",
+  DISCONNECTED: "bg-muted-foreground",
   OK: "bg-emerald-500",
 };
 
@@ -37,13 +37,13 @@ export default function HeroPlantPanel({ plantGroups, selectedPlant, onSelectPla
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-white">
+        <h3 className="text-lg font-semibold text-foreground">
           {t.executiveDashboard.plantOverview}
         </h3>
         {selectedPlant && (
           <button
             onClick={() => onSelectPlant(null)}
-            className="text-xs text-slate-400 hover:text-white transition-colors"
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             {t.executiveDashboard.allPlants}
           </button>
@@ -61,10 +61,10 @@ export default function HeroPlantPanel({ plantGroups, selectedPlant, onSelectPla
               onClick={() => onSelectPlant(group.plantId)}
               className={`
                 relative text-left w-full rounded-xl p-4
-                bg-white/5 backdrop-blur-md border transition-all duration-300
-                hover:scale-[1.02] hover:bg-white/8
+                bg-muted/50 backdrop-blur-md border transition-all duration-300
+                hover:scale-[1.02] hover:bg-muted/60
                 ${BORDER_COLORS[status]}
-                ${isSelected ? "ring-2 ring-cyan-500/50 bg-white/10" : ""}
+                ${isSelected ? "ring-2 ring-cyan-500/50 bg-muted" : ""}
               `}
             >
               {/* Top border gradient */}
@@ -73,16 +73,16 @@ export default function HeroPlantPanel({ plantGroups, selectedPlant, onSelectPla
               />
 
               <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-white/5">
-                  <Building2 className="h-5 w-5 text-slate-300" />
+                <div className="p-2 rounded-lg bg-muted/50">
+                  <Building2 className="h-5 w-5 text-foreground/70" />
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-semibold text-white truncate">
+                    <h4 className="font-semibold text-foreground truncate">
                       {group.plantId}
                     </h4>
-                    <span className="text-xs text-slate-500 ml-2">
+                    <span className="text-xs text-muted-foreground ml-2">
                       {group.instances.length} {t.executiveDashboard.instances}
                     </span>
                   </div>
@@ -100,7 +100,7 @@ export default function HeroPlantPanel({ plantGroups, selectedPlant, onSelectPla
                       </span>
                     )}
                     {group.disconnected > 0 && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-400 font-medium">
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-muted/50 text-muted-foreground font-medium">
                         {group.disconnected} {t.executiveDashboard.disconnected}
                       </span>
                     )}
@@ -109,7 +109,7 @@ export default function HeroPlantPanel({ plantGroups, selectedPlant, onSelectPla
                   {/* Operational bar */}
                   <div className="mt-3">
                     <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="text-slate-400">{t.executiveDashboard.operational}</span>
+                      <span className="text-muted-foreground">{t.executiveDashboard.operational}</span>
                       <span
                         className={
                           group.operationalPercent >= 80
@@ -122,7 +122,7 @@ export default function HeroPlantPanel({ plantGroups, selectedPlant, onSelectPla
                         {group.operationalPercent}%
                       </span>
                     </div>
-                    <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                    <div className="h-1.5 rounded-full bg-muted overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all duration-700 ${
                           group.operationalPercent >= 80
@@ -139,7 +139,7 @@ export default function HeroPlantPanel({ plantGroups, selectedPlant, onSelectPla
               </div>
 
               {/* Hover hint */}
-              <p className="text-[10px] text-slate-600 mt-2 text-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <p className="text-[10px] text-muted-foreground/60 mt-2 text-center opacity-0 group-hover:opacity-100 transition-opacity">
                 {t.executiveDashboard.clickToFilter}
               </p>
             </button>

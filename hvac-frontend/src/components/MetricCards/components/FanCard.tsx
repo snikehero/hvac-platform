@@ -2,6 +2,7 @@ import { Fan } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { MetricCardBase } from "./MetricCardBase";
 import type { FanCardProps } from "../types";
+import { isActiveStatus } from "../hooks/useMetricCardLogic";
 
 export function FanCard({
   label,
@@ -9,9 +10,11 @@ export function FanCard({
   unit,
   quality,
   color,
+  historyData,
+  trend,
   status,
 }: FanCardProps) {
-  const isOn = status === "ON" || String(status) === "1" || String(status) === "true";
+  const isOn = isActiveStatus(status);
 
   return (
     <MetricCardBase
@@ -21,6 +24,8 @@ export function FanCard({
       unit={unit}
       quality={quality}
       color={color}
+      historyData={historyData}
+      trend={trend}
       badge={
         <Badge
           className={

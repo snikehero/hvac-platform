@@ -2,6 +2,8 @@ import { useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useExecutiveDashboardData } from "./hooks/useExecutiveDashboardData";
+import { useMachineTelemetry } from "@/hooks/useMachineTelemetry";
+import { ExecutiveSkeleton } from "@/components/skeletons/ExecutiveSkeleton";
 import type { DeviceHealthStatus } from "@/domain/device/getDeviceHealth";
 import HeroSystemStatus from "./components/HeroSystemStatus";
 import HeroPlantPanel from "./components/HeroPlantPanel";
@@ -15,6 +17,7 @@ export default function ExecutiveDashboardPage() {
   const { t } = useTranslation();
   const data = useExecutiveDashboardData(machineTypeSlug);
 
+  const { connected } = useMachineTelemetry(machineTypeSlug);
   const [plantFilter, setPlantFilter] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<DeviceHealthStatus | null>(null);
 
@@ -43,14 +46,18 @@ export default function ExecutiveDashboardPage() {
 
   if (!machineTypeSlug) return null;
 
+  if (data.instances.length === 0 && connected) {
+    return <ExecutiveSkeleton />;
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white -m-6 p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background text-foreground -m-6 p-6 lg:p-8">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight">
           {t.executiveDashboard.title}
         </h1>
-        <p className="text-slate-400 mt-1">
+        <p className="text-muted-foreground mt-1">
           {data.machineType?.name ?? machineTypeSlug}
         </p>
       </div>
@@ -108,7 +115,7 @@ export default function ExecutiveDashboardPage() {
             {plantFilter && (
               <button
                 onClick={() => setPlantFilter(null)}
-                className="text-sm bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full transition-colors"
+                className="text-sm bg-muted hover:bg-muted/80 px-3 py-1 rounded-full transition-colors"
               >
                 {plantFilter} &times;
               </button>
@@ -116,7 +123,7 @@ export default function ExecutiveDashboardPage() {
             {statusFilter && (
               <button
                 onClick={() => setStatusFilter(null)}
-                className="text-sm bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full transition-colors"
+                className="text-sm bg-muted hover:bg-muted/80 px-3 py-1 rounded-full transition-colors"
               >
                 {statusFilter} &times;
               </button>
@@ -125,7 +132,7 @@ export default function ExecutiveDashboardPage() {
         )}
 
         {filteredInstances.length === 0 ? (
-          <div className="text-center py-16 text-slate-500">
+          <div className="text-center py-16 text-muted-foreground">
             <p className="text-lg">{t.executiveDashboard.noInstances}</p>
             <p className="text-sm mt-1">{t.executiveDashboard.noInstancesDesc}</p>
           </div>

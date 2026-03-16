@@ -1,5 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { LucideIcon } from "lucide-react";
+import type React from "react";
+import type { HistoryPoint } from "@/types/history";
+
+export interface TrendInfo {
+  direction: "up" | "down" | "stable";
+  delta?: string;
+}
 
 /* ================= METRIC CARD TYPES ================= */
 
@@ -27,10 +33,14 @@ export type MetricColor =
 
 export interface BaseMetricCardProps {
   label: string;
-  value: any;
+  value: number | string | boolean | null | undefined;
   unit: string;
   quality?: MetricQuality;
   color: MetricColor;
+  /** Passed from MachineDetailPage for sparkline rendering */
+  historyData?: HistoryPoint[];
+  /** Pre-calculated trend for arrow indicator */
+  trend?: TrendInfo;
 }
 
 export interface TemperatureCardProps extends BaseMetricCardProps {
@@ -93,10 +103,14 @@ export interface CurrentCardProps extends BaseMetricCardProps {
 export interface MetricCardBaseProps {
   icon: LucideIcon;
   label: string;
-  value: any;
+  value: number | string | boolean | null | undefined;
   unit: string;
   quality?: MetricQuality;
   color: MetricColor;
   badge?: React.ReactNode;
   children: React.ReactNode;
+  /** Optional trend data derived from history */
+  trend?: TrendInfo;
+  /** Raw history points for mini sparkline (last 10 used) */
+  historyData?: HistoryPoint[];
 }

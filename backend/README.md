@@ -6,27 +6,16 @@ NestJS 11 backend that ingests real-time telemetry from industrial machines via 
 
 ## How it works
 
-The backend serves two parallel pipelines:
-
-1. **HVAC pipeline** — Specialized processing for Air Handling Units with hardcoded variable semantics
-2. **Generic machine pipeline** — Dynamic processing for any machine type defined in the Machine Designer
-
-Both pipelines converge at the **Commands** module (unified command dispatch) and the **unified device event** system.
+The backend is built around a **fully generic machine pipeline**. Any machine type defined in the Machine Designer is dynamically registered as an MQTT topic handler and processed through the same telemetry, event, and command infrastructure.
 
 ### Data flow — telemetry (MQTT → WebSocket)
 
 ```
 MQTT Broker
     │
-    │  hvac/#           → HvacService (specialized)
-    │  <machineType>/#  → MachineService (generic)
+    │  <machineType>/#  → MachineService (dynamic, one handler per registered type)
     ▼
 MqttService              ← subscribes on startup, routes by topic pattern
-    │
-    ├──► HvacService     ← merges into in-memory AHU state Map
-    │       │
-    │       ▼
-    │    HvacGateway      ← broadcasts hvac_update / hvac_snapshot
     │
     └──► MachineService  ← merges into per-type in-memory state Maps
             │
@@ -34,17 +23,14 @@ MqttService              ← subscribes on startup, routes by topic pattern
          MachineGateway   ← broadcasts machine_update / machine_snapshot / device_event
 ```
 
-**HVAC flow:**
-
-1. `MqttService` subscribes to `hvac/#` and forwards parsed JSON to `HvacService.handleTelemetry()`.
-2. `HvacService` maintains an in-memory `Map<string, InternalAhuState>` keyed by `plantId-stationId`.
-3. `HvacGateway` emits `hvac_update` per tick and sends `hvac_snapshot` on client connect.
-
 **Generic machine flow:**
 
-1. `MqttService` subscribes to topics from all registered machine types (e.g., `motor/#`).
-2. `MachineService` maintains per-type in-memory state maps and evaluates device health.
-3. `MachineGateway` emits `machine_update`, `machine_snapshot`, `device_event`, and `machine_event`.
+1. On startup, `MachineService` loads all machine types from the DB and calls `MqttService.registerTopicHandler()` for each MQTT topic pattern (e.g., `motor/#`).
+2. `MqttService` subscribes to each pattern on the broker and dispatches incoming messages to the matching handler.
+3. `MachineService` maintains per-type in-memory state maps and evaluates device health against configurable thresholds.
+4. `MachineGateway` emits `machine_update`, `machine_snapshot`, `device_event`, and `machine_event` to connected clients.
+
+When a new machine type is created or deleted via the REST API, `MachineService` dynamically registers or unregisters the corresponding MQTT topic handler at runtime.
 
 ### Data flow — commands (WebSocket → MQTT)
 
@@ -56,9 +42,8 @@ CommandsGateway
     │
     ▼
 CommandsService
-    │  ├── machineType === 'hvac' → topic: hvac/<plantId>/<stationId>/commands/set
-    │  └── machineType === other  → looks up MachineType.mqttTopic from DB
-    │                                topic: <base>/<plantId>/<stationId>/commands/set
+    │  looks up MachineType.mqttTopic from DB
+    │  topic: <base>/<plantId>/<stationId>/commands/set
     ▼
 MQTT Broker ──► Physical device / simulator
     │
@@ -86,7 +71,7 @@ MachineDesignerController  (/api/machine-types)
 MachineDesignerService
     │
     ▼
-TypeORM ──► SQLite database (./data/database.sqlite)
+TypeORM ──► SQLite database (./data/machine-designer.sqlite)
     │
     ├── machine_types       (name, slug, mqttTopic, description, icon)
     ├── machine_variables   (key, label, dataType, unit, cardType, color, cardConfig)
@@ -102,17 +87,8 @@ src/
 ├── app.module.ts              Root module — wires all modules + TypeORM + ConfigModule
 ├── main.ts                    Bootstrap: reads PORT from env, starts HTTP + Socket.IO
 │
-├── hvac/                      HVAC-specific telemetry module
-│   ├── hvac.module.ts         Provides HvacService + HvacGateway + HvacController
-│   ├── hvac.service.ts        In-memory AHU state store; merges telemetry, serves snapshots
-│   ├── hvac.gateway.ts        WebSocket gateway: hvac_update / hvac_snapshot
-│   ├── hvac.controller.ts     REST GET /hvac/snapshot
-│   ├── dto/
-│   │   └── telemetry.dto.ts   TelemetryDto + HvacPointDto
-│   ├── internal/
-│   │   └── ahu-state.ts       InternalAhuState (rich internal representation)
-│   └── mappers/
-│       └── telemetry.mapper.ts
+├── config/
+│   └── app.config.ts          Typed configuration factory (reads env vars)
 │
 ├── machine/                   Generic machine telemetry module
 │   ├── machine.module.ts      Provides MachineService + MachineGateway + MachineController
@@ -143,8 +119,8 @@ src/
 │       └── command.dto.ts     CommandRequestDto + CommandResultDto
 │
 ├── mqtt/                      MQTT broker connection module
-│   ├── mqtt.module.ts         Imports HvacModule + MachineModule; provides + exports MqttService
-│   └── mqtt.service.ts        MQTT client lifecycle, topic routing, response handler registry
+│   ├── mqtt.module.ts         Imports MachineModule; provides + exports MqttService
+│   └── mqtt.service.ts        MQTT client lifecycle, dynamic topic handler registry, message routing
 │
 └── common/                    Shared utilities
     └── dto/
@@ -157,9 +133,7 @@ src/
 
 | Direction | Event | Payload |
 |---|---|---|
-| Server → Client | `hvac_snapshot` | `TelemetryDto[]` — full HVAC state on connect |
-| Server → Client | `hvac_update` | `TelemetryDto` — single AHU update |
-| Server → Client | `machine_snapshot` | `Record<string, MachineTelemetryDto[]>` — all generic machine state on connect |
+| Server → Client | `machine_snapshot` | `Record<string, MachineTelemetryDto[]>` — all machine state on connect |
 | Server → Client | `machine_update` | `MachineTelemetryDto` — single machine instance update |
 | Server → Client | `machine_event` | `MachineEventDto` — connectivity events (DISCONNECTED/RECONNECTED) |
 | Server → Client | `device_event` | `DeviceEventDto` — unified health events (OK/WARNING/ALARM/DISCONNECTED/RECONNECTED) |
@@ -173,8 +147,7 @@ src/
 
 | Method | Path | Description |
 |---|---|---|
-| GET | `/hvac/snapshot` | Current state of all HVAC AHUs |
-| GET | `/machines/snapshot` | Current state of all generic machine instances |
+| GET | `/machines/snapshot` | Current state of all machine instances (all types) |
 | GET | `/machines/:machineType/snapshot` | Current state of a specific machine type |
 | GET | `/api/machine-types` | List all machine type definitions |
 | GET | `/api/machine-types/:slug` | Get a machine type by slug |
@@ -186,7 +159,7 @@ src/
 
 ## Database (SQLite + TypeORM)
 
-The backend persists machine type definitions in an SQLite database at `./data/database.sqlite`. Three tables:
+The backend persists machine type definitions in an SQLite database at `./data/machine-designer.sqlite`. Three tables:
 
 | Table | Description |
 |---|---|
@@ -204,7 +177,6 @@ TypeORM is configured with `synchronize: true` in development — schema changes
 |---|---|---|
 | `PORT` | `3000` | HTTP / WebSocket server port |
 | `MQTT_BROKER_URL` | `mqtt://mosquitto:1883` | MQTT broker connection URL |
-| `MQTT_TOPIC` | `hvac/#` | Base topic pattern to subscribe to |
 | `CORS_ORIGIN` | `*` | Allowed CORS origin(s) |
 
 Copy `.env.example` to `.env` and adjust as needed.

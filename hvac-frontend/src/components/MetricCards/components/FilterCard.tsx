@@ -1,6 +1,7 @@
 import { Filter } from "lucide-react";
 import { MetricCardBase } from "./MetricCardBase";
 import type { FilterCardProps } from "../types";
+import { parseNumValue, calcHealthPercent } from "../hooks/useMetricCardLogic";
 
 export function FilterCard({
   label,
@@ -8,15 +9,14 @@ export function FilterCard({
   unit,
   quality,
   color,
+  historyData,
+  trend,
   min = 0,
   max = 500,
   critical = 400,
 }: FilterCardProps) {
-  const numValue = typeof value === "number" ? value : parseFloat(value) || 0;
-  const percentage = Math.min(
-    Math.max(((numValue - min) / (max - min)) * 100, 0),
-    100,
-  );
+  const numValue = parseNumValue(value);
+  const percentage = calcHealthPercent(numValue, min, max);
   const isCritical = numValue > critical;
   const isWarning = numValue > critical * 0.75;
 
@@ -28,6 +28,8 @@ export function FilterCard({
       unit={unit}
       quality={quality}
       color={color}
+      historyData={historyData}
+      trend={trend}
     >
       <svg viewBox="0 0 100 120" className="w-full h-32">
         {/* Filter Frame */}

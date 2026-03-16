@@ -11,17 +11,57 @@ import {
     CurrentCard,
     GenericCard,
 } from "./index";
-import type { MetricColor, MetricQuality } from "./types";
+import type { MetricColor, MetricQuality, TrendInfo } from "./types";
+import type { HistoryPoint } from "@/types/history";
 
 export interface RenderMetricCardProps {
     cardType: string;
     label: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any;
     unit: string;
     quality?: MetricQuality;
     color: MetricColor;
     cardConfig?: Record<string, unknown>;
+    /** Optional history data for sparkline */
+    historyData?: HistoryPoint[];
+    /** Optional pre-calculated trend */
+    trend?: TrendInfo;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyRecord = Record<string, any>;
+
+// Cast a component to accept any props — avoids TS2769 on React.createElement
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mkEl(Comp: React.ComponentType<any>, props: AnyRecord): React.ReactElement {
+    return React.createElement(Comp, props);
+}
+
+type CardRenderer = (baseProps: AnyRecord, cardConfig: AnyRecord) => React.ReactElement;
+
+const CARD_RENDERERS: Record<string, CardRenderer> = {
+    temperature: (p, cfg) => mkEl(TemperatureCard, { type: "temperature", ...p, ...cfg }),
+    humidity: (p, cfg) => mkEl(HumidityCard, { type: "humidity", ...p, ...cfg }),
+    fan: (p, cfg) => mkEl(FanCard, {
+        type: "fan",
+        status: typeof p.value === "boolean" ? (p.value ? "ON" : "OFF") : String(p.value),
+        ...p,
+        ...cfg,
+    }),
+    airflow: (p, cfg) => mkEl(AirflowCard, { type: "airflow", ...p, ...cfg }),
+    damper: (p, cfg) => mkEl(DamperCard, { type: "damper", ...p, ...cfg }),
+    power: (p, cfg) => mkEl(PowerCard, {
+        type: "power",
+        status: typeof p.value === "boolean" ? (p.value ? "ON" : "OFF") : String(p.value),
+        ...p,
+        ...cfg,
+    }),
+    filter: (p, cfg) => mkEl(FilterCard, { type: "filter", ...p, ...cfg }),
+    rpm: (p, cfg) => mkEl(RpmCard, { type: "rpm", ...p, ...cfg }),
+    gauge: (p, cfg) => mkEl(RpmCard, { type: "rpm", ...p, ...cfg }),
+    current: (p, cfg) => mkEl(CurrentCard, { type: "current", ...p, ...cfg }),
+};
 
 export function renderMetricCard({
     cardType,
@@ -31,8 +71,9 @@ export function renderMetricCard({
     quality,
     color,
     cardConfig = {},
+    historyData,
+    trend,
 }: RenderMetricCardProps): React.ReactElement {
-    // Map color strings to valid MetricColor values
     const validColors = new Set<string>(["primary", "accent", "success", "warning", "destructive", "chart"]);
     let mappedColor: MetricColor;
     if (color && color.toString().startsWith("chart-")) {
@@ -43,98 +84,12 @@ export function renderMetricCard({
         mappedColor = "primary";
     }
 
-    // Shared props for all cards
-    const baseProps = {
-        label,
-        value,
-        unit,
-        quality,
-        color: mappedColor,
-    };
+    const baseProps: AnyRecord = { label, value, unit, quality, color: mappedColor, historyData, trend };
+    const renderer = CARD_RENDERERS[cardType.toLowerCase()];
 
-    switch (cardType.toLowerCase()) {
-        case "temperature":
-            return (
-                <TemperatureCard
-                    type="temperature"
-                    {...baseProps}
-                    {...(cardConfig as any)}
-                />
-            );
-        case "humidity":
-            return (
-                <HumidityCard
-                    type="humidity"
-                    {...baseProps}
-                    {...(cardConfig as any)}
-                />
-            );
-        case "fan":
-            return (
-                <FanCard
-                    type="fan"
-                    {...baseProps}
-                    status={typeof value === "boolean" ? (value ? "ON" : "OFF") : String(value)}
-                    {...(cardConfig as any)}
-                />
-            );
-        case "airflow":
-            return (
-                <AirflowCard
-                    type="airflow"
-                    {...baseProps}
-                    {...(cardConfig as any)}
-                />
-            );
-        case "damper":
-            return (
-                <DamperCard
-                    type="damper"
-                    {...baseProps}
-                    {...(cardConfig as any)}
-                />
-            );
-        case "power":
-            return (
-                <PowerCard
-                    type="power"
-                    {...baseProps}
-                    status={typeof value === "boolean" ? (value ? "ON" : "OFF") : String(value)}
-                    {...(cardConfig as any)}
-                />
-            );
-        case "filter":
-            return (
-                <FilterCard
-                    type="filter"
-                    {...baseProps}
-                    {...(cardConfig as any)}
-                />
-            );
-        case "rpm":
-        case "gauge": // Map "gauge" to RPM card as requested
-            return (
-                <RpmCard
-                    type="rpm"
-                    {...baseProps}
-                    {...(cardConfig as any)}
-                />
-            );
-        case "current":
-            return (
-                <CurrentCard
-                    type="current"
-                    {...baseProps}
-                    {...(cardConfig as any)}
-                />
-            );
-        default:
-            return (
-                <GenericCard
-                    type="generic"
-                    {...baseProps}
-                    {...(cardConfig as any)}
-                />
-            );
+    if (renderer) {
+        return renderer(baseProps, cardConfig as AnyRecord);
     }
+
+    return mkEl(GenericCard, { type: "generic", ...baseProps, ...cardConfig });
 }

@@ -1,6 +1,7 @@
 import { Thermometer } from "lucide-react";
 import { MetricCardBase } from "./MetricCardBase";
 import type { TemperatureCardProps } from "../types";
+import { parseNumValue, calcHealthPercent } from "../hooks/useMetricCardLogic";
 
 export function TemperatureCard({
   label,
@@ -8,15 +9,14 @@ export function TemperatureCard({
   unit,
   quality,
   color,
+  historyData,
+  trend,
   min = 0,
   max = 40,
   target = 22,
 }: TemperatureCardProps) {
-  const numValue = typeof value === "number" ? value : parseFloat(value) || 0;
-  const percentage = Math.min(
-    Math.max(((numValue - min) / (max - min)) * 100, 0),
-    100,
-  );
+  const numValue = parseNumValue(value);
+  const percentage = calcHealthPercent(numValue, min, max);
   const isCold = numValue < target - 3;
   const isHot = numValue > target + 3;
   const isGood = !isCold && !isHot && quality !== "BAD";
@@ -29,6 +29,8 @@ export function TemperatureCard({
       unit={unit}
       quality={quality}
       color={color}
+      historyData={historyData}
+      trend={trend}
     >
       <svg viewBox="0 0 100 120" className="w-full h-32">
         {/* Thermometer Body */}
