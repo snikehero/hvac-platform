@@ -2,7 +2,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { plainToInstance } from 'class-transformer';
-import { validateSync } from 'class-validator';
+import { validateSync, type ValidationError } from 'class-validator';
 import * as mqtt from 'mqtt';
 import { HvacService } from '../hvac/hvac.service';
 import { TelemetryDto } from '../hvac/dto/telemetry.dto';
@@ -11,7 +11,8 @@ import { TelemetryDto } from '../hvac/dto/telemetry.dto';
 export class MqttService implements OnModuleInit {
   private readonly logger = new Logger(MqttService.name);
   private client: mqtt.MqttClient;
-  private responseHandler: ((topic: string, payload: unknown) => void) | null = null;
+  private responseHandler: ((topic: string, payload: unknown) => void) | null =
+    null;
 
   constructor(
     private readonly hvacService: HvacService,
@@ -28,7 +29,10 @@ export class MqttService implements OnModuleInit {
   }
 
   onModuleInit() {
-    const brokerUrl = this.config.get<string>('MQTT_BROKER_URL', 'mqtt://mosquitto:1883');
+    const brokerUrl = this.config.get<string>(
+      'MQTT_BROKER_URL',
+      'mqtt://mosquitto:1883',
+    );
     const topic = this.config.get<string>('MQTT_TOPIC', 'hvac/#');
 
     this.logger.log(`Connecting to MQTT broker at ${brokerUrl}`);
@@ -73,7 +77,9 @@ export class MqttService implements OnModuleInit {
         if (errors.length > 0) {
           this.logger.warn(
             `Invalid telemetry on topic "${topic}": ${errors
-              .map((e) => Object.values(e.constraints ?? {}).join(', '))
+              .map((e: ValidationError) =>
+                Object.values(e.constraints ?? {}).join(', '),
+              )
               .join(' | ')}`,
           );
           return;
@@ -81,7 +87,10 @@ export class MqttService implements OnModuleInit {
 
         this.hvacService.handleTelemetry(dto);
       } catch (err) {
-        this.logger.error(`JSON parse error on topic "${topic}"`, (err as Error).message);
+        this.logger.error(
+          `JSON parse error on topic "${topic}"`,
+          (err as Error).message,
+        );
       }
     });
   }

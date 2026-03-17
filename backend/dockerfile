@@ -3,10 +3,13 @@
 FROM node:20-alpine AS development
 WORKDIR /app
 COPY package*.json ./
+# Install deps into the image layer; the entrypoint re-runs npm ci at startup
+# so the named volume gets populated even on a fresh mount.
 RUN npm ci
 COPY . .
 EXPOSE 3000
-CMD ["npm", "run", "start:dev"]
+# npm ci at startup populates the named volume if it's empty, then starts the app
+CMD ["sh", "-c", "npm ci && npm run start:dev"]
 
 # ─── Builder stage ─────────────────────────────────────────────────────────────
 # Compiles TypeScript to /app/dist.
