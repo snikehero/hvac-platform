@@ -4,7 +4,23 @@ import { io, type Socket } from "socket.io-client";
 import { toast } from "sonner";
 import { useTranslation } from "@/i18n/useTranslation";
 
-const WS_URL = import.meta.env.VITE_WS_URL ?? "http://localhost:3000";
+const getWsUrl = (): string => {
+  const envUrl = import.meta.env.VITE_WS_URL;
+
+  // Si está definida en .env, usarla
+  if (envUrl && envUrl.trim()) {
+    return envUrl;
+  }
+
+  // Si no, usar la URL actual del navegador
+  const protocol = window.location.protocol; // http: o https:
+  const hostname = window.location.hostname; // IP o localhost
+  const wsPort = import.meta.env.VITE_WS_PORT ?? "3000";
+
+  return `${protocol}//${hostname}:${wsPort}`;
+};
+
+const WS_URL = getWsUrl();
 
 interface UseWebSocketConnectionReturn {
   socket: Socket | null;

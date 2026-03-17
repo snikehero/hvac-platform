@@ -16,7 +16,7 @@ async function bootstrap() {
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: false }),
   );
 
-  await app.listen(port);
-  logger.log(`Server listening on port ${port}`);
+  await app.listen(port, '0.0.0.0');
+  logger.log(`Server listening on 0.0.0.0:${port}`);
 }
 bootstrap();
