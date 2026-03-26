@@ -4,7 +4,9 @@ import { io, type Socket } from "socket.io-client";
 import { toast } from "sonner";
 import { useTranslation } from "@/i18n/useTranslation";
 
-const WS_URL = import.meta.env.VITE_WS_URL ?? "http://localhost:3000";
+// "" hace que Socket.IO use el origen actual de la página automáticamente.
+// Funciona en local, con nginx-proxy y con CloudFlare sin cambios.
+const WS_URL = import.meta.env.VITE_WS_URL ?? "";
 
 interface UseWebSocketConnectionReturn {
   socket: Socket | null;
